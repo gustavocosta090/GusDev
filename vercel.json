@@ -1,0 +1,19 @@
+{
+  "redirects": [
+    { "source": "/", "destination": "/login.html", "permanent": false }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://ahxlnebxffkrkacnacss.supabase.co; connect-src 'self' https://ahxlnebxffkrkacnacss.supabase.co wss://ahxlnebxffkrkacnacss.supabase.co; media-src 'self' blob: https://ahxlnebxffkrkacnacss.supabase.co"
+        }
+      ]
+    }
+  ]
+}

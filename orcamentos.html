@@ -1,0 +1,406 @@
+<!-- build: 2026-06-16a -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auron — Orcamentos</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Jost:wght@200;300;400;500;600&family=Josefin+Sans:wght@100;200;300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app-shell.css">
+<style>
+  #gen{display:grid;grid-template-columns:380px 1fr;min-height:calc(100vh - 62px);}
+  #sidebar{background:var(--dark2);border-right:1px solid var(--line);padding:24px 22px;overflow-y:auto;display:flex;flex-direction:column;gap:20px;}
+  .category-tabs{display:flex;gap:5px;flex-wrap:wrap;}
+  .cat-tab{padding:5px 11px;border:1px solid rgba(200,169,110,.25);background:transparent;color:var(--gray);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;border-radius:3px;cursor:pointer;transition:all .2s;}
+  .cat-tab.active{background:var(--accent);color:var(--dark);border-color:var(--accent);font-weight:600;}
+  .item-row{display:grid;grid-template-columns:1fr 64px 96px;gap:6px;align-items:end;}
+  #items-list{display:flex;flex-direction:column;gap:5px;max-height:220px;overflow-y:auto;}
+  .item-chip{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid rgba(200,169,110,.12);border-radius:4px;padding:7px 11px;font-size:12px;gap:8px;}
+  .item-chip .item-name{flex:1;color:var(--light);}
+  .item-chip .item-info{color:var(--gray);font-size:11px;white-space:nowrap;}
+  .item-chip .btn-remove{background:none;border:none;color:rgba(200,169,110,.4);cursor:pointer;font-size:16px;line-height:1;padding:0 2px;}
+  .item-chip .btn-remove:hover{color:#e05555;}
+  #preview{background:#f4f1ec;overflow-y:auto;}
+  /* ── DOC ── */
+  #quote-doc{max-width:840px;margin:0 auto;background:#fff;min-height:calc(100vh - 62px);font-family:'Jost',sans-serif;color:#1a2535;box-shadow:0 0 60px rgba(0,0,0,.15);}
+  .doc-header{background:#0d1b2a;padding:40px 56px 32px;display:flex;justify-content:space-between;align-items:center;}
+  .doc-logo-name{font-family:'Josefin Sans',sans-serif;font-size:26px;font-weight:100;letter-spacing:10px;color:#f5f0e8;text-transform:uppercase;margin-left:10px;}
+  .doc-logo-sub{font-size:8px;letter-spacing:3.5px;color:#c8a96e;text-transform:uppercase;}
+  .doc-meta{text-align:right;}
+  .doc-meta .quote-number{font-family:'Josefin Sans',sans-serif;font-size:11px;color:#c8a96e;letter-spacing:2px;text-transform:uppercase;}
+  .doc-meta .quote-date{font-size:11px;color:rgba(245,240,232,.5);margin-top:4px;}
+  .doc-accent-bar{height:3px;background:linear-gradient(90deg,#c8a96e,#e8c98e,transparent);}
+  .doc-body{padding:40px 56px;}
+  .doc-client-section{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-bottom:32px;padding-bottom:28px;border-bottom:1px solid #e8e4dc;}
+  .doc-section-label{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:#c8a96e;font-weight:600;margin-bottom:7px;}
+  .doc-client-name{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;color:#0d1b2a;margin-bottom:4px;}
+  .doc-client-detail{font-size:12px;color:#5a6a7a;line-height:1.8;}
+  .project-title-doc{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:500;color:#0d1b2a;margin-bottom:4px;}
+  .cat-block{margin-bottom:28px;}
+  .cat-block-header{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+  .cat-block-title{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:500;color:#0d1b2a;letter-spacing:1px;}
+  .doc-table{width:100%;border-collapse:collapse;}
+  .doc-table thead tr{background:#0d1b2a;color:#f5f0e8;}
+  .doc-table thead th{padding:9px 12px;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:400;text-align:left;}
+  .doc-table thead th.th-right{text-align:right;}
+  .doc-table tbody tr{border-bottom:1px solid #f0ece4;}
+  .doc-table tbody td{padding:10px 12px;font-size:12.5px;color:#2a3a4a;vertical-align:middle;}
+  .doc-table tbody td.td-right{text-align:right;}
+  .prod-img{width:48px;height:48px;object-fit:contain;border-radius:4px;border:1px solid #eee;background:#f8f8f8;display:block;}
+  .prod-img-placeholder{width:48px;height:48px;border-radius:4px;border:1px dashed #ddd;background:#f8f8f8;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:18px;}
+  .totals-section{margin-top:24px;display:flex;justify-content:flex-end;}
+  .totals-box{width:300px;border:1px solid #e8e4dc;border-radius:6px;overflow:hidden;}
+  .totals-row{display:flex;justify-content:space-between;padding:9px 16px;font-size:13px;border-bottom:1px solid #f0ece4;color:#3a4a5a;}
+  .totals-row:last-child{border-bottom:none;}
+  .totals-row.total-final{background:#0d1b2a;color:#f5f0e8;padding:13px 16px;}
+  .totals-row.total-final .label-t{font-family:'Josefin Sans',sans-serif;font-size:12px;font-weight:200;letter-spacing:2px;}
+  .totals-row.total-final .value-t{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;color:#e8c98e;}
+  .doc-conditions{margin-top:32px;display:grid;grid-template-columns:1fr 1fr;gap:20px;padding-top:26px;border-top:1px solid #e8e4dc;}
+  .cond-label{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:#c8a96e;font-weight:600;margin-bottom:6px;}
+  .cond-value{font-size:13px;color:#2a3a4a;line-height:1.7;}
+  .doc-notes{margin-top:22px;background:#faf8f4;border-left:3px solid #c8a96e;padding:14px 18px;border-radius:0 4px 4px 0;}
+  .doc-notes p{font-size:12px;color:#5a6a7a;line-height:1.8;}
+  .doc-footer{margin-top:44px;background:#0d1b2a;padding:28px 56px;display:flex;justify-content:space-between;align-items:center;}
+  .footer-contact{font-size:11px;color:rgba(245,240,232,.5);line-height:1.9;}
+  .footer-contact strong{color:rgba(245,240,232,.8);display:block;font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px;}
+  .footer-tagline{font-family:'Cormorant Garamond',serif;font-size:12px;color:rgba(200,169,110,.5);letter-spacing:2px;text-align:right;font-style:italic;}
+  #empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:400px;gap:14px;padding:60px;text-align:center;}
+  #empty-state p{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:300;color:rgba(26,37,53,.4);}
+  .saved-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid rgba(200,169,110,.08);}
+  .saved-row:hover{background:rgba(200,169,110,.04);}
+  @media print{
+    *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+    #topbar{display:none!important;} #gen{display:block;} #sidebar{display:none!important;}
+    #preview{padding:0;background:white;display:block;overflow:visible;}
+    #empty-state{display:none!important;}
+    #quote-doc{box-shadow:none;max-width:100%;display:block!important;}
+    .doc-header,.doc-footer,.doc-table thead tr,.totals-row.total-final{background:#0d1b2a!important;}
+    .doc-accent-bar{background:linear-gradient(90deg,#c8a96e,#e8c98e,transparent)!important;}
+  }
+</style>
+</head>
+<body>
+<div id="gen">
+  <aside id="sidebar">
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost btn-sm btn-block" onclick="abrirSalvos()">Orcamentos salvos</button>
+    </div>
+
+    <div>
+      <div class="section-title">Cliente</div>
+      <div class="field-group">
+        <div><label>Selecionar cliente</label><select id="f-cliente"></select></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Projeto</div>
+      <div class="field-group">
+        <div><label>Descricao do Projeto</label><input id="f-project" type="text" placeholder="Ex: Instalacao de CFTV"></div>
+        <div class="two-col">
+          <div><label>Numero</label><input id="f-quoteno" type="text" placeholder="Auto"></div>
+          <div><label>Validade</label>
+            <select id="f-validity">
+              <option value="15 dias">15 dias</option><option value="30 dias" selected>30 dias</option>
+              <option value="45 dias">45 dias</option><option value="60 dias">60 dias</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Adicionar Itens</div>
+      <div class="category-tabs" id="cat-tabs">
+        <button class="cat-tab active" data-cat="cameras">Cameras</button>
+        <button class="cat-tab" data-cat="automacao">Automacao</button>
+        <button class="cat-tab" data-cat="som">Audio</button>
+        <button class="cat-tab" data-cat="rede">Rede</button>
+        <button class="cat-tab" data-cat="outros">Outros</button>
+      </div>
+      <div style="margin-top:10px;" class="field-group">
+        <div><label>Item do catalogo</label><select id="f-item-select" onchange="onSelectItem(this.value)"><option value="">- Selecione -</option></select></div>
+        <div><label>Ou digite personalizado</label><input id="f-item-name" type="text" placeholder="Nome do item"></div>
+        <div class="item-row">
+          <div><label>Qtd</label><input id="f-qty" type="number" min="1" value="1"></div>
+          <div><label>Unit. (R$)</label><input id="f-price" type="number" min="0" placeholder="0,00"></div>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="addItem()">+ Adicionar Item</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Itens <span id="items-count" class="muted"></span></div>
+      <div id="items-list"></div>
+    </div>
+
+    <div>
+      <div class="section-title">Condicoes</div>
+      <div class="field-group">
+        <div><label>Prazo de Entrega</label><input id="f-deadline" type="text" placeholder="Ex: 15 dias uteis"></div>
+        <div><label>Forma de Pagamento</label><textarea id="f-payment" placeholder="Ex: 50% entrada + 50% entrega"></textarea></div>
+        <div class="two-col">
+          <div><label>Garantia</label><input id="f-warranty" type="text" placeholder="12 meses"></div>
+          <div><label>Desconto (%)</label><input id="f-discount" type="number" min="0" max="100" value="0"></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Observacoes</div>
+      <textarea id="f-notes" placeholder="Escopo incluso/excluso, etc."></textarea>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;padding-bottom:24px;">
+      <button class="btn btn-gold btn-block" onclick="gerar()">Gerar Orcamento</button>
+      <button class="btn btn-primary btn-block" onclick="salvar()">Salvar no sistema</button>
+      <button class="btn btn-ghost btn-block" onclick="window.print()">Imprimir / PDF</button>
+    </div>
+  </aside>
+
+  <main id="preview">
+    <div id="empty-state"><p>Preencha os dados e clique em<br><strong style="color:rgba(26,37,53,.6);">Gerar Orcamento</strong></p></div>
+    <div id="quote-doc" style="display:none;"></div>
+  </main>
+</div>
+
+<!-- MODAL SALVOS -->
+<div class="modal-overlay" id="modal-salvos">
+  <div class="modal">
+    <div class="modal-head"><h3>Orcamentos salvos</h3><button class="modal-close" onclick="closeModal('modal-salvos')">&times;</button></div>
+    <div id="salvos-list" style="max-height:60vh;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="utils.js"></script>
+<script>
+let items = [];
+let activeCategory = 'cameras';
+let catalog = { cameras:[], automacao:[], som:[], rede:[], outros:[] };
+let editId = null;  // id do orcamento em edicao (se carregado dos salvos)
+
+const catMeta = {
+  cameras:{label:'Cameras, Portaria e Controle de Acesso'},
+  automacao:{label:'Automacao Residencial'},
+  som:{label:'Som Ambiente e Home Theater'},
+  rede:{label:'Rede e Infraestrutura'},
+  outros:{label:'Servicos e Outros'},
+};
+
+(async function init(){
+  await renderTopbar('orcamentos');
+  await carregarClientesSelect(document.getElementById('f-cliente'), new URLSearchParams(location.search).get('cliente'));
+  await carregarCatalogo();
+  renderItemsList();
+})();
+
+async function carregarCatalogo(){
+  const { data } = await db.from('equipamentos').select('*').eq('ativo',true).order('nome');
+  catalog = { cameras:[], automacao:[], som:[], rede:[], outros:[] };
+  (data||[]).forEach(e=>{
+    const cat = catalog[e.categoria] ? e.categoria : 'outros';
+    catalog[cat].push({ name:e.nome, img:e.foto_url||'', desc:e.descricao||'', price:e.preco||0 });
+  });
+  populateSelect();
+}
+
+document.querySelectorAll('.cat-tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.cat-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    activeCategory = btn.dataset.cat;
+    document.getElementById('f-item-name').value='';
+    populateSelect();
+  });
+});
+
+function populateSelect(){
+  const sel = document.getElementById('f-item-select');
+  const pool = catalog[activeCategory] || [];
+  sel.innerHTML = '<option value="">- Selecione -</option>' + pool.map(s=>`<option value="${s.name}">${s.name}</option>`).join('');
+}
+function onSelectItem(val){
+  if(!val) return;
+  document.getElementById('f-item-name').value = val;
+  const found = (catalog[activeCategory]||[]).find(p=>p.name===val);
+  if(found && found.price){ document.getElementById('f-price').value = found.price; }
+}
+
+function addItem(){
+  const name = document.getElementById('f-item-name').value.trim();
+  const qty = parseFloat(document.getElementById('f-qty').value)||1;
+  const price = parseFloat(document.getElementById('f-price').value)||0;
+  if(!name){ showToast('Informe ou selecione um item.', true); return; }
+  const found = (catalog[activeCategory]||[]).find(p=>p.name===name);
+  items.push({ nome:name, qtd:qty, preco:price, categoria:activeCategory, img: found?found.img:'' });
+  renderItemsList();
+  document.getElementById('f-item-name').value='';
+  document.getElementById('f-item-select').value='';
+  document.getElementById('f-qty').value='1';
+  document.getElementById('f-price').value='';
+}
+document.getElementById('f-item-name').addEventListener('keydown', e=>{ if(e.key==='Enter') addItem(); });
+function removeItem(i){ items.splice(i,1); renderItemsList(); }
+
+function renderItemsList(){
+  const list = document.getElementById('items-list');
+  document.getElementById('items-count').textContent = items.length?`(${items.length})`:'';
+  if(!items.length){ list.innerHTML='<p class="muted" style="text-align:center;padding:12px 0;">Nenhum item</p>'; return; }
+  list.innerHTML = items.map((it,i)=>`
+    <div class="item-chip">
+      <span class="item-name">${it.nome}</span>
+      <span class="item-info">${it.qtd}x ${fmtBRL(it.preco)}</span>
+      <button class="btn-remove" onclick="removeItem(${i})">&times;</button>
+    </div>`).join('');
+}
+
+function coletar(){
+  const sel = document.getElementById('f-cliente');
+  const clienteId = sel.value || null;
+  const clienteNome = sel.options[sel.selectedIndex]?.text || '-';
+  const subtotal = items.reduce((s,it)=>s+it.qtd*it.preco,0);
+  const desconto = parseFloat(document.getElementById('f-discount').value)||0;
+  const total = subtotal - subtotal*(desconto/100);
+  return {
+    clienteId, clienteNome,
+    numero: document.getElementById('f-quoteno').value.trim() || `AHS-${Date.now().toString().slice(-5)}`,
+    projeto: document.getElementById('f-project').value.trim(),
+    validade: document.getElementById('f-validity').value,
+    prazo: document.getElementById('f-deadline').value.trim() || 'A combinar',
+    pagamento: document.getElementById('f-payment').value.trim() || 'A definir',
+    garantia: document.getElementById('f-warranty').value.trim() || '12 meses',
+    desconto, subtotal, total,
+    observacoes: document.getElementById('f-notes').value.trim(),
+  };
+}
+
+function gerar(){
+  if(!items.length){ showToast('Adicione pelo menos um item.', true); return; }
+  const d = coletar();
+  const groups = {};
+  items.forEach(it=>{ (groups[it.categoria] = groups[it.categoria]||[]).push(it); });
+  let tablesHTML = '';
+  for(const [cat, catItems] of Object.entries(groups)){
+    const meta = catMeta[cat] || {label:cat};
+    const catTotal = catItems.reduce((s,it)=>s+it.qtd*it.preco,0);
+    tablesHTML += `
+      <div class="cat-block">
+        <div class="cat-block-header"><span class="cat-block-title">${meta.label}</span></div>
+        <table class="doc-table">
+          <thead><tr><th style="width:56px;"></th><th style="width:42%">Descricao</th><th class="th-right" style="width:8%">Qtd</th><th class="th-right" style="width:16%">Unit.</th><th class="th-right" style="width:16%">Total</th></tr></thead>
+          <tbody>
+            ${catItems.map(it=>{
+              const imgCell = it.img ? `<img src="${it.img}" class="prod-img" onerror="this.style.display='none'">` : `<div class="prod-img-placeholder">&#128247;</div>`;
+              return `<tr><td>${imgCell}</td><td>${it.nome}</td><td class="td-right">${it.qtd}</td><td class="td-right">${fmtBRL(it.preco)}</td><td class="td-right">${fmtBRL(it.qtd*it.preco)}</td></tr>`;
+            }).join('')}
+            <tr style="background:#faf8f4;"><td colspan="4" style="text-align:right;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#8a9bb0;font-weight:500;">Subtotal ${meta.label}</td><td class="td-right" style="font-weight:600;color:#0d1b2a;">${fmtBRL(catTotal)}</td></tr>
+          </tbody>
+        </table>
+      </div>`;
+  }
+  const doc = document.getElementById('quote-doc');
+  doc.style.display='block';
+  document.getElementById('empty-state').style.display='none';
+  doc.innerHTML = `
+    <div class="doc-header">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">${LOGO_SVG}<div class="doc-logo-name">Auron</div><div class="doc-logo-sub">Home Systems</div></div>
+      <div class="doc-meta">
+        <div class="quote-number">Orcamento ${d.numero}</div>
+        <div class="quote-date">${today()}</div>
+        <div class="quote-date" style="margin-top:3px;">Validade: ${d.validade}</div>
+      </div>
+    </div>
+    <div class="doc-accent-bar"></div>
+    <div class="doc-body">
+      <div class="doc-client-section">
+        <div><div class="doc-section-label">Proposta para</div><div class="doc-client-name">${d.clienteNome}</div></div>
+        <div><div class="doc-section-label">Descricao</div>${d.projeto?`<div class="project-title-doc">${d.projeto}</div>`:''}</div>
+      </div>
+      ${tablesHTML}
+      <div class="totals-section"><div class="totals-box">
+        <div class="totals-row"><span>Subtotal</span><span>${fmtBRL(d.subtotal)}</span></div>
+        ${d.desconto>0?`<div class="totals-row" style="color:#c04040;"><span>Desconto (${d.desconto}%)</span><span>- ${fmtBRL(d.subtotal*d.desconto/100)}</span></div>`:''}
+        <div class="totals-row total-final"><span class="label-t">Total do Orcamento</span><span class="value-t">${fmtBRL(d.total)}</span></div>
+      </div></div>
+      <div class="doc-conditions">
+        <div><div class="cond-label">Prazo de Entrega</div><div class="cond-value">${d.prazo}</div></div>
+        <div><div class="cond-label">Forma de Pagamento</div><div class="cond-value">${d.pagamento.replace(/\n/g,'<br>')}</div></div>
+        <div><div class="cond-label">Garantia</div><div class="cond-value">${d.garantia}</div></div>
+        <div><div class="cond-label">Validade</div><div class="cond-value">${d.validade} a partir da emissao</div></div>
+      </div>
+      ${d.observacoes?`<div class="doc-notes"><div class="doc-section-label" style="margin-bottom:6px;">Observacoes</div><p>${d.observacoes.replace(/\n/g,'<br>')}</p></div>`:''}
+    </div>
+    <div class="doc-footer">
+      <div class="footer-contact"><strong>${EMPRESA.nome}</strong>CNPJ: ${EMPRESA.cnpj}<br>${EMPRESA.pix}</div>
+      <div class="footer-tagline">Tecnologia que se integra ao seu viver.</div>
+    </div>`;
+  document.getElementById('preview').scrollTop = 0;
+}
+
+async function salvar(){
+  if(!items.length){ showToast('Adicione itens antes de salvar.', true); return; }
+  const d = coletar();
+  const reg = {
+    cliente_id: d.clienteId, numero: d.numero, projeto: d.projeto || null, validade: d.validade,
+    itens: items, desconto: d.desconto, subtotal: d.subtotal, total: d.total,
+    prazo: d.prazo, pagamento: d.pagamento, garantia: d.garantia, observacoes: d.observacoes || null,
+    atualizado_em: new Date().toISOString(),
+  };
+  let res;
+  if(editId){ res = await db.from('orcamentos').update(reg).eq('id', editId); }
+  else { res = await db.from('orcamentos').insert(reg); }
+  if(res.error){ showToast('Erro ao salvar: '+res.error.message, true); return; }
+  showToast('Orcamento salvo no sistema.');
+}
+
+async function abrirSalvos(){
+  openModal('modal-salvos');
+  const { data, error } = await db.from('orcamentos').select('*, clientes(nome)').order('criado_em',{ascending:false}).limit(100);
+  const el = document.getElementById('salvos-list');
+  if(error){ el.innerHTML='<p class="muted">Erro ao carregar.</p>'; return; }
+  if(!data || !data.length){ el.innerHTML='<div class="empty"><p>Nenhum orcamento salvo</p></div>'; return; }
+  el.innerHTML = data.map(o=>`
+    <div class="saved-row">
+      <div>
+        <div style="color:var(--white);">${o.numero||'(sem numero)'} - ${fmtBRL(o.total)}</div>
+        <div class="muted">${o.clientes?o.clientes.nome:'sem cliente'} · ${fmtDataCurta(o.criado_em)}</div>
+      </div>
+      <div class="row-actions">
+        <button class="btn btn-ghost btn-sm" onclick="carregarOrc(${o.id})">Abrir</button>
+        <button class="btn btn-danger btn-sm" onclick="excluirOrc(${o.id})">Excluir</button>
+      </div>
+    </div>`).join('');
+}
+
+async function carregarOrc(id){
+  const { data, error } = await db.from('orcamentos').select('*').eq('id', id).single();
+  if(error){ showToast('Erro ao abrir.', true); return; }
+  editId = id;
+  items = data.itens || [];
+  document.getElementById('f-cliente').value = data.cliente_id || '';
+  document.getElementById('f-project').value = data.projeto || '';
+  document.getElementById('f-quoteno').value = data.numero || '';
+  document.getElementById('f-validity').value = data.validade || '30 dias';
+  document.getElementById('f-deadline').value = data.prazo || '';
+  document.getElementById('f-payment').value = data.pagamento || '';
+  document.getElementById('f-warranty').value = data.garantia || '';
+  document.getElementById('f-discount').value = data.desconto || 0;
+  document.getElementById('f-notes').value = data.observacoes || '';
+  renderItemsList();
+  closeModal('modal-salvos');
+  gerar();
+  showToast('Orcamento carregado (salvar atualiza o mesmo).');
+}
+
+async function excluirOrc(id){
+  if(!confirm('Excluir este orcamento?')) return;
+  const { error } = await db.from('orcamentos').delete().eq('id', id);
+  if(error){ showToast('Erro ao excluir.', true); return; }
+  if(editId===id) editId=null;
+  showToast('Orcamento excluido.');
+  abrirSalvos();
+}
+</script>
+</body>
+</html>

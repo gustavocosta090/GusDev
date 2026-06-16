@@ -1,0 +1,574 @@
+<!-- build: 2026-06-16a -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auron — Contratos</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Jost:wght@200;300;400;500;600&family=Josefin+Sans:wght@100;200;300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app-shell.css">
+<style>
+  #gen{display:grid;grid-template-columns:380px 1fr;min-height:calc(100vh - 62px);}
+  #sidebar{background:var(--dark2);border-right:1px solid var(--line);padding:24px 22px;overflow-y:auto;display:flex;flex-direction:column;gap:20px;}
+  .parcela-chip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid rgba(200,169,110,.12);border-radius:4px;padding:7px 11px;font-size:12px;color:var(--light);}
+  .parcela-chip span{flex:1;} .parcela-chip .val{color:var(--accent);font-weight:500;white-space:nowrap;}
+  .parcela-chip .rm{background:none;border:none;color:rgba(200,169,110,.4);cursor:pointer;font-size:15px;}
+  .parcela-chip .rm:hover{color:#e05555;}
+  .upload-box{border:1px dashed rgba(200,169,110,.3);border-radius:6px;padding:14px;text-align:center;cursor:pointer;transition:all .2s;}
+  .upload-box:hover{border-color:var(--accent);background:rgba(200,169,110,.05);}
+  .upload-box input{display:none;}
+  .foto-thumb{width:100%;max-height:90px;object-fit:cover;border-radius:4px;margin-top:8px;display:none;}
+  #preview{background:#f4f1ec;overflow-y:auto;}
+  #contrato-doc{max-width:820px;margin:0 auto;background:#fff;font-family:'Jost',sans-serif;color:#1a2535;box-shadow:0 0 60px rgba(0,0,0,.15);min-height:calc(100vh - 62px);}
+  .doc-header{background:#0d1b2a;padding:40px 56px 32px;display:flex;justify-content:space-between;align-items:center;}
+  .doc-logo-name{font-family:'Josefin Sans',sans-serif;font-size:24px;font-weight:100;letter-spacing:10px;color:#f5f0e8;text-transform:uppercase;}
+  .doc-logo-sub{font-size:8px;letter-spacing:3.5px;color:#c8a96e;text-transform:uppercase;}
+  .doc-meta{text-align:right;}
+  .doc-badge{display:inline-block;background:rgba(200,169,110,.15);border:1px solid rgba(200,169,110,.3);border-radius:3px;padding:5px 14px;font-family:'Josefin Sans',sans-serif;font-size:10px;letter-spacing:3px;color:#c8a96e;text-transform:uppercase;margin-bottom:8px;}
+  .doc-num{font-family:'Josefin Sans',sans-serif;font-size:18px;font-weight:100;letter-spacing:3px;color:#f5f0e8;}
+  .doc-date-header{font-size:11px;color:rgba(245,240,232,.45);margin-top:4px;letter-spacing:1px;}
+  .doc-accent-bar{height:3px;background:linear-gradient(90deg,#c8a96e,#e8c98e,transparent);}
+  .doc-body{padding:44px 56px;}
+  .contrato-titulo{text-align:center;margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid #e8e4dc;}
+  .contrato-titulo h1{font-family:'Josefin Sans',sans-serif;font-size:17px;font-weight:200;letter-spacing:5px;color:#0d1b2a;text-transform:uppercase;margin-bottom:6px;}
+  .contrato-titulo p{font-size:12px;color:#8a9bb0;letter-spacing:1px;}
+  .partes-box{background:#faf8f4;border:1px solid #e8e4dc;border-radius:6px;padding:20px 24px;margin-bottom:28px;}
+  .parte-item{margin-bottom:14px;} .parte-item:last-child{margin-bottom:0;}
+  .parte-role{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:#c8a96e;font-weight:600;margin-bottom:5px;}
+  .parte-texto{font-size:13px;color:#2a3a4a;line-height:1.8;} .parte-texto strong{color:#0d1b2a;}
+  .parte-sep{height:1px;background:#e8e4dc;margin:14px 0;}
+  .clausula{margin-bottom:22px;}
+  .clausula-titulo{font-family:'Josefin Sans',sans-serif;font-size:11px;font-weight:300;letter-spacing:2.5px;text-transform:uppercase;color:#0d1b2a;background:#f4f1ec;padding:7px 14px;border-left:3px solid #c8a96e;margin-bottom:10px;border-radius:0 4px 4px 0;}
+  .clausula-body{font-size:13px;color:#2a3a4a;line-height:1.9;padding:0 4px;}
+  .clausula-body p{margin-bottom:8px;} .clausula-body p:last-child{margin-bottom:0;}
+  .clausula-body .inciso{padding-left:20px;margin-bottom:6px;display:flex;gap:8px;}
+  .clausula-body .inciso span.letra{color:#c8a96e;font-weight:600;flex-shrink:0;}
+  .clausula-body .paragrafo{padding-left:20px;border-left:2px solid #e8e4dc;margin:8px 0;font-size:12.5px;color:#4a5a6a;}
+  .pagto-table{width:100%;border-collapse:collapse;margin:10px 0;}
+  .pagto-table thead tr{background:#0d1b2a;color:#f5f0e8;}
+  .pagto-table thead th{padding:8px 12px;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:400;text-align:left;}
+  .pagto-table thead th.r{text-align:right;}
+  .pagto-table tbody tr{border-bottom:1px solid #f0ece4;}
+  .pagto-table tbody td{padding:9px 12px;font-size:12.5px;color:#2a3a4a;} .pagto-table tbody td.r{text-align:right;}
+  .pagto-table tfoot td{padding:9px 12px;font-size:12.5px;background:#faf8f4;font-weight:600;color:#0d1b2a;} .pagto-table tfoot td.r{text-align:right;color:#c8a96e;}
+  .assinaturas-section{margin-top:44px;padding-top:28px;border-top:1px solid #e8e4dc;}
+  .ass-cidade{font-size:13px;color:#4a5a6a;margin-bottom:40px;text-align:center;}
+  .ass-grid,.ass-grid-4{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-bottom:36px;}
+  .ass-block{text-align:center;}
+  .ass-linha{width:100%;height:1px;background:#b0a898;margin-bottom:8px;}
+  .ass-nome{font-size:13px;color:#0d1b2a;font-weight:500;margin-bottom:2px;}
+  .ass-cargo{font-size:10px;color:#8a9bb0;letter-spacing:1.5px;text-transform:uppercase;}
+  .ass-cpf{font-size:11px;color:#8a9bb0;margin-top:2px;}
+  .ass-label{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#c8a96e;font-weight:600;text-align:center;margin-bottom:20px;}
+  .doc-footer{background:#0d1b2a;padding:24px 56px;display:flex;justify-content:space-between;align-items:center;}
+  .footer-info{font-size:11px;color:rgba(245,240,232,.45);line-height:1.9;}
+  .footer-info strong{color:rgba(245,240,232,.75);display:block;font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px;}
+  .footer-tag{font-family:'Cormorant Garamond',serif;font-size:12px;color:rgba(200,169,110,.4);letter-spacing:2px;text-align:right;font-style:italic;}
+  .doc-fotos-section{margin:20px 0 28px;}
+  .doc-fotos-titulo{font-family:'Josefin Sans',sans-serif;font-size:11px;font-weight:300;letter-spacing:2.5px;text-transform:uppercase;color:#0d1b2a;background:#f4f1ec;padding:7px 14px;border-left:3px solid #c8a96e;margin-bottom:14px;border-radius:0 4px 4px 0;}
+  .doc-fotos-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .doc-foto-item{border:1px solid #e8e4dc;border-radius:6px;overflow:hidden;}
+  .doc-foto-item img{width:100%;height:160px;object-fit:cover;display:block;}
+  .doc-foto-caption{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#8a9bb0;padding:7px 12px;background:#faf8f4;text-align:center;}
+  #empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:400px;gap:14px;padding:60px;text-align:center;}
+  #empty-state p{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:300;color:rgba(26,37,53,.4);}
+  .saved-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid rgba(200,169,110,.08);}
+  .saved-row:hover{background:rgba(200,169,110,.04);}
+  @media print{
+    *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+    #topbar{display:none!important;} #gen{display:block;} #sidebar{display:none!important;}
+    #preview{padding:0;background:white;display:block;overflow:visible;}
+    #empty-state{display:none!important;}
+    #contrato-doc{box-shadow:none;max-width:100%;display:block!important;}
+    .doc-header,.doc-footer,.pagto-table thead tr{background:#0d1b2a!important;}
+    .clausula-titulo,.doc-fotos-titulo{background:#f4f1ec!important;}
+    .partes-box,.pagto-table tfoot td{background:#faf8f4!important;}
+    .clausula,.assinaturas-section{page-break-inside:avoid;}
+  }
+</style>
+</head>
+<body>
+<div id="gen">
+  <aside id="sidebar">
+    <button class="btn btn-ghost btn-sm btn-block" onclick="abrirSalvos()">Contratos salvos</button>
+
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('contrato')">Contrato</button>
+      <button class="tab-btn" onclick="switchTab('intermediador')">Interm.</button>
+      <button class="tab-btn" onclick="switchTab('exigencias')">Exig.</button>
+      <button class="tab-btn" onclick="switchTab('fotos')">Fotos</button>
+    </div>
+
+    <div id="tab-contrato" class="tab-panel active" style="display:flex;flex-direction:column;gap:20px;">
+      <div>
+        <div class="section-title">Contratante</div>
+        <div class="field-group">
+          <div><label>Cliente cadastrado</label><select id="f-cliente" onchange="prefillCliente()"></select></div>
+          <div><label>Nome / Razao Social</label><input id="c-nome" type="text" placeholder="Ex: Joao da Silva"></div>
+          <div class="two-col">
+            <div><label>CPF / CNPJ</label><input id="c-doc" type="text"></div>
+            <div><label>RG</label><input id="c-rg" type="text"></div>
+          </div>
+          <div><label>Endereco Completo</label><textarea id="c-end" style="min-height:50px;"></textarea></div>
+          <div class="two-col">
+            <div><label>E-mail</label><input id="c-email" type="text"></div>
+            <div><label>Telefone</label><input id="c-tel" type="text"></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-title">Dados do Contrato</div>
+        <div class="field-group">
+          <div><label>Numero</label><input id="c-num" type="text" placeholder="Auto (001/2026)"></div>
+          <div class="two-col">
+            <div><label>Data</label><input id="c-data" type="date"></div>
+            <div><label>Cidade</label><input id="c-cidade" type="text" value="Cuiaba"></div>
+          </div>
+          <div class="two-col">
+            <div><label>Prazo de Execucao</label><input id="c-prazo" type="text" placeholder="30 dias uteis"></div>
+            <div><label>Inicio Previsto</label><input id="c-inicio" type="date"></div>
+          </div>
+          <div><label>Local de Execucao</label><input id="c-local" type="text"></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-title">Objeto</div>
+        <div class="field-group">
+          <div><label>Tipo de Servico</label>
+            <select id="c-tipo">
+              <option value="instalacao e configuracao de sistema de cameras de seguranca (CFTV)">Cameras CFTV</option>
+              <option value="instalacao de sistema de automacao residencial">Automacao Residencial</option>
+              <option value="instalacao de sistema de som ambiente e home theater">Som / Home Theater</option>
+              <option value="instalacao de rede estruturada e cabeamento">Rede Estruturada</option>
+              <option value="instalacao de sistema de alarme e seguranca eletronica">Alarme e Seguranca</option>
+              <option value="prestacao de servicos de tecnologia residencial integrada">Tecnologia Integrada</option>
+            </select>
+          </div>
+          <div><label>Descricao dos Servicos</label><textarea id="c-servicos" style="min-height:90px;"></textarea></div>
+          <div><label>Materiais Fornecidos pela Contratada</label><textarea id="c-materiais" style="min-height:64px;"></textarea></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-title">Valor e Pagamento</div>
+        <div class="field-group">
+          <div><label>Valor Total (R$)</label><input id="c-total" type="number" min="0" step="0.01" placeholder="0,00"></div>
+          <div><label>Forma de Pagamento</label>
+            <select id="c-forma-pag">
+              <option value="PIX (CNPJ: 50.081.460/0001-60) - Banco Sicredi">PIX - CNPJ (Sicredi)</option>
+              <option value="Transferencia Bancaria - Banco Sicredi">Transferencia - Sicredi</option>
+              <option value="Dinheiro">Dinheiro</option>
+              <option value="Cartao de Credito">Cartao de Credito</option>
+              <option value="Boleto Bancario">Boleto Bancario</option>
+            </select>
+          </div>
+          <div>
+            <label>Parcelas</label>
+            <div style="display:flex;gap:6px;margin-bottom:6px;">
+              <input id="p-desc" type="text" placeholder='Ex: 50% na assinatura' style="flex:1;">
+              <input id="p-val" type="number" placeholder="R$" style="width:90px;">
+              <button class="btn btn-primary btn-sm" onclick="addParcela()">+</button>
+            </div>
+            <div id="parcelas-list" style="display:flex;flex-direction:column;gap:5px;"></div>
+          </div>
+          <div><label>Multa por Atraso</label>
+            <select id="c-multa">
+              <option value="2% ao mes">2% ao mes</option>
+              <option value="1% ao mes">1% ao mes</option>
+              <option value="juros de 1% ao mes + multa de 2%">1% juro + 2% multa</option>
+              <option value="a ser negociada entre as partes">A negociar</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-title">Garantia e Suporte</div>
+        <div class="field-group">
+          <div><label>Garantia dos Servicos</label>
+            <select id="c-garantia">
+              <option value="90 (noventa) dias">90 dias</option>
+              <option value="180 (cento e oitenta) dias">180 dias</option>
+              <option value="12 (doze) meses">12 meses</option>
+              <option value="24 (vinte e quatro) meses">24 meses</option>
+            </select>
+          </div>
+          <div><label>Suporte Pos-Instalacao</label>
+            <select id="c-suporte">
+              <option value="30 (trinta) dias de suporte remoto gratuito">30 dias remoto gratuito</option>
+              <option value="90 (noventa) dias de servico gratuito">90 dias visita gratuita</option>
+              <option value="suporte mediante contrato de manutencao">Mediante contrato</option>
+              <option value="nao incluso">Nao incluso</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-title">Testemunhas (opcional)</div>
+        <div class="field-group">
+          <div class="two-col"><div><label>Test. 1 Nome</label><input id="t1-nome" type="text"></div><div><label>Test. 1 CPF</label><input id="t1-cpf" type="text"></div></div>
+          <div class="two-col"><div><label>Test. 2 Nome</label><input id="t2-nome" type="text"></div><div><label>Test. 2 CPF</label><input id="t2-cpf" type="text"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-intermediador" class="tab-panel" style="flex-direction:column;gap:14px;">
+      <p class="muted" style="line-height:1.6;">Preencha apenas se houve um intermediario na venda.</p>
+      <div class="field-group">
+        <div><label>Tipo</label><select id="i-tipo"><option value="">- Nenhum -</option><option value="pj">Pessoa Juridica</option><option value="pf">Pessoa Fisica</option></select></div>
+        <div><label>Nome / Razao Social</label><input id="i-nome" type="text"></div>
+        <div><label>CPF / CNPJ</label><input id="i-doc" type="text"></div>
+        <div><label>Representante (se empresa)</label><input id="i-representante" type="text"></div>
+        <div><label>Endereco</label><textarea id="i-end" style="min-height:50px;"></textarea></div>
+        <div><label>Telefone</label><input id="i-tel" type="text"></div>
+        <div><label>Papel</label><select id="i-papel"><option value="intermediacao na venda">Intermediacao na venda</option><option value="indicacao comercial">Indicacao comercial</option><option value="parceiro revendedor">Parceiro revendedor</option><option value="representante comercial">Representante comercial</option></select></div>
+        <div><label>Observacao</label><textarea id="i-obs" style="min-height:64px;"></textarea></div>
+      </div>
+    </div>
+
+    <div id="tab-exigencias" class="tab-panel" style="flex-direction:column;gap:14px;">
+      <p class="muted" style="line-height:1.6;">Requisitos tecnicos que o local deve atender. Viram clausula no contrato.</p>
+      <div class="field-group">
+        <div><label>Titulo da Clausula</label><input id="ex-titulo" type="text" value="Requisitos Tecnicos para Execucao dos Servicos"></div>
+        <div><label>Exigencias (uma por linha)</label><textarea id="ex-lista" style="min-height:170px;" placeholder="Ponto de energia 220V com disjuntor exclusivo&#10;Acesso livre ao forro&#10;..."></textarea></div>
+        <div><label>Observacao Final</label><textarea id="ex-obs" style="min-height:56px;"></textarea></div>
+      </div>
+    </div>
+
+    <div id="tab-fotos" class="tab-panel" style="flex-direction:column;gap:16px;">
+      <p class="muted" style="line-height:1.6;">As fotos aparecem apos a descricao dos servicos. Sobem pro Storage do Supabase.</p>
+      <div>
+        <label>Foto 1</label>
+        <label class="upload-box" for="foto1-input"><input type="file" id="foto1-input" accept="image/*" onchange="onFoto(this,1)"><span class="muted" id="foto1-hint">Clique para enviar</span><img id="foto1-thumb" class="foto-thumb"></label>
+        <div style="margin-top:8px;"><label>Legenda 1</label><input id="foto1-legenda" type="text" value="Equipamento instalado"></div>
+      </div>
+      <div>
+        <label>Foto 2</label>
+        <label class="upload-box" for="foto2-input"><input type="file" id="foto2-input" accept="image/*" onchange="onFoto(this,2)"><span class="muted" id="foto2-hint">Clique para enviar</span><img id="foto2-thumb" class="foto-thumb"></label>
+        <div style="margin-top:8px;"><label>Legenda 2</label><input id="foto2-legenda" type="text" value="Acabamento final"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;padding-bottom:24px;padding-top:8px;">
+      <button class="btn btn-gold btn-block" onclick="gerar()">Gerar Contrato</button>
+      <button class="btn btn-primary btn-block" onclick="salvar()">Salvar no sistema</button>
+      <button class="btn btn-ghost btn-block" onclick="window.print()">Imprimir / PDF</button>
+    </div>
+  </aside>
+
+  <main id="preview">
+    <div id="empty-state"><p>Preencha os dados e clique em<br><strong style="color:rgba(26,37,53,.6);">Gerar Contrato</strong></p></div>
+    <div id="contrato-doc" style="display:none;"></div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="modal-salvos">
+  <div class="modal">
+    <div class="modal-head"><h3>Contratos salvos</h3><button class="modal-close" onclick="closeModal('modal-salvos')">&times;</button></div>
+    <div id="salvos-list" style="max-height:60vh;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="utils.js"></script>
+<script>
+const CONTRATADA = {
+  nome: 'AURON HOME SYSTEMS', cnpj: EMPRESA.cnpj,
+  endereco: EMPRESA.endereco, representante: EMPRESA.responsavel,
+};
+let parcelas = [];
+let clientesCache = [];
+let fotos = { 1:{url:'',legenda:''}, 2:{url:'',legenda:''} };
+let editId = null;
+
+(async function init(){
+  await renderTopbar('contratos');
+  const { data } = await db.from('clientes').select('*').order('nome');
+  clientesCache = data || [];
+  const sel = document.getElementById('f-cliente');
+  const preId = new URLSearchParams(location.search).get('cliente');
+  sel.innerHTML = '<option value="">- Selecione (ou digite abaixo) -</option>'
+    + clientesCache.map(c=>`<option value="${c.id}" ${String(c.id)===String(preId)?'selected':''}>${c.nome}</option>`).join('');
+  document.getElementById('c-data').valueAsDate = new Date();
+  if(preId) prefillCliente();
+})();
+
+function prefillCliente(){
+  const id = document.getElementById('f-cliente').value;
+  const c = clientesCache.find(x=>String(x.id)===String(id));
+  if(!c) return;
+  document.getElementById('c-nome').value = c.nome||'';
+  document.getElementById('c-doc').value = c.doc||'';
+  document.getElementById('c-end').value = c.endereco||'';
+  document.getElementById('c-email').value = c.email||'';
+  document.getElementById('c-tel').value = c.telefone||'';
+}
+
+function switchTab(name){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.getAttribute('onclick').includes("'"+name+"'")));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active', p.id==='tab-'+name));
+}
+
+function addParcela(){
+  const desc = document.getElementById('p-desc').value.trim();
+  const val = parseFloat(document.getElementById('p-val').value)||0;
+  if(!desc){ showToast('Descreva a parcela.', true); return; }
+  parcelas.push({ desc, val });
+  renderParcelas();
+  document.getElementById('p-desc').value=''; document.getElementById('p-val').value='';
+}
+function removeParcela(i){ parcelas.splice(i,1); renderParcelas(); }
+function renderParcelas(){
+  const el = document.getElementById('parcelas-list');
+  el.innerHTML = parcelas.map((p,i)=>`<div class="parcela-chip"><span>${p.desc}</span><span class="val">${p.val>0?fmtBRL(p.val):''}</span><button class="rm" onclick="removeParcela(${i})">&times;</button></div>`).join('');
+}
+
+async function onFoto(input, n){
+  const file = input.files[0]; if(!file) return;
+  document.getElementById(`foto${n}-hint`).textContent = 'Enviando...';
+  try{
+    const url = await uploadFotoEquip(file);
+    fotos[n].url = url;
+    const t = document.getElementById(`foto${n}-thumb`);
+    t.src = url; t.style.display = 'block';
+    document.getElementById(`foto${n}-hint`).textContent = 'Trocar foto';
+    showToast('Foto enviada.');
+  }catch(err){ showToast('Erro no upload: '+(err.message||err), true); document.getElementById(`foto${n}-hint`).textContent='Clique para enviar'; }
+}
+
+function coletar(){
+  const cTotal = parseFloat(document.getElementById('c-total').value)||0;
+  return {
+    clienteId: document.getElementById('f-cliente').value || null,
+    cNome: document.getElementById('c-nome').value.trim(),
+    cDoc: document.getElementById('c-doc').value.trim(),
+    cRg: document.getElementById('c-rg').value.trim(),
+    cEnd: document.getElementById('c-end').value.trim(),
+    cEmail: document.getElementById('c-email').value.trim(),
+    cTel: document.getElementById('c-tel').value.trim(),
+    cNum: document.getElementById('c-num').value.trim(),
+    cData: document.getElementById('c-data').value,
+    cCidade: document.getElementById('c-cidade').value.trim()||'Cuiaba',
+    cPrazo: document.getElementById('c-prazo').value.trim()||'a combinar',
+    cInicio: document.getElementById('c-inicio').value,
+    cLocal: document.getElementById('c-local').value.trim(),
+    cTipo: document.getElementById('c-tipo').value,
+    cServicos: document.getElementById('c-servicos').value.trim(),
+    cMateriais: document.getElementById('c-materiais').value.trim(),
+    cTotal,
+    cFormaPag: document.getElementById('c-forma-pag').value,
+    cMulta: document.getElementById('c-multa').value,
+    cGarantia: document.getElementById('c-garantia').value,
+    cSuporte: document.getElementById('c-suporte').value,
+    t1Nome: document.getElementById('t1-nome').value.trim(), t1Cpf: document.getElementById('t1-cpf').value.trim(),
+    t2Nome: document.getElementById('t2-nome').value.trim(), t2Cpf: document.getElementById('t2-cpf').value.trim(),
+    iTipo: document.getElementById('i-tipo').value, iNome: document.getElementById('i-nome').value.trim(),
+    iDoc: document.getElementById('i-doc').value.trim(), iRepres: document.getElementById('i-representante').value.trim(),
+    iEnd: document.getElementById('i-end').value.trim(), iTel: document.getElementById('i-tel').value.trim(),
+    iPapel: document.getElementById('i-papel').value, iObs: document.getElementById('i-obs').value.trim(),
+    exTitulo: document.getElementById('ex-titulo').value.trim()||'Requisitos Tecnicos para Execucao dos Servicos',
+    exLista: document.getElementById('ex-lista').value.trim(), exObs: document.getElementById('ex-obs').value.trim(),
+    foto1Legenda: document.getElementById('foto1-legenda').value.trim(),
+    foto2Legenda: document.getElementById('foto2-legenda').value.trim(),
+  };
+}
+
+function gerar(){
+  const d = coletar();
+  if(!d.cNome){ showToast('Informe o nome do Contratante.', true); return; }
+  const cNum = d.cNum || String(Date.now()).slice(-3)+'/'+new Date().getFullYear();
+  const local = d.cLocal || d.cEnd || 'a ser definido';
+
+  // Intermediador
+  let intParte='', intClausula='';
+  if(d.iTipo && d.iNome){
+    const qd = d.iDoc?`, inscrito(a) no CPF/CNPJ sob o no <strong>${d.iDoc}</strong>`:'';
+    const qe = d.iEnd?`, com endereco em <strong>${d.iEnd}</strong>`:'';
+    const qt = d.iTel?`, telefone: <strong>${d.iTel}</strong>`:'';
+    const qr = (d.iTipo==='pj'&&d.iRepres)?`, neste ato representada por <strong>${d.iRepres}</strong>`:'';
+    const td = d.iTipo==='pj'?'pessoa juridica de direito privado':'pessoa fisica';
+    intParte = `<div class="parte-sep"></div><div class="parte-item"><div class="parte-role" style="color:#b8851a;">Intermediador</div><div class="parte-texto"><strong>${d.iNome}</strong>, ${td}${qd}${qe}${qr}${qt}, doravante denominado(a) <strong>INTERMEDIADOR</strong>.</div></div>`;
+    const obsT = d.iObs || `O presente contrato foi firmado com ${d.iPapel} por parte do INTERMEDIADOR acima qualificado, que atuou exclusivamente na aproximacao das partes, sem assumir responsabilidade tecnica, financeira ou contratual.`;
+    intClausula = `<div class="clausula"><div class="clausula-titulo">Clausula - Da Intermediacao</div><div class="clausula-body"><p>O presente contrato contou com a <strong>${d.iPapel}</strong> de <strong>${d.iNome}</strong>${qd}, doravante denominado(a) <strong>INTERMEDIADOR</strong>.</p><p class="paragrafo">${obsT}</p><p class="paragrafo">A participacao do INTERMEDIADOR limita-se a aproximacao das partes, nao gerando vinculo empregaticio, societario ou de representacao permanente com a CONTRATADA, nem responsabilidade solidaria ou subsidiaria pelas obrigacoes deste contrato.</p></div></div>`;
+  }
+
+  // Exigencias
+  let exClausula='';
+  if(d.exLista){
+    const itens = d.exLista.split('\n').filter(l=>l.trim());
+    const letras='abcdefghijklmnopqrstuvwxyz';
+    const incisos = itens.map((it,i)=>`<div class="inciso"><span class="letra">${letras[i]||(i+1)})</span><span>${it.trim()}</span></div>`).join('');
+    exClausula = `<div class="clausula"><div class="clausula-titulo">${d.exTitulo}</div><div class="clausula-body"><p>Para a correta execucao dos servicos, o CONTRATANTE devera garantir que o local atenda aos seguintes requisitos tecnicos minimos:</p>${incisos}${d.exObs?`<p class="paragrafo">${d.exObs}</p>`:''}</div></div>`;
+  }
+
+  // Fotos
+  let fotosHTML='';
+  if(fotos[1].url || fotos[2].url){
+    const item = (url,leg)=> url?`<div class="doc-foto-item"><img src="${url}"><div class="doc-foto-caption">${leg||''}</div></div>`:'';
+    fotosHTML = `<div class="doc-fotos-section"><div class="doc-fotos-titulo">Registro Fotografico</div><div class="doc-fotos-grid">${item(fotos[1].url,d.foto1Legenda)}${item(fotos[2].url,d.foto2Legenda)}</div></div>`;
+  }
+
+  const qDoc = d.cDoc?`, portador do CPF/CNPJ no <strong>${d.cDoc}</strong>`:'';
+  const qRg = d.cRg?`, RG no <strong>${d.cRg}</strong>`:'';
+  const qEnd = d.cEnd?`, residente/sediado na <strong>${d.cEnd}</strong>`:'';
+  const qEmail = d.cEmail?`, e-mail: <strong>${d.cEmail}</strong>`:'';
+  const qTel = d.cTel?`, telefone: <strong>${d.cTel}</strong>`:'';
+
+  let parcelasHTML;
+  if(parcelas.length){
+    const rows = parcelas.map((p,i)=>`<tr><td>${i+1}a</td><td>${p.desc}</td><td class="r">${p.val>0?fmtBRL(p.val):'-'}</td></tr>`).join('');
+    parcelasHTML = `<table class="pagto-table"><thead><tr><th style="width:40px;">#</th><th>Condicao</th><th class="r" style="width:120px;">Valor</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td colspan="2" style="text-align:right;">Total</td><td class="r">${fmtBRL(d.cTotal)}</td></tr></tfoot></table>`;
+  } else {
+    parcelasHTML = `<p>Valor total de <strong>${fmtBRL(d.cTotal)}</strong>, a ser pago via ${d.cFormaPag}.</p>`;
+  }
+
+  const servicosFmt = d.cServicos ? d.cServicos.split('\n').filter(l=>l.trim()).map(l=>`<p>${l}</p>`).join('') : '<p>Conforme proposta comercial aceita pelas partes.</p>';
+  const materiaisFmt = d.cMateriais ? `<p class="paragrafo">Equipamentos e materiais fornecidos pela Contratada: ${d.cMateriais}.</p>` : '';
+  const inicioFmt = d.cInicio ? `com inicio previsto para <strong>${fmtData(d.cInicio)}</strong>, ` : '';
+
+  let assTest='';
+  if(d.t1Nome || d.t2Nome){
+    const t1 = d.t1Nome?`<div class="ass-block"><div class="ass-linha"></div><div class="ass-nome">${d.t1Nome}</div>${d.t1Cpf?`<div class="ass-cpf">CPF: ${d.t1Cpf}</div>`:''}<div class="ass-cargo">Testemunha 1</div></div>`:'<div></div>';
+    const t2 = d.t2Nome?`<div class="ass-block"><div class="ass-linha"></div><div class="ass-nome">${d.t2Nome}</div>${d.t2Cpf?`<div class="ass-cpf">CPF: ${d.t2Cpf}</div>`:''}<div class="ass-cargo">Testemunha 2</div></div>`:'<div></div>';
+    assTest = `<div class="ass-label" style="margin-top:32px;">Testemunhas</div><div class="ass-grid-4">${t1}${t2}</div>`;
+  }
+
+  const doc = document.getElementById('contrato-doc');
+  doc.style.display='block';
+  document.getElementById('empty-state').style.display='none';
+  doc.innerHTML = `
+    <div class="doc-header">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">${LOGO_SVG}<div class="doc-logo-name">Auron</div><div class="doc-logo-sub">Home Systems</div></div>
+      <div class="doc-meta"><div class="doc-badge">Contrato de Prestacao de Servicos</div><div class="doc-num">No ${cNum}</div><div class="doc-date-header">${fmtData(d.cData)}</div></div>
+    </div>
+    <div class="doc-accent-bar"></div>
+    <div class="doc-body">
+      <div class="contrato-titulo"><h1>Contrato de Prestacao de Servicos</h1><p>Tecnologia Residencial - ${d.cTipo.charAt(0).toUpperCase()+d.cTipo.slice(1)}</p></div>
+      <div class="partes-box">
+        <div class="parte-item"><div class="parte-role">Contratada</div><div class="parte-texto"><strong>${CONTRATADA.nome}</strong>, pessoa juridica de direito privado, inscrita no CNPJ sob o no <strong>${CONTRATADA.cnpj}</strong>, com sede na <strong>${CONTRATADA.endereco}</strong>, neste ato representada por seu socio-administrador, <strong>${CONTRATADA.representante}</strong>, doravante denominada <strong>CONTRATADA</strong>.</div></div>
+        <div class="parte-sep"></div>
+        <div class="parte-item"><div class="parte-role">Contratante</div><div class="parte-texto"><strong>${d.cNome}</strong>${qDoc}${qRg}${qEnd}${qEmail}${qTel}, doravante denominado(a) <strong>CONTRATANTE</strong>.</div></div>
+        ${intParte}
+      </div>
+      <div class="clausula-body" style="margin-bottom:20px;"><p>As partes acima qualificadas tem entre si justo e contratado o presente <strong>Contrato de Prestacao de Servicos</strong>, que se regera pelas clausulas e condicoes a seguir.</p></div>
+
+      <div class="clausula"><div class="clausula-titulo">Clausula 1a - Do Objeto</div><div class="clausula-body">
+        <p>O presente contrato tem por objeto a ${d.cTipo}, a ser executada no endereco: <strong>${local}</strong>, ${inicioFmt}com prazo de conclusao de <strong>${d.cPrazo}</strong> a contar do inicio efetivo dos servicos.</p>
+        <p><strong>1.1 - Descricao dos Servicos:</strong></p>${servicosFmt}${materiaisFmt}
+        <p class="paragrafo">Os materiais nao expressamente indicados como de responsabilidade da CONTRATADA serao fornecidos pelo CONTRATANTE, salvo acordo posterior.</p>
+      </div>${fotosHTML}</div>
+
+      ${exClausula}
+
+      <div class="clausula"><div class="clausula-titulo">Clausula 2a - Do Valor e Forma de Pagamento</div><div class="clausula-body">
+        ${parcelasHTML}
+        <p class="paragrafo">Em caso de atraso no pagamento, incidira multa de <strong>${d.cMulta}</strong> sobre o valor em aberto.</p>
+      </div></div>
+
+      <div class="clausula"><div class="clausula-titulo">Clausula 3a - Do Prazo e Execucao</div><div class="clausula-body">
+        <p>Os servicos serao executados no prazo de <strong>${d.cPrazo}</strong>, podendo ser prorrogado mediante acordo entre as partes em caso de impedimentos alheios a CONTRATADA.</p>
+      </div></div>
+
+      <div class="clausula"><div class="clausula-titulo">Clausula 4a - Da Garantia e Suporte</div><div class="clausula-body">
+        <p>A CONTRATADA oferece garantia de <strong>${d.cGarantia}</strong> sobre os servicos executados, contados da conclusao. Inclui-se <strong>${d.cSuporte}</strong>.</p>
+        <p class="paragrafo">A garantia nao cobre defeitos decorrentes de mau uso, intervencao de terceiros, surtos eletricos, descargas atmosfericas ou caso fortuito/forca maior.</p>
+      </div></div>
+
+      ${intClausula}
+
+      <div class="clausula"><div class="clausula-titulo">Clausula 5a - Das Disposicoes Gerais</div><div class="clausula-body">
+        <p>O presente contrato obriga as partes e seus sucessores. Fica eleito o foro da comarca de <strong>${d.cCidade}</strong> para dirimir eventuais duvidas oriundas deste instrumento.</p>
+        <p>E, por estarem assim justas e contratadas, firmam o presente em duas vias de igual teor.</p>
+      </div></div>
+
+      <div class="assinaturas-section">
+        <div class="ass-cidade">${d.cCidade}, ${fmtData(d.cData)}.</div>
+        <div class="ass-grid">
+          <div class="ass-block"><div class="ass-linha"></div><div class="ass-nome">${CONTRATADA.representante}</div><div class="ass-cargo">CONTRATADA - ${CONTRATADA.nome}</div></div>
+          <div class="ass-block"><div class="ass-linha"></div><div class="ass-nome">${d.cNome}</div><div class="ass-cargo">CONTRATANTE</div></div>
+        </div>
+        ${assTest}
+      </div>
+    </div>
+    <div class="doc-footer">
+      <div class="footer-info"><strong>${CONTRATADA.nome}</strong>CNPJ: ${CONTRATADA.cnpj}<br>${EMPRESA.pix}</div>
+      <div class="footer-tag">Tecnologia que se integra ao seu viver.</div>
+    </div>`;
+  document.getElementById('preview').scrollTop = 0;
+}
+
+async function salvar(){
+  const d = coletar();
+  if(!d.cNome){ showToast('Informe o nome do Contratante.', true); return; }
+  const reg = {
+    cliente_id: d.clienteId,
+    numero: d.cNum || String(Date.now()).slice(-3)+'/'+new Date().getFullYear(),
+    data: d.cData || null, cidade: d.cCidade, tipo: d.cTipo,
+    servicos: d.cServicos || null, materiais: d.cMateriais || null,
+    valor_total: d.cTotal, forma_pagamento: d.cFormaPag,
+    parcelas: parcelas, multa: d.cMulta, garantia: d.cGarantia, suporte: d.cSuporte,
+    intermediador: (d.iTipo&&d.iNome) ? {tipo:d.iTipo,nome:d.iNome,doc:d.iDoc,representante:d.iRepres,endereco:d.iEnd,tel:d.iTel,papel:d.iPapel,obs:d.iObs} : null,
+    exigencias: d.exLista ? {titulo:d.exTitulo,lista:d.exLista,obs:d.exObs} : null,
+    fotos: [ {url:fotos[1].url,legenda:d.foto1Legenda}, {url:fotos[2].url,legenda:d.foto2Legenda} ],
+    testemunhas: (d.t1Nome||d.t2Nome) ? [{nome:d.t1Nome,cpf:d.t1Cpf},{nome:d.t2Nome,cpf:d.t2Cpf}] : null,
+    atualizado_em: new Date().toISOString(),
+  };
+  let res;
+  if(editId){ res = await db.from('contratos').update(reg).eq('id', editId); }
+  else { res = await db.from('contratos').insert(reg); }
+  if(res.error){ showToast('Erro ao salvar: '+res.error.message, true); return; }
+  showToast('Contrato salvo no sistema.');
+}
+
+async function abrirSalvos(){
+  openModal('modal-salvos');
+  const { data, error } = await db.from('contratos').select('*, clientes(nome)').order('criado_em',{ascending:false}).limit(100);
+  const el = document.getElementById('salvos-list');
+  if(error){ el.innerHTML='<p class="muted">Erro ao carregar.</p>'; return; }
+  if(!data || !data.length){ el.innerHTML='<div class="empty"><p>Nenhum contrato salvo</p></div>'; return; }
+  el.innerHTML = data.map(c=>`
+    <div class="saved-row">
+      <div><div style="color:var(--white);">No ${c.numero||'-'} - ${fmtBRL(c.valor_total)}</div>
+        <div class="muted">${c.clientes?c.clientes.nome:'sem cliente'} · ${fmtDataCurta(c.data||c.criado_em)}</div></div>
+      <div class="row-actions">
+        <button class="btn btn-ghost btn-sm" onclick="carregarCon(${c.id})">Abrir</button>
+        <button class="btn btn-danger btn-sm" onclick="excluirCon(${c.id})">Excluir</button>
+      </div>
+    </div>`).join('');
+}
+
+async function carregarCon(id){
+  const { data, error } = await db.from('contratos').select('*').eq('id', id).single();
+  if(error){ showToast('Erro ao abrir.', true); return; }
+  editId = id;
+  const g = (i,v)=>{ const el=document.getElementById(i); if(el) el.value = v||''; };
+  document.getElementById('f-cliente').value = data.cliente_id || '';
+  prefillCliente();
+  g('c-num', data.numero); if(data.data) g('c-data', data.data);
+  g('c-cidade', data.cidade); g('c-tipo', data.tipo); g('c-servicos', data.servicos);
+  g('c-materiais', data.materiais); g('c-total', data.valor_total);
+  g('c-forma-pag', data.forma_pagamento); g('c-multa', data.multa);
+  g('c-garantia', data.garantia); g('c-suporte', data.suporte);
+  parcelas = data.parcelas || []; renderParcelas();
+  const it = data.intermediador;
+  if(it){ g('i-tipo',it.tipo);g('i-nome',it.nome);g('i-doc',it.doc);g('i-representante',it.representante);g('i-end',it.endereco);g('i-tel',it.tel);g('i-papel',it.papel);g('i-obs',it.obs); }
+  const ex = data.exigencias;
+  if(ex){ g('ex-titulo',ex.titulo);g('ex-lista',ex.lista);g('ex-obs',ex.obs); }
+  const fs = data.fotos || [];
+  fotos = { 1:{url:fs[0]?.url||'',legenda:fs[0]?.legenda||''}, 2:{url:fs[1]?.url||'',legenda:fs[1]?.legenda||''} };
+  [1,2].forEach(n=>{ const t=document.getElementById(`foto${n}-thumb`); g(`foto${n}-legenda`,fotos[n].legenda); if(fotos[n].url){t.src=fotos[n].url;t.style.display='block';document.getElementById(`foto${n}-hint`).textContent='Trocar foto';} });
+  const ts = data.testemunhas || [];
+  g('t1-nome',ts[0]?.nome);g('t1-cpf',ts[0]?.cpf);g('t2-nome',ts[1]?.nome);g('t2-cpf',ts[1]?.cpf);
+  closeModal('modal-salvos');
+  gerar();
+}
+
+async function excluirCon(id){
+  if(!confirm('Excluir este contrato?')) return;
+  const { error } = await db.from('contratos').delete().eq('id', id);
+  if(error){ showToast('Erro ao excluir.', true); return; }
+  if(editId===id) editId=null;
+  showToast('Contrato excluido.');
+  abrirSalvos();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!-- build: 2026-06-16a -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auron Home Systems — Acesso</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Jost:wght@200;300;400;500;600&family=Josefin+Sans:wght@100;200;300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app-shell.css">
+<style>
+  body{display:flex;align-items:center;justify-content:center;padding:24px;
+    background:radial-gradient(circle at 30% 20%, #162232, #0d1b2a 70%);}
+  .login-card{width:100%;max-width:380px;background:var(--dark2);border:1px solid var(--line);
+    border-radius:12px;padding:38px 32px;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+  .login-brand{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:30px;}
+  .login-brand .ln{font-family:'Josefin Sans',sans-serif;font-size:22px;font-weight:200;letter-spacing:9px;
+    color:var(--white);text-transform:uppercase;margin-left:9px;}
+  .login-brand .ls{font-size:8px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;}
+  .login-card .field-group{margin-bottom:18px;}
+  #login-err{color:#e88;font-size:12px;margin-bottom:12px;display:none;text-align:center;}
+</style>
+</head>
+<body>
+<div class="login-card">
+  <div class="login-brand">
+    <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:64px;height:64px;">
+      <circle cx="100" cy="100" r="78" stroke="#c8a96e" stroke-width="5.5"/>
+      <path d="M100 26 C100 26 158 76 158 113 C158 147 132 170 100 170 C68 170 42 147 42 113 C42 76 100 26 100 26Z" stroke="#c8a96e" stroke-width="5.5" fill="none"/>
+      <line x1="100" y1="26" x2="42" y2="170" stroke="#c8a96e" stroke-width="5.5" stroke-linecap="round"/>
+      <line x1="100" y1="26" x2="158" y2="170" stroke="#c8a96e" stroke-width="5.5" stroke-linecap="round"/>
+      <line x1="61" y1="128" x2="139" y2="128" stroke="#c8a96e" stroke-width="5.5" stroke-linecap="round"/>
+    </svg>
+    <div class="ln">Auron</div>
+    <div class="ls">Home Systems</div>
+  </div>
+  <div id="login-err"></div>
+  <div class="field-group">
+    <div><label>E-mail</label><input id="f-email" type="email" placeholder="voce@email.com" autocomplete="username"></div>
+    <div><label>Senha</label><input id="f-pass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+  </div>
+  <button class="btn btn-gold btn-block" id="btn-login" onclick="entrar()">Entrar</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="utils.js"></script>
+<script>
+// Se ja logado, vai direto pro dashboard
+db.auth.getSession().then(({data:{session}})=>{ if(session) location.replace('dashboard.html'); });
+
+const errEl = document.getElementById('login-err');
+function showErr(msg){ errEl.textContent = msg; errEl.style.display='block'; }
+
+async function entrar(){
+  const email = document.getElementById('f-email').value.trim();
+  const pass  = document.getElementById('f-pass').value;
+  if(!email || !pass){ showErr('Informe e-mail e senha.'); return; }
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true; btn.textContent = 'Entrando...';
+  const { error } = await db.auth.signInWithPassword({ email, password: pass });
+  if(error){
+    showErr('E-mail ou senha invalidos.');
+    btn.disabled = false; btn.textContent = 'Entrar';
+    return;
+  }
+  location.replace('dashboard.html');
+}
+document.getElementById('f-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') entrar(); });
+</script>
+</body>
+</html>
