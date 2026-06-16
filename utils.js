@@ -69,7 +69,7 @@ async function renderTopbar(activeId){
   const bar = document.createElement('div');
   bar.id = 'topbar';
   bar.innerHTML = `
-    <div class="tb-brand">${logoHTML(36)}<span class="tb-name">Auron</span></div>
+    <div class="tb-brand">${logoHTML(36)}</div>
     <nav>${links}</nav>
     <div class="tb-user">
       <span class="tb-email">${email}</span>
