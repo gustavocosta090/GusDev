@@ -1,0 +1,225 @@
+<!-- build: 2026-06-16a -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auron — Clientes</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Jost:wght@200;300;400;500;600&family=Josefin+Sans:wght@100;200;300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app-shell.css">
+<style>
+  .search-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+  .search-row input{max-width:320px;}
+  .cli-hist{font-size:11px;color:var(--gray);}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="page-head">
+    <div>
+      <div class="page-title">Clientes</div>
+      <div class="page-sub">Em aberto e entregues</div>
+    </div>
+    <button class="btn btn-primary" onclick="novoCliente()">+ Novo cliente</button>
+  </div>
+
+  <div class="tabs-nav">
+    <button class="tab-btn active" data-tab="aberto" onclick="setTab('aberto')">Em aberto <span id="c-aberto"></span></button>
+    <button class="tab-btn" data-tab="entregue" onclick="setTab('entregue')">Entregues <span id="c-entregue"></span></button>
+  </div>
+
+  <div class="search-row">
+    <input id="busca" type="text" placeholder="Buscar por nome, documento, telefone..." oninput="render()">
+  </div>
+
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="tbl">
+      <thead><tr>
+        <th>Cliente</th><th>Contato</th><th>Imovel</th><th>Documentos</th><th class="r">Acoes</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div id="empty" class="empty" style="display:none;"><p>Nenhum cliente aqui</p></div>
+  </div>
+</div>
+
+<!-- MODAL CLIENTE -->
+<div class="modal-overlay" id="modal-cli">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="m-title">Novo cliente</h3>
+      <button class="modal-close" onclick="closeModal('modal-cli')">&times;</button>
+    </div>
+    <div class="field-group">
+      <input type="hidden" id="m-id">
+      <div><label>Nome / Empresa</label><input id="m-nome" type="text" placeholder="Nome do cliente"></div>
+      <div class="two-col">
+        <div><label>CPF / CNPJ</label><input id="m-doc" type="text" placeholder="000.000.000-00"></div>
+        <div><label>Telefone / WhatsApp</label><input id="m-tel" type="text" placeholder="(65) 99999-9999"></div>
+      </div>
+      <div><label>E-mail</label><input id="m-email" type="text" placeholder="cliente@email.com"></div>
+      <div><label>Endereco</label><input id="m-end" type="text" placeholder="Rua, numero - Cidade/UF"></div>
+      <div class="two-col">
+        <div><label>Tipo de Imovel</label>
+          <select id="m-imovel">
+            <option value="">-</option>
+            <option>Residencia</option><option>Apartamento</option><option>Cobertura</option>
+            <option>Empresarial</option><option>Escritorio</option><option>Condominio</option>
+          </select>
+        </div>
+        <div><label>Situacao</label>
+          <select id="m-entregue">
+            <option value="false">Em aberto</option>
+            <option value="true">Entregue</option>
+          </select>
+        </div>
+      </div>
+      <div><label>Observacoes</label><textarea id="m-obs" placeholder="Notas sobre o cliente / projeto"></textarea></div>
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button class="btn btn-gold btn-block" id="m-save" onclick="salvar()">Salvar</button>
+        <button class="btn btn-danger" id="m-del" onclick="excluir()" style="display:none;">Excluir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="utils.js"></script>
+<script>
+let clientes = [];
+let tab = 'aberto';
+
+(async function init(){
+  await renderTopbar('clientes');
+  await carregar();
+})();
+
+async function carregar(){
+  const { data, error } = await db.from('clientes').select('*').order('nome');
+  if(error){ showToast('Erro ao carregar.', true); return; }
+  clientes = data || [];
+  document.getElementById('c-aberto').textContent   = `(${clientes.filter(c=>!c.entregue).length})`;
+  document.getElementById('c-entregue').textContent = `(${clientes.filter(c=>c.entregue).length})`;
+  render();
+}
+
+function setTab(t){
+  tab = t;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===t));
+  render();
+}
+
+function render(){
+  const q = document.getElementById('busca').value.trim().toLowerCase();
+  let lista = clientes.filter(c => tab==='entregue' ? c.entregue : !c.entregue);
+  if(q){
+    lista = lista.filter(c =>
+      (c.nome||'').toLowerCase().includes(q) ||
+      (c.doc||'').toLowerCase().includes(q) ||
+      (c.telefone||'').toLowerCase().includes(q) ||
+      (c.email||'').toLowerCase().includes(q));
+  }
+  const tbody = document.getElementById('tbody');
+  const empty = document.getElementById('empty');
+  if(!lista.length){ tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tbody.innerHTML = lista.map(c=>`
+    <tr>
+      <td>
+        <div style="color:var(--white);font-weight:500;">${c.nome}</div>
+        ${c.doc?`<div class="muted">${c.doc}</div>`:''}
+      </td>
+      <td class="muted">${c.telefone||''}${c.telefone&&c.email?'<br>':''}${c.email||''}</td>
+      <td class="muted">${c.tipo_imovel||'-'}</td>
+      <td>
+        <a class="cli-hist" href="orcamentos.html?cliente=${c.id}">Orcamentos</a> ·
+        <a class="cli-hist" href="contratos.html?cliente=${c.id}">Contratos</a> ·
+        <a class="cli-hist" href="recibos.html?cliente=${c.id}">Recibos</a>
+      </td>
+      <td>
+        <div class="row-actions">
+          ${c.entregue
+            ? `<button class="btn btn-ghost btn-sm" onclick="toggleEntregue(${c.id},false)">Reabrir</button>`
+            : `<button class="btn btn-ghost btn-sm" onclick="toggleEntregue(${c.id},true)">Marcar entregue</button>`}
+          <button class="btn btn-primary btn-sm" onclick="editar(${c.id})">Editar</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+async function toggleEntregue(id, val){
+  const { error } = await db.from('clientes').update({
+    entregue: val,
+    entregue_em: val ? new Date().toISOString() : null,
+    atualizado_em: new Date().toISOString(),
+  }).eq('id', id);
+  if(error){ showToast('Erro.', true); return; }
+  showToast(val ? 'Cliente marcado como entregue.' : 'Cliente reaberto.');
+  await carregar();
+}
+
+function novoCliente(){
+  document.getElementById('m-title').textContent = 'Novo cliente';
+  ['m-id','m-nome','m-doc','m-tel','m-email','m-end','m-obs'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('m-imovel').value = '';
+  document.getElementById('m-entregue').value = 'false';
+  document.getElementById('m-del').style.display = 'none';
+  openModal('modal-cli');
+}
+
+function editar(id){
+  const c = clientes.find(x=>x.id===id); if(!c) return;
+  document.getElementById('m-title').textContent = 'Editar cliente';
+  document.getElementById('m-id').value = c.id;
+  document.getElementById('m-nome').value = c.nome||'';
+  document.getElementById('m-doc').value = c.doc||'';
+  document.getElementById('m-tel').value = c.telefone||'';
+  document.getElementById('m-email').value = c.email||'';
+  document.getElementById('m-end').value = c.endereco||'';
+  document.getElementById('m-imovel').value = c.tipo_imovel||'';
+  document.getElementById('m-entregue').value = c.entregue ? 'true':'false';
+  document.getElementById('m-obs').value = c.observacoes||'';
+  document.getElementById('m-del').style.display = 'block';
+  openModal('modal-cli');
+}
+
+async function salvar(){
+  const nome = document.getElementById('m-nome').value.trim();
+  if(!nome){ showToast('Informe o nome.', true); return; }
+  const entregue = document.getElementById('m-entregue').value === 'true';
+  const reg = {
+    nome,
+    doc: document.getElementById('m-doc').value.trim() || null,
+    telefone: document.getElementById('m-tel').value.trim() || null,
+    email: document.getElementById('m-email').value.trim() || null,
+    endereco: document.getElementById('m-end').value.trim() || null,
+    tipo_imovel: document.getElementById('m-imovel').value || null,
+    entregue,
+    observacoes: document.getElementById('m-obs').value.trim() || null,
+    atualizado_em: new Date().toISOString(),
+  };
+  const id = document.getElementById('m-id').value;
+  // preserva entregue_em ao editar
+  if(entregue){ const ex = clientes.find(x=>String(x.id)===String(id)); reg.entregue_em = (ex&&ex.entregue_em) ? ex.entregue_em : new Date().toISOString(); }
+  else { reg.entregue_em = null; }
+  let res;
+  if(id){ res = await db.from('clientes').update(reg).eq('id', id); }
+  else  { res = await db.from('clientes').insert(reg); }
+  if(res.error){ showToast('Erro ao salvar.', true); return; }
+  showToast('Cliente salvo.');
+  closeModal('modal-cli');
+  await carregar();
+}
+
+async function excluir(){
+  const id = document.getElementById('m-id').value; if(!id) return;
+  if(!confirm('Excluir este cliente? Os documentos vinculados ficarao sem cliente.')) return;
+  const { error } = await db.from('clientes').delete().eq('id', id);
+  if(error){ showToast('Erro ao excluir.', true); return; }
+  showToast('Cliente excluido.');
+  closeModal('modal-cli');
+  await carregar();
+}
+</script>
+</body>
+</html>

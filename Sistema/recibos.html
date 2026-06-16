@@ -1,0 +1,328 @@
+<!-- build: 2026-06-16a -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auron — Recibos</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Jost:wght@200;300;400;500;600&family=Josefin+Sans:wght@100;200;300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app-shell.css">
+<style>
+  #gen{display:grid;grid-template-columns:380px 1fr;min-height:calc(100vh - 62px);}
+  #sidebar{background:var(--dark2);border-right:1px solid var(--line);padding:24px 22px;overflow-y:auto;display:flex;flex-direction:column;gap:20px;}
+  .item-row{display:grid;grid-template-columns:1fr 110px;gap:6px;align-items:end;}
+  #items-list{display:flex;flex-direction:column;gap:5px;max-height:200px;overflow-y:auto;}
+  .item-chip{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid rgba(200,169,110,.12);border-radius:4px;padding:7px 11px;font-size:12px;gap:8px;}
+  .item-chip .item-name{flex:1;color:var(--light);}
+  .item-chip .item-val{color:var(--accent);font-size:11px;white-space:nowrap;font-weight:500;}
+  .item-chip .btn-remove{background:none;border:none;color:rgba(200,169,110,.4);cursor:pointer;font-size:16px;line-height:1;padding:0 2px;}
+  .item-chip .btn-remove:hover{color:#e05555;}
+  #preview{background:#f4f1ec;overflow-y:auto;}
+  #recibo-doc{max-width:780px;margin:0 auto;background:#fff;min-height:calc(100vh - 62px);font-family:'Jost',sans-serif;color:#1a2535;box-shadow:0 0 60px rgba(0,0,0,.15);}
+  .doc-header{background:#0d1b2a;padding:40px 52px 32px;display:flex;justify-content:space-between;align-items:center;}
+  .doc-logo-name{font-family:'Josefin Sans',sans-serif;font-size:24px;font-weight:100;letter-spacing:10px;color:#f5f0e8;text-transform:uppercase;}
+  .doc-logo-sub{font-size:8px;letter-spacing:3.5px;color:#c8a96e;text-transform:uppercase;}
+  .doc-meta{text-align:right;}
+  .doc-meta .rec-badge{display:inline-block;background:rgba(200,169,110,.15);border:1px solid rgba(200,169,110,.3);border-radius:3px;padding:4px 12px;font-family:'Josefin Sans',sans-serif;font-size:10px;letter-spacing:3px;color:#c8a96e;text-transform:uppercase;margin-bottom:8px;}
+  .doc-meta .rec-number{font-family:'Josefin Sans',sans-serif;font-size:20px;font-weight:100;letter-spacing:4px;color:#f5f0e8;}
+  .doc-meta .rec-date{font-size:11px;color:rgba(245,240,232,.45);margin-top:4px;letter-spacing:1px;}
+  .doc-accent-bar{height:3px;background:linear-gradient(90deg,#c8a96e,#e8c98e,transparent);}
+  .doc-body{padding:40px 52px;}
+  .partes-grid{display:grid;grid-template-columns:1fr 1fr;gap:36px;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid #e8e4dc;}
+  .parte-label{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:#c8a96e;font-weight:600;margin-bottom:8px;}
+  .parte-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;color:#0d1b2a;margin-bottom:3px;}
+  .parte-detail{font-size:12px;color:#5a6a7a;line-height:1.9;}
+  .declaracao{background:#f7f5f0;border-left:3px solid #c8a96e;padding:16px 20px;border-radius:0 6px 6px 0;margin-bottom:28px;font-size:13.5px;color:#2a3a4a;line-height:2;}
+  .section-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .section-header span{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:500;color:#0d1b2a;letter-spacing:1px;}
+  .doc-table{width:100%;border-collapse:collapse;}
+  .doc-table thead tr{background:#0d1b2a;color:#f5f0e8;}
+  .doc-table thead th{padding:9px 14px;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:400;text-align:left;}
+  .doc-table thead th.r{text-align:right;}
+  .doc-table tbody tr{border-bottom:1px solid #f0ece4;}
+  .doc-table tbody td{padding:12px 14px;font-size:13px;color:#2a3a4a;}
+  .doc-table tbody td.r{text-align:right;}
+  .doc-table tbody td .td-desc{font-size:11px;color:#8a9bb0;margin-top:2px;}
+  .total-wrap{margin-top:20px;display:flex;justify-content:flex-end;}
+  .total-box{width:270px;border:1px solid #e8e4dc;border-radius:6px;overflow:hidden;}
+  .total-final{background:#0d1b2a;color:#f5f0e8;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;}
+  .total-final .lbl{font-family:'Josefin Sans',sans-serif;font-size:11px;font-weight:200;letter-spacing:2px;}
+  .total-final .val{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:500;color:#e8c98e;}
+  .pag-grid{margin-top:28px;display:grid;grid-template-columns:1fr 1fr;gap:20px;padding-top:24px;border-top:1px solid #e8e4dc;}
+  .pag-label{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:#c8a96e;font-weight:600;margin-bottom:6px;}
+  .pag-value{font-size:13px;color:#2a3a4a;line-height:1.7;}
+  .pag-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:1px;}
+  .pag-badge.pago{background:#e6f4ea;color:#2d7a3a;}
+  .pag-badge.parcial{background:#fff8e6;color:#a67c00;}
+  .pag-badge.pendente{background:#fdecea;color:#c0392b;}
+  .obs-box{margin-top:20px;background:#faf8f4;border-left:3px solid #c8a96e;padding:13px 18px;border-radius:0 4px 4px 0;}
+  .obs-box p{font-size:12px;color:#5a6a7a;line-height:1.8;}
+  .assinaturas{margin-top:48px;display:grid;grid-template-columns:1fr 1fr;gap:60px;padding:0 20px;}
+  .ass-block{text-align:center;}
+  .ass-linha{width:100%;height:1px;background:#c0b8ae;margin-bottom:8px;}
+  .ass-nome{font-size:12px;color:#2a3a4a;font-weight:500;margin-bottom:2px;}
+  .ass-cargo{font-size:10px;color:#8a9bb0;letter-spacing:1.5px;text-transform:uppercase;}
+  .doc-footer{margin-top:40px;background:#0d1b2a;padding:24px 52px;display:flex;justify-content:space-between;align-items:center;}
+  .footer-info{font-size:11px;color:rgba(245,240,232,.45);line-height:1.9;}
+  .footer-info strong{color:rgba(245,240,232,.75);display:block;font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px;}
+  .footer-tag{font-family:'Cormorant Garamond',serif;font-size:12px;color:rgba(200,169,110,.4);letter-spacing:2px;text-align:right;font-style:italic;}
+  #empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:400px;gap:14px;padding:60px;text-align:center;}
+  #empty-state p{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:300;color:rgba(26,37,53,.4);}
+  .saved-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid rgba(200,169,110,.08);}
+  .saved-row:hover{background:rgba(200,169,110,.04);}
+  @media print{
+    *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+    #topbar{display:none!important;} #gen{display:block;} #sidebar{display:none!important;}
+    #preview{padding:0;background:white;display:block;overflow:visible;}
+    #empty-state{display:none!important;}
+    #recibo-doc{box-shadow:none;max-width:100%;display:block!important;}
+    .doc-header,.doc-footer,.doc-table thead tr,.total-final{background:#0d1b2a!important;}
+    .declaracao,.obs-box{background:#f7f5f0!important;}
+  }
+</style>
+</head>
+<body>
+<div id="gen">
+  <aside id="sidebar">
+    <button class="btn btn-ghost btn-sm btn-block" onclick="abrirSalvos()">Recibos salvos</button>
+
+    <div>
+      <div class="section-title">Cliente / Pagador</div>
+      <div class="field-group">
+        <div><label>Selecionar cliente</label><select id="f-cliente"></select></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Dados do Recibo</div>
+      <div class="field-group">
+        <div class="two-col">
+          <div><label>Numero</label><input id="f-num" type="text" placeholder="Auto"></div>
+          <div><label>Data</label><input id="f-data" type="date"></div>
+        </div>
+        <div><label>Forma de Pagamento</label>
+          <select id="f-pagamento">
+            <option value="PIX - CNPJ 50.081.460/0001-60 (Sicredi)">PIX (CNPJ)</option>
+            <option value="Dinheiro">Dinheiro</option>
+            <option value="Transferencia Bancaria - Sicredi">Transferencia - Sicredi</option>
+            <option value="Cartao de Debito">Cartao de Debito</option>
+            <option value="Cartao de Credito">Cartao de Credito</option>
+            <option value="Boleto Bancario">Boleto Bancario</option>
+          </select>
+        </div>
+        <div><label>Status</label>
+          <select id="f-status">
+            <option value="pago">Pago integralmente</option>
+            <option value="parcial">Pago parcialmente</option>
+            <option value="pendente">Pendente</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Servicos Executados</div>
+      <div class="field-group">
+        <div><label>Descricao do servico</label><input id="f-nome" type="text" placeholder="Ex: Instalacao de CFTV"></div>
+        <div class="item-row">
+          <div><label>Detalhes (opcional)</label><input id="f-desc" type="text" placeholder="Ex: 8 cameras, 1 NVR"></div>
+          <div><label>Valor (R$)</label><input id="f-valor" type="number" min="0" step="0.01" placeholder="0,00"></div>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="addServico()">+ Adicionar</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Itens <span id="items-count" class="muted"></span></div>
+      <div id="items-list"></div>
+    </div>
+
+    <div>
+      <div class="section-title">Observacoes</div>
+      <textarea id="f-obs">Garantia de 90 dias sobre os servicos executados.</textarea>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;padding-bottom:24px;">
+      <button class="btn btn-gold btn-block" onclick="gerar()">Gerar Recibo</button>
+      <button class="btn btn-primary btn-block" onclick="salvar()">Salvar no sistema</button>
+      <button class="btn btn-ghost btn-block" onclick="window.print()">Imprimir / PDF</button>
+    </div>
+  </aside>
+
+  <main id="preview">
+    <div id="empty-state"><p>Preencha os dados e clique em<br><strong style="color:rgba(26,37,53,.6);">Gerar Recibo</strong></p></div>
+    <div id="recibo-doc" style="display:none;"></div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="modal-salvos">
+  <div class="modal">
+    <div class="modal-head"><h3>Recibos salvos</h3><button class="modal-close" onclick="closeModal('modal-salvos')">&times;</button></div>
+    <div id="salvos-list" style="max-height:60vh;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="utils.js"></script>
+<script>
+let servicos = [];
+let editId = null;
+
+(async function init(){
+  await renderTopbar('recibos');
+  await carregarClientesSelect(document.getElementById('f-cliente'), new URLSearchParams(location.search).get('cliente'));
+  document.getElementById('f-data').valueAsDate = new Date();
+  renderLista();
+})();
+
+function addServico(){
+  const nome = document.getElementById('f-nome').value.trim();
+  const desc = document.getElementById('f-desc').value.trim();
+  const valor = parseFloat(document.getElementById('f-valor').value)||0;
+  if(!nome){ showToast('Informe o servico.', true); return; }
+  servicos.push({ nome, desc, valor });
+  renderLista();
+  document.getElementById('f-nome').value='';
+  document.getElementById('f-desc').value='';
+  document.getElementById('f-valor').value='';
+}
+function removeServico(i){ servicos.splice(i,1); renderLista(); }
+
+function renderLista(){
+  const el = document.getElementById('items-list');
+  document.getElementById('items-count').textContent = servicos.length?`(${servicos.length})`:'';
+  if(!servicos.length){ el.innerHTML='<p class="muted" style="text-align:center;padding:10px 0;">Nenhum servico</p>'; return; }
+  el.innerHTML = servicos.map((s,i)=>`
+    <div class="item-chip">
+      <span class="item-name">${s.nome}${s.desc?` <span class="muted">- ${s.desc}</span>`:''}</span>
+      <span class="item-val">${fmtBRL(s.valor)}</span>
+      <button class="btn-remove" onclick="removeServico(${i})">&times;</button>
+    </div>`).join('');
+}
+
+function coletar(){
+  const sel = document.getElementById('f-cliente');
+  return {
+    clienteId: sel.value || null,
+    clienteNome: sel.options[sel.selectedIndex]?.text || '-',
+    numero: document.getElementById('f-num').value.trim() || String(Date.now()).slice(-4),
+    data: document.getElementById('f-data').value,
+    pagamento: document.getElementById('f-pagamento').value,
+    status: document.getElementById('f-status').value,
+    obs: document.getElementById('f-obs').value.trim(),
+    total: servicos.reduce((s,sv)=>s+sv.valor,0),
+  };
+}
+
+function gerar(){
+  if(!servicos.length){ showToast('Adicione pelo menos um servico.', true); return; }
+  const d = coletar();
+  const statusMap = { pago:{txt:'Pago integralmente',cls:'pago'}, parcial:{txt:'Pago parcialmente',cls:'parcial'}, pendente:{txt:'Pendente',cls:'pendente'} };
+  const st = statusMap[d.status];
+  const linhas = servicos.map((s,i)=>`<tr><td>${i+1}</td><td>${s.nome}${s.desc?`<div class="td-desc">${s.desc}</div>`:''}</td><td class="r">${fmtBRL(s.valor)}</td></tr>`).join('');
+  const doc = document.getElementById('recibo-doc');
+  doc.style.display='block';
+  document.getElementById('empty-state').style.display='none';
+  doc.innerHTML = `
+    <div class="doc-header">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">${LOGO_SVG}<div class="doc-logo-name">Auron</div><div class="doc-logo-sub">Home Systems</div></div>
+      <div class="doc-meta"><div class="rec-badge">Recibo de Servico</div><div class="rec-number">No ${d.numero}</div><div class="rec-date">${fmtData(d.data)}</div></div>
+    </div>
+    <div class="doc-accent-bar"></div>
+    <div class="doc-body">
+      <div class="partes-grid">
+        <div><div class="parte-label">Prestador de Servico</div><div class="parte-name">${EMPRESA.nome}</div>
+          <div class="parte-detail">${EMPRESA.responsavel}<br>CNPJ: ${EMPRESA.cnpj}<br>${EMPRESA.pix}</div></div>
+        <div><div class="parte-label">Contratante / Pagador</div><div class="parte-name">${d.clienteNome}</div></div>
+      </div>
+      <div class="declaracao">
+        Eu, <strong>${EMPRESA.responsavel}</strong>, representante da <strong>${EMPRESA.nome}</strong>, CNPJ <strong>${EMPRESA.cnpj}</strong>,
+        declaro ter recebido de <strong>${d.clienteNome}</strong> a importancia de <strong>${fmtBRL(d.total)}</strong>
+        <span style="font-size:12px;color:#5a6a7a;">(${extenso(d.total)})</span>, referente aos servicos descritos abaixo, em ${fmtData(d.data)}.
+      </div>
+      <div class="section-header"><span>Servicos Executados</span></div>
+      <table class="doc-table">
+        <thead><tr><th style="width:36px;">#</th><th>Descricao do Servico</th><th class="r" style="width:120px;">Valor</th></tr></thead>
+        <tbody>${linhas}
+          <tr style="background:#faf8f4;"><td colspan="2" style="text-align:right;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#8a9bb0;font-weight:500;">Total dos Servicos</td><td class="r" style="font-weight:600;color:#0d1b2a;">${fmtBRL(d.total)}</td></tr>
+        </tbody>
+      </table>
+      <div class="total-wrap"><div class="total-box"><div class="total-final"><span class="lbl">Valor Recebido</span><span class="val">${fmtBRL(d.total)}</span></div></div></div>
+      <div class="pag-grid">
+        <div><div class="pag-label">Forma de Pagamento</div><div class="pag-value">${d.pagamento}</div></div>
+        <div><div class="pag-label">Status</div><div><span class="pag-badge ${st.cls}">${st.txt}</span></div></div>
+        <div><div class="pag-label">Data</div><div class="pag-value">${fmtData(d.data)}</div></div>
+        <div><div class="pag-label">Numero</div><div class="pag-value">No ${d.numero}</div></div>
+      </div>
+      ${d.obs?`<div class="obs-box"><p>${d.obs.replace(/\n/g,'<br>')}</p></div>`:''}
+      <div class="assinaturas">
+        <div class="ass-block"><div class="ass-linha"></div><div class="ass-nome">${EMPRESA.responsavel}</div><div class="ass-cargo">Prestador - ${EMPRESA.nome}</div></div>
+        <div class="ass-block"><div class="ass-linha"></div><div class="ass-nome">${d.clienteNome}</div><div class="ass-cargo">Contratante</div></div>
+      </div>
+    </div>
+    <div class="doc-footer">
+      <div class="footer-info"><strong>${EMPRESA.nome}</strong>CNPJ: ${EMPRESA.cnpj}<br>${EMPRESA.pix}</div>
+      <div class="footer-tag">Tecnologia que eleva<br>o seu estilo de vida.</div>
+    </div>`;
+  document.getElementById('preview').scrollTop = 0;
+}
+
+async function salvar(){
+  if(!servicos.length){ showToast('Adicione servicos antes de salvar.', true); return; }
+  const d = coletar();
+  const reg = {
+    cliente_id: d.clienteId, numero: d.numero, data: d.data || null,
+    servicos: servicos, total: d.total, forma_pagamento: d.pagamento, status: d.status,
+    observacoes: d.obs || null,
+  };
+  let res;
+  if(editId){ res = await db.from('recibos').update(reg).eq('id', editId); }
+  else { res = await db.from('recibos').insert(reg); }
+  if(res.error){ showToast('Erro ao salvar: '+res.error.message, true); return; }
+  showToast('Recibo salvo no sistema.');
+}
+
+async function abrirSalvos(){
+  openModal('modal-salvos');
+  const { data, error } = await db.from('recibos').select('*, clientes(nome)').order('criado_em',{ascending:false}).limit(100);
+  const el = document.getElementById('salvos-list');
+  if(error){ el.innerHTML='<p class="muted">Erro ao carregar.</p>'; return; }
+  if(!data || !data.length){ el.innerHTML='<div class="empty"><p>Nenhum recibo salvo</p></div>'; return; }
+  el.innerHTML = data.map(r=>`
+    <div class="saved-row">
+      <div><div style="color:var(--white);">No ${r.numero||'-'} - ${fmtBRL(r.total)}</div>
+        <div class="muted">${r.clientes?r.clientes.nome:'sem cliente'} · ${fmtDataCurta(r.data||r.criado_em)}</div></div>
+      <div class="row-actions">
+        <button class="btn btn-ghost btn-sm" onclick="carregarRec(${r.id})">Abrir</button>
+        <button class="btn btn-danger btn-sm" onclick="excluirRec(${r.id})">Excluir</button>
+      </div>
+    </div>`).join('');
+}
+
+async function carregarRec(id){
+  const { data, error } = await db.from('recibos').select('*').eq('id', id).single();
+  if(error){ showToast('Erro ao abrir.', true); return; }
+  editId = id;
+  servicos = data.servicos || [];
+  document.getElementById('f-cliente').value = data.cliente_id || '';
+  document.getElementById('f-num').value = data.numero || '';
+  if(data.data) document.getElementById('f-data').value = data.data;
+  document.getElementById('f-pagamento').value = data.forma_pagamento || document.getElementById('f-pagamento').value;
+  document.getElementById('f-status').value = data.status || 'pago';
+  document.getElementById('f-obs').value = data.observacoes || '';
+  renderLista();
+  closeModal('modal-salvos');
+  gerar();
+}
+
+async function excluirRec(id){
+  if(!confirm('Excluir este recibo?')) return;
+  const { error } = await db.from('recibos').delete().eq('id', id);
+  if(error){ showToast('Erro ao excluir.', true); return; }
+  if(editId===id) editId=null;
+  showToast('Recibo excluido.');
+  abrirSalvos();
+}
+</script>
+</body>
+</html>
