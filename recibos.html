@@ -1,4 +1,4 @@
-<!-- build: 2026-06-16a -->
+<!-- build: 2026-06-16b -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -225,7 +225,7 @@ function gerar(){
   document.getElementById('empty-state').style.display='none';
   doc.innerHTML = `
     <div class="doc-header">
-      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">${LOGO_SVG}<div class="doc-logo-name">Auron</div><div class="doc-logo-sub">Home Systems</div></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">${logoHTML(64)}<div class="doc-logo-name">Auron</div><div class="doc-logo-sub">Home Systems</div></div>
       <div class="doc-meta"><div class="rec-badge">Recibo de Servico</div><div class="rec-number">No ${d.numero}</div><div class="rec-date">${fmtData(d.data)}</div></div>
     </div>
     <div class="doc-accent-bar"></div>

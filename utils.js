@@ -29,13 +29,27 @@ const NAV_LINKS = [
   {id:'recibos',    href:'recibos.html',    label:'Recibos'},
 ];
 
-const LOGO_SVG = `<svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:34px;width:34px;">
-  <circle cx="100" cy="100" r="78" stroke="#c8a96e" stroke-width="6"/>
-  <path d="M100 26 C100 26 158 76 158 113 C158 147 132 170 100 170 C68 170 42 147 42 113 C42 76 100 26 100 26Z" stroke="#c8a96e" stroke-width="6" fill="none"/>
-  <line x1="100" y1="26" x2="42" y2="170" stroke="#c8a96e" stroke-width="6" stroke-linecap="round"/>
-  <line x1="100" y1="26" x2="158" y2="170" stroke="#c8a96e" stroke-width="6" stroke-linecap="round"/>
-  <line x1="61" y1="128" x2="139" y2="128" stroke="#c8a96e" stroke-width="6" stroke-linecap="round"/>
-</svg>`;
+// Logo em SVG (fallback caso logo.png nao exista na pasta)
+function svgLogo(size){
+  size = size || 34;
+  return `<svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:${size}px;width:${size}px;">
+    <circle cx="100" cy="100" r="78" stroke="#c8a96e" stroke-width="6"/>
+    <path d="M100 26 C100 26 158 76 158 113 C158 147 132 170 100 170 C68 170 42 147 42 113 C42 76 100 26 100 26Z" stroke="#c8a96e" stroke-width="6" fill="none"/>
+    <line x1="100" y1="26" x2="42" y2="170" stroke="#c8a96e" stroke-width="6" stroke-linecap="round"/>
+    <line x1="100" y1="26" x2="158" y2="170" stroke="#c8a96e" stroke-width="6" stroke-linecap="round"/>
+    <line x1="61" y1="128" x2="139" y2="128" stroke="#c8a96e" stroke-width="6" stroke-linecap="round"/>
+  </svg>`;
+}
+
+// Logo oficial: usa logo.png da pasta; se faltar, cai no SVG.
+function logoHTML(size){
+  size = size || 34;
+  return `<img src="logo.png" alt="Auron" style="height:${size}px;width:auto;object-fit:contain;display:block;" `
+    + `onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block';">`
+    + `<span style="display:none;line-height:0;">${svgLogo(size)}</span>`;
+}
+
+const LOGO_SVG = svgLogo(34); // compat
 
 // ── GUARD: protege a pagina. Redireciona pro login se nao houver sessao. ──
 async function requireAuth(){
@@ -55,7 +69,7 @@ async function renderTopbar(activeId){
   const bar = document.createElement('div');
   bar.id = 'topbar';
   bar.innerHTML = `
-    <div class="tb-brand">${LOGO_SVG}<span class="tb-name">Auron</span></div>
+    <div class="tb-brand">${logoHTML(36)}<span class="tb-name">Auron</span></div>
     <nav>${links}</nav>
     <div class="tb-user">
       <span class="tb-email">${email}</span>
