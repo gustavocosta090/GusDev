@@ -1,4 +1,4 @@
-<!-- build: 2026-06-16a -->
+<!-- build: 2026-06-16b -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -35,7 +35,7 @@
   </div>
   <div id="login-err"></div>
   <div class="field-group">
-    <div><label>E-mail</label><input id="f-email" type="email" placeholder="voce@email.com" autocomplete="username"></div>
+    <div><label>Usuario</label><input id="f-email" type="text" placeholder="ex: gustavo" autocomplete="username"></div>
     <div><label>Senha</label><input id="f-pass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
   </div>
   <button class="btn btn-gold btn-block" id="btn-login" onclick="entrar()">Entrar</button>
@@ -50,15 +50,19 @@ db.auth.getSession().then(({data:{session}})=>{ if(session) location.replace('da
 const errEl = document.getElementById('login-err');
 function showErr(msg){ errEl.textContent = msg; errEl.style.display='block'; }
 
+// Dominio interno ficticio: usuario "gustavo" vira "gustavo@auron.app"
+const AUTH_DOMAIN = '@auron.app';
+
 async function entrar(){
-  const email = document.getElementById('f-email').value.trim();
-  const pass  = document.getElementById('f-pass').value;
-  if(!email || !pass){ showErr('Informe e-mail e senha.'); return; }
+  let user = document.getElementById('f-email').value.trim().toLowerCase();
+  const pass = document.getElementById('f-pass').value;
+  if(!user || !pass){ showErr('Informe usuario e senha.'); return; }
+  const email = user.includes('@') ? user : user + AUTH_DOMAIN;
   const btn = document.getElementById('btn-login');
   btn.disabled = true; btn.textContent = 'Entrando...';
   const { error } = await db.auth.signInWithPassword({ email, password: pass });
   if(error){
-    showErr('E-mail ou senha invalidos.');
+    showErr('Usuario ou senha invalidos.');
     btn.disabled = false; btn.textContent = 'Entrar';
     return;
   }
