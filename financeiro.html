@@ -1,0 +1,538 @@
+<!-- build: 2026-06-16a -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auron — Financeiro</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Jost:wght@200;300;400;500;600&family=Josefin+Sans:wght@100;200;300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app-shell.css">
+<style>
+  .fin-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
+  .fin-toolbar .grow{flex:1;}
+  .fin-toolbar select{max-width:210px;}
+  .val-in{color:#7fd18c;}
+  .val-out{color:#e88;}
+  .exec-chart{width:100%;height:260px;display:block;}
+  .chart-legend{display:flex;gap:18px;justify-content:center;margin-top:10px;font-size:11px;color:var(--gray);letter-spacing:1px;}
+  .chart-legend .dot{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:middle;}
+  .alert-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(200,169,110,.07);font-size:13px;}
+  .alert-row:last-child{border-bottom:none;}
+  .alert-row .a-desc{color:var(--light);}
+  .alert-row .a-sub{font-size:11px;color:var(--gray);}
+  .saldo-pos{color:#7fd18c;} .saldo-neg{color:#e88;}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="page-head">
+    <div>
+      <div class="page-title">Financeiro</div>
+      <div class="page-sub">Contas a pagar, a receber e balanco</div>
+    </div>
+  </div>
+
+  <div class="tabs-nav">
+    <button class="tab-btn active" data-tab="pagar"   onclick="setTab('pagar')">Contas a Pagar</button>
+    <button class="tab-btn"        data-tab="receber" onclick="setTab('receber')">Contas a Receber</button>
+    <button class="tab-btn"        data-tab="exec"    onclick="setTab('exec')">Painel Executivo</button>
+  </div>
+
+  <!-- ============ PAGAR ============ -->
+  <div class="tab-panel active" id="panel-pagar">
+    <div class="kpis" id="kpis-pagar"></div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="fin-toolbar" style="padding:16px 16px 0;">
+        <select id="f-cat-pagar" onchange="render()"></select>
+        <select id="f-st-pagar" onchange="render()">
+          <option value="">Todos os status</option>
+          <option value="aberto">Em aberto</option>
+          <option value="vencido">Vencidos</option>
+          <option value="pago">Pagos</option>
+        </select>
+        <div class="grow"></div>
+        <button class="btn btn-primary btn-sm" onclick="novo('pagar')">+ Nova conta a pagar</button>
+      </div>
+      <table class="tbl" style="margin-top:14px;">
+        <thead><tr>
+          <th>Descricao</th><th>Categoria</th><th>Fornecedor</th><th>Vencimento</th>
+          <th class="r">Valor</th><th>Status</th><th class="r">Acoes</th>
+        </tr></thead>
+        <tbody id="tb-pagar"></tbody>
+      </table>
+      <div id="empty-pagar" class="empty" style="display:none;"><p>Nenhuma conta a pagar</p></div>
+    </div>
+  </div>
+
+  <!-- ============ RECEBER ============ -->
+  <div class="tab-panel" id="panel-receber">
+    <div class="kpis" id="kpis-receber"></div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="fin-toolbar" style="padding:16px 16px 0;">
+        <select id="f-cat-receber" onchange="render()"></select>
+        <select id="f-st-receber" onchange="render()">
+          <option value="">Todos os status</option>
+          <option value="aberto">Em aberto</option>
+          <option value="vencido">Vencidos</option>
+          <option value="pago">Recebidos</option>
+        </select>
+        <div class="grow"></div>
+        <button class="btn btn-ghost btn-sm" onclick="abrirGerar()">Gerar do contrato</button>
+        <button class="btn btn-primary btn-sm" onclick="novo('receber')">+ Nova conta a receber</button>
+      </div>
+      <table class="tbl" style="margin-top:14px;">
+        <thead><tr>
+          <th>Descricao</th><th>Categoria</th><th>Cliente</th><th>Vencimento</th>
+          <th class="r">Valor</th><th>Status</th><th class="r">Acoes</th>
+        </tr></thead>
+        <tbody id="tb-receber"></tbody>
+      </table>
+      <div id="empty-receber" class="empty" style="display:none;"><p>Nenhuma conta a receber</p></div>
+    </div>
+  </div>
+
+  <!-- ============ EXECUTIVO ============ -->
+  <div class="tab-panel" id="panel-exec">
+    <div class="kpis" id="kpis-exec"></div>
+    <div class="card" style="margin-bottom:24px;">
+      <div class="section-title">Entradas x Saidas por mes (por vencimento)</div>
+      <svg class="exec-chart" id="chart" viewBox="0 0 800 260" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="chart-legend">
+        <span><span class="dot" style="background:#7fd18c;"></span>Entradas (a receber)</span>
+        <span><span class="dot" style="background:#e88;"></span>Saidas (a pagar)</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Vencidos e a vencer (proximos 7 dias)</div>
+      <div id="alertas"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LANCAMENTO -->
+<div class="modal-overlay" id="modal-lanc">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="m-title">Novo lancamento</h3>
+      <button class="modal-close" onclick="closeModal('modal-lanc')">&times;</button>
+    </div>
+    <div class="field-group">
+      <input type="hidden" id="m-id">
+      <input type="hidden" id="m-tipo">
+      <div><label>Descricao</label><input id="m-desc" type="text" placeholder="Ex: Mensalidade internet"></div>
+      <div class="two-col">
+        <div><label>Categoria</label><input id="m-cat" type="text" list="cats" placeholder="Ex: Fornecedor, Salario, Servico"><datalist id="cats"></datalist></div>
+        <div><label>Valor (R$)</label><input id="m-valor" type="number" min="0" step="0.01" placeholder="0,00"></div>
+      </div>
+      <div class="two-col">
+        <div><label>Vencimento</label><input id="m-venc" type="date"></div>
+        <div id="row-cliente"><label>Cliente</label><select id="m-cliente"></select></div>
+        <div id="row-forn"><label>Fornecedor</label><input id="m-forn" type="text" placeholder="Nome do fornecedor"></div>
+      </div>
+      <div class="two-col">
+        <div><label>Quitado?</label>
+          <select id="m-pago" onchange="onPagoChange()">
+            <option value="false">Em aberto</option>
+            <option value="true">Sim</option>
+          </select>
+        </div>
+        <div id="row-pagoem"><label id="lbl-pagoem">Pago em</label><input id="m-pagoem" type="date"></div>
+      </div>
+      <div><label>Observacoes</label><textarea id="m-obs" placeholder="Notas"></textarea></div>
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button class="btn btn-gold btn-block" id="m-save" onclick="salvar()">Salvar</button>
+        <button class="btn btn-danger" id="m-del" onclick="excluir()" style="display:none;">Excluir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GERAR DO CONTRATO -->
+<div class="modal-overlay" id="modal-gerar">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Gerar a receber do contrato</h3>
+      <button class="modal-close" onclick="closeModal('modal-gerar')">&times;</button>
+    </div>
+    <div class="field-group">
+      <div><label>Contrato</label><select id="g-contrato" onchange="previewContrato()"></select></div>
+      <div class="two-col">
+        <div><label>1o vencimento</label><input id="g-venc" type="date"></div>
+        <div><label>Intervalo</label>
+          <select id="g-int">
+            <option value="1">Mensal</option>
+            <option value="0">Mesma data</option>
+            <option value="2">A cada 2 meses</option>
+          </select>
+        </div>
+      </div>
+      <div id="g-preview" class="muted" style="font-size:12px;line-height:1.6;"></div>
+      <button class="btn btn-gold btn-block" id="g-save" onclick="gerarDoContrato()">Gerar lancamentos</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="utils.js"></script>
+<script>
+let lancs = [];
+let clientesMap = {};
+let contratos = [];
+let tab = 'pagar';
+const hojeISO = new Date().toISOString().slice(0,10);
+
+(async function init(){
+  await renderTopbar('financeiro');
+  await carregar();
+})();
+
+async function carregar(){
+  const [lc, cl, ct] = await Promise.all([
+    db.from('lancamentos').select('*').order('vencimento', {nullsFirst:false}),
+    db.from('clientes').select('id,nome').order('nome'),
+    db.from('contratos').select('id,numero,cliente_id,valor_total,parcelas').order('id',{ascending:false}),
+  ]);
+  if(lc.error){ showToast('Erro ao carregar financeiro.', true); return; }
+  lancs = lc.data || [];
+  clientesMap = {};
+  (cl.data||[]).forEach(c=>clientesMap[c.id]=c.nome);
+  contratos = ct.data || [];
+  popularFiltrosCategoria();
+  render();
+}
+
+function statusLanc(l){
+  if(l.pago) return 'pago';
+  if(l.vencimento && l.vencimento < hojeISO) return 'vencido';
+  return 'aberto';
+}
+function badgeStatus(st){
+  if(st==='pago')    return '<span class="badge ok">Quitado</span>';
+  if(st==='vencido') return '<span class="badge err">Vencido</span>';
+  return '<span class="badge open">Em aberto</span>';
+}
+function somaValor(arr){ return arr.reduce((s,l)=>s+Number(l.valor||0),0); }
+function mesAtual(iso){ return iso && iso.slice(0,7) === hojeISO.slice(0,7); }
+
+function setTab(t){
+  tab = t;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===t));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+t).classList.add('active');
+  render();
+}
+
+function popularFiltrosCategoria(){
+  ['pagar','receber'].forEach(tp=>{
+    const cats = [...new Set(lancs.filter(l=>l.tipo===tp && l.categoria).map(l=>l.categoria))].sort();
+    const sel = document.getElementById('f-cat-'+tp);
+    const atual = sel.value;
+    sel.innerHTML = '<option value="">Todas as categorias</option>' + cats.map(c=>`<option ${c===atual?'selected':''}>${c}</option>`).join('');
+  });
+  const todas = [...new Set(lancs.filter(l=>l.categoria).map(l=>l.categoria))].sort();
+  document.getElementById('cats').innerHTML = todas.map(c=>`<option value="${c}">`).join('');
+}
+
+function render(){
+  if(tab==='exec'){ renderExec(); return; }
+  renderTabela(tab);
+}
+
+function renderTabela(tp){
+  const fCat = document.getElementById('f-cat-'+tp).value;
+  const fSt  = document.getElementById('f-st-'+tp).value;
+  let lista = lancs.filter(l=>l.tipo===tp);
+  if(fCat) lista = lista.filter(l=>l.categoria===fCat);
+  if(fSt)  lista = lista.filter(l=>statusLanc(l)===fSt);
+
+  // KPIs
+  const doTipo = lancs.filter(l=>l.tipo===tp);
+  const aberto  = doTipo.filter(l=>!l.pago);
+  const vencido = aberto.filter(l=>l.vencimento && l.vencimento < hojeISO);
+  const quitMes = doTipo.filter(l=>l.pago && mesAtual(l.pago_em||l.vencimento));
+  const lblQuit = tp==='pagar' ? 'Pago no mes' : 'Recebido no mes';
+  const kpi=(label,val,cls,foot)=>`<div class="kpi"><div class="kpi-label">${label}</div><div class="kpi-value ${cls||''}">${fmtBRL(val)}</div>${foot?`<div class="kpi-foot">${foot}</div>`:''}</div>`;
+  document.getElementById('kpis-'+tp).innerHTML =
+      kpi('Em aberto', somaValor(aberto), '', `${aberto.length} conta(s)`)
+    + kpi('Vencido', somaValor(vencido), 'saldo-neg', `${vencido.length} conta(s)`)
+    + kpi(lblQuit, somaValor(quitMes));
+
+  // tabela
+  const tbody = document.getElementById('tb-'+tp);
+  const empty = document.getElementById('empty-'+tp);
+  if(!lista.length){ tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  const valCls = tp==='pagar' ? 'val-out' : 'val-in';
+  tbody.innerHTML = lista.map(l=>{
+    const st = statusLanc(l);
+    const terceiro = tp==='pagar' ? (l.fornecedor||'-') : (clientesMap[l.cliente_id]||'-');
+    return `<tr>
+      <td><div style="color:var(--white);">${l.descricao}</div>${l.origem==='contrato'?'<div class="muted">do contrato</div>':''}</td>
+      <td class="muted">${l.categoria||'-'}</td>
+      <td class="muted">${terceiro}</td>
+      <td class="muted">${l.vencimento?fmtDataCurta(l.vencimento):'-'}</td>
+      <td class="r ${valCls}">${fmtBRL(l.valor)}</td>
+      <td>${badgeStatus(st)}</td>
+      <td>
+        <div class="row-actions">
+          ${l.pago
+            ? `<button class="btn btn-ghost btn-sm" onclick="togglePago(${l.id},false)">Reabrir</button>`
+            : `<button class="btn btn-ghost btn-sm" onclick="togglePago(${l.id},true)">${tp==='pagar'?'Pagar':'Receber'}</button>`}
+          <button class="btn btn-primary btn-sm" onclick="editar(${l.id})">Editar</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function togglePago(id, val){
+  const { error } = await db.from('lancamentos').update({
+    pago: val,
+    pago_em: val ? hojeISO : null,
+    atualizado_em: new Date().toISOString(),
+  }).eq('id', id);
+  if(error){ showToast('Erro.', true); return; }
+  showToast(val ? 'Baixa registrada.' : 'Reaberto.');
+  await carregar();
+}
+
+// ── MODAL LANCAMENTO ──
+function aplicarTipoCampos(tp){
+  document.getElementById('row-cliente').style.display = tp==='receber' ? 'block' : 'none';
+  document.getElementById('row-forn').style.display    = tp==='pagar'   ? 'block' : 'none';
+}
+function onPagoChange(){
+  const pago = document.getElementById('m-pago').value==='true';
+  document.getElementById('row-pagoem').style.display = pago ? 'block' : 'none';
+  const lbl = document.getElementById('m-tipo').value==='pagar' ? 'Pago em' : 'Recebido em';
+  document.getElementById('lbl-pagoem').textContent = lbl;
+  const pe = document.getElementById('m-pagoem');
+  if(pago && !pe.value) pe.value = hojeISO;
+}
+
+async function novo(tp){
+  document.getElementById('m-title').textContent = tp==='pagar' ? 'Nova conta a pagar' : 'Nova conta a receber';
+  ['m-id','m-desc','m-cat','m-valor','m-venc','m-forn','m-pagoem','m-obs'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('m-tipo').value = tp;
+  document.getElementById('m-pago').value = 'false';
+  document.getElementById('m-del').style.display = 'none';
+  aplicarTipoCampos(tp);
+  onPagoChange();
+  await carregarClientesSelect(document.getElementById('m-cliente'), '');
+  openModal('modal-lanc');
+}
+
+async function editar(id){
+  const l = lancs.find(x=>x.id===id); if(!l) return;
+  document.getElementById('m-title').textContent = 'Editar lancamento';
+  document.getElementById('m-id').value = l.id;
+  document.getElementById('m-tipo').value = l.tipo;
+  document.getElementById('m-desc').value = l.descricao||'';
+  document.getElementById('m-cat').value = l.categoria||'';
+  document.getElementById('m-valor').value = l.valor||'';
+  document.getElementById('m-venc').value = l.vencimento||'';
+  document.getElementById('m-forn').value = l.fornecedor||'';
+  document.getElementById('m-pago').value = l.pago ? 'true':'false';
+  document.getElementById('m-pagoem').value = l.pago_em||'';
+  document.getElementById('m-obs').value = l.observacoes||'';
+  document.getElementById('m-del').style.display = 'block';
+  aplicarTipoCampos(l.tipo);
+  onPagoChange();
+  await carregarClientesSelect(document.getElementById('m-cliente'), l.cliente_id||'');
+  openModal('modal-lanc');
+}
+
+async function salvar(){
+  const tp = document.getElementById('m-tipo').value;
+  const descricao = document.getElementById('m-desc').value.trim();
+  if(!descricao){ showToast('Informe a descricao.', true); return; }
+  const valor = parseFloat(document.getElementById('m-valor').value);
+  if(isNaN(valor) || valor<0){ showToast('Informe um valor valido.', true); return; }
+  const pago = document.getElementById('m-pago').value==='true';
+  const reg = {
+    tipo: tp,
+    descricao,
+    categoria: document.getElementById('m-cat').value.trim() || null,
+    valor,
+    vencimento: document.getElementById('m-venc').value || null,
+    cliente_id: tp==='receber' ? (document.getElementById('m-cliente').value || null) : null,
+    fornecedor: tp==='pagar' ? (document.getElementById('m-forn').value.trim() || null) : null,
+    pago,
+    pago_em: pago ? (document.getElementById('m-pagoem').value || hojeISO) : null,
+    observacoes: document.getElementById('m-obs').value.trim() || null,
+    atualizado_em: new Date().toISOString(),
+  };
+  const id = document.getElementById('m-id').value;
+  let res;
+  if(id){ res = await db.from('lancamentos').update(reg).eq('id', id); }
+  else  { reg.origem='manual'; res = await db.from('lancamentos').insert(reg); }
+  if(res.error){ showToast('Erro ao salvar: '+(res.error.message||''), true); return; }
+  showToast('Lancamento salvo.');
+  closeModal('modal-lanc');
+  await carregar();
+}
+
+async function excluir(){
+  const id = document.getElementById('m-id').value; if(!id) return;
+  if(!confirm('Excluir este lancamento?')) return;
+  const { error } = await db.from('lancamentos').delete().eq('id', id);
+  if(error){ showToast('Erro ao excluir.', true); return; }
+  showToast('Lancamento excluido.');
+  closeModal('modal-lanc');
+  await carregar();
+}
+
+// ── GERAR DO CONTRATO ──
+function abrirGerar(){
+  if(!contratos.length){ showToast('Nenhum contrato cadastrado.', true); return; }
+  const sel = document.getElementById('g-contrato');
+  sel.innerHTML = contratos.map(c=>{
+    const nome = clientesMap[c.cliente_id] || 'sem cliente';
+    return `<option value="${c.id}">No ${c.numero||c.id} - ${nome} (${fmtBRL(c.valor_total)})</option>`;
+  }).join('');
+  document.getElementById('g-venc').value = hojeISO;
+  document.getElementById('g-int').value = '1';
+  previewContrato();
+  openModal('modal-gerar');
+}
+
+function parcelasDoContrato(c){
+  let ps = (c.parcelas||[]).filter(p=>Number(p.val)>0);
+  if(!ps.length && Number(c.valor_total)>0) ps = [{desc:'Valor total', val:Number(c.valor_total)}];
+  return ps;
+}
+
+function previewContrato(){
+  const c = contratos.find(x=>String(x.id)===document.getElementById('g-contrato').value);
+  const box = document.getElementById('g-preview');
+  if(!c){ box.textContent=''; return; }
+  const ps = parcelasDoContrato(c);
+  if(!ps.length){ box.innerHTML='<span class="val-out">Este contrato nao tem parcelas nem valor total.</span>'; return; }
+  const jaExiste = lancs.some(l=>l.origem==='contrato' && String(l.origem_id)===String(c.id));
+  box.innerHTML = `Serao criados <strong>${ps.length}</strong> lancamento(s) a receber, total <strong>${fmtBRL(somaValor(ps.map(p=>({valor:p.val}))))}</strong>.`
+    + (jaExiste ? '<br><span class="val-out">Atencao: ja existem lancamentos gerados deste contrato. As parcelas ja geradas serao ignoradas.</span>' : '');
+}
+
+async function gerarDoContrato(){
+  const c = contratos.find(x=>String(x.id)===document.getElementById('g-contrato').value);
+  if(!c) return;
+  const ps = parcelasDoContrato(c);
+  if(!ps.length){ showToast('Contrato sem parcelas/valor.', true); return; }
+  const intervalo = parseInt(document.getElementById('g-int').value);
+  const baseVenc = document.getElementById('g-venc').value;
+  const nome = clientesMap[c.cliente_id] || '';
+  const jaIdx = new Set(lancs.filter(l=>l.origem==='contrato' && String(l.origem_id)===String(c.id)).map(l=>l.parcela_idx));
+  const novos = [];
+  ps.forEach((p,i)=>{
+    if(jaIdx.has(i)) return;
+    let venc = null;
+    if(baseVenc){
+      const d = new Date(baseVenc+'T00:00:00');
+      d.setMonth(d.getMonth() + intervalo*i);
+      venc = d.toISOString().slice(0,10);
+    }
+    novos.push({
+      tipo:'receber',
+      descricao:`Contrato No ${c.numero||c.id} - parcela ${i+1}${p.desc?(' ('+p.desc+')'):''}`,
+      categoria:'Contrato',
+      cliente_id: c.cliente_id || null,
+      valor: Number(p.val),
+      vencimento: venc,
+      pago:false,
+      origem:'contrato', origem_id:c.id, parcela_idx:i,
+    });
+  });
+  if(!novos.length){ showToast('Nada novo a gerar (parcelas ja existem).'); closeModal('modal-gerar'); return; }
+  const { error } = await db.from('lancamentos').insert(novos);
+  if(error){ showToast('Erro ao gerar: '+(error.message||''), true); return; }
+  showToast(`${novos.length} lancamento(s) gerado(s).`);
+  closeModal('modal-gerar');
+  await carregar();
+}
+
+// ── PAINEL EXECUTIVO ──
+function renderExec(){
+  const receb = lancs.filter(l=>l.tipo==='receber');
+  const pagar = lancs.filter(l=>l.tipo==='pagar');
+  const recRealizado = somaValor(receb.filter(l=>l.pago));
+  const pagRealizado = somaValor(pagar.filter(l=>l.pago));
+  const saldoReal = recRealizado - pagRealizado;
+  const aReceber = somaValor(receb.filter(l=>!l.pago));
+  const aPagar   = somaValor(pagar.filter(l=>!l.pago));
+  const saldoProj = saldoReal + aReceber - aPagar;
+  const cls = v => v>=0 ? 'saldo-pos' : 'saldo-neg';
+  const kpi=(label,val,c,foot)=>`<div class="kpi"><div class="kpi-label">${label}</div><div class="kpi-value ${c||''}">${fmtBRL(val)}</div>${foot?`<div class="kpi-foot">${foot}</div>`:''}</div>`;
+  document.getElementById('kpis-exec').innerHTML =
+      kpi('Saldo realizado', saldoReal, cls(saldoReal), 'recebido - pago')
+    + kpi('A receber', aReceber, '', 'em aberto')
+    + kpi('A pagar', aPagar, '', 'em aberto')
+    + kpi('Saldo projetado', saldoProj, cls(saldoProj), 'realizado + a receber - a pagar');
+
+  renderChart();
+  renderAlertas();
+}
+
+function renderChart(){
+  // agrupa por mes de vencimento
+  const map = {};
+  lancs.forEach(l=>{
+    if(!l.vencimento) return;
+    const m = l.vencimento.slice(0,7);
+    if(!map[m]) map[m] = {entrada:0, saida:0};
+    if(l.tipo==='receber') map[m].entrada += Number(l.valor||0);
+    else map[m].saida += Number(l.valor||0);
+  });
+  let meses = Object.keys(map).sort();
+  if(meses.length>12) meses = meses.slice(-12);
+  const svg = document.getElementById('chart');
+  if(!meses.length){ svg.innerHTML = '<text x="400" y="130" fill="#8a9bb0" font-size="14" text-anchor="middle" font-family="Jost">Sem lancamentos com vencimento</text>'; return; }
+
+  const W=800, H=260, padL=8, padR=8, padT=14, padB=34;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const max = Math.max(1, ...meses.map(m=>Math.max(map[m].entrada, map[m].saida)));
+  const groupW = plotW / meses.length;
+  const barW = Math.min(26, groupW/3.2);
+  const nomesMes = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  let parts = [];
+  // linha de base
+  parts.push(`<line x1="${padL}" y1="${padT+plotH}" x2="${W-padR}" y2="${padT+plotH}" stroke="rgba(200,169,110,.2)"/>`);
+  meses.forEach((m,i)=>{
+    const cx = padL + groupW*i + groupW/2;
+    const he = (map[m].entrada/max)*plotH;
+    const hs = (map[m].saida/max)*plotH;
+    const xe = cx - barW - 2, xs = cx + 2;
+    parts.push(`<rect x="${xe.toFixed(1)}" y="${(padT+plotH-he).toFixed(1)}" width="${barW.toFixed(1)}" height="${he.toFixed(1)}" rx="2" fill="#7fd18c"><title>Entradas ${fmtBRL(map[m].entrada)}</title></rect>`);
+    parts.push(`<rect x="${xs.toFixed(1)}" y="${(padT+plotH-hs).toFixed(1)}" width="${barW.toFixed(1)}" height="${hs.toFixed(1)}" rx="2" fill="#e88"><title>Saidas ${fmtBRL(map[m].saida)}</title></rect>`);
+    const [yy,mm] = m.split('-');
+    parts.push(`<text x="${cx.toFixed(1)}" y="${H-12}" fill="#8a9bb0" font-size="11" text-anchor="middle" font-family="Jost">${nomesMes[parseInt(mm)-1]}/${yy.slice(2)}</text>`);
+  });
+  svg.innerHTML = parts.join('');
+}
+
+function renderAlertas(){
+  const lim = new Date(); lim.setDate(lim.getDate()+7);
+  const limISO = lim.toISOString().slice(0,10);
+  let lista = lancs.filter(l=>!l.pago && l.vencimento && l.vencimento <= limISO);
+  lista.sort((a,b)=> (a.vencimento<b.vencimento?-1:1));
+  const box = document.getElementById('alertas');
+  if(!lista.length){ box.innerHTML = '<div class="muted" style="padding:8px 0;">Nada vencido ou vencendo nos proximos 7 dias.</div>'; return; }
+  box.innerHTML = lista.map(l=>{
+    const venc = l.vencimento < hojeISO;
+    const tipoTxt = l.tipo==='receber' ? 'A receber' : 'A pagar';
+    const terceiro = l.tipo==='receber' ? (clientesMap[l.cliente_id]||'') : (l.fornecedor||'');
+    const valCls = l.tipo==='receber' ? 'val-in' : 'val-out';
+    return `<div class="alert-row">
+      <div>
+        <div class="a-desc">${l.descricao}</div>
+        <div class="a-sub">${tipoTxt}${terceiro?(' - '+terceiro):''} - vence ${fmtDataCurta(l.vencimento)}</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="${valCls}" style="font-weight:500;">${fmtBRL(l.valor)}</div>
+        ${venc?'<span class="badge err">Vencido</span>':'<span class="badge warn">A vencer</span>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>

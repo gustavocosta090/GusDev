@@ -27,6 +27,7 @@ const NAV_LINKS = [
   {id:'orcamentos', href:'orcamentos.html', label:'Orcamentos'},
   {id:'contratos',  href:'contratos.html',  label:'Contratos'},
   {id:'recibos',    href:'recibos.html',    label:'Recibos'},
+  {id:'financeiro', href:'financeiro.html', label:'Financeiro'},
 ];
 
 // Logo em SVG (fallback caso logo.png nao exista na pasta)
