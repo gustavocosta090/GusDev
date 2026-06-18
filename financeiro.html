@@ -1,4 +1,4 @@
-<!-- build: 2026-06-16a -->
+<!-- build: 2026-06-17a -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -33,9 +33,40 @@
   </div>
 
   <div class="tabs-nav">
-    <button class="tab-btn active" data-tab="pagar"   onclick="setTab('pagar')">Contas a Pagar</button>
+    <button class="tab-btn active" data-tab="geral"   onclick="setTab('geral')">Visao Geral</button>
+    <button class="tab-btn"        data-tab="pagar"   onclick="setTab('pagar')">Contas a Pagar</button>
     <button class="tab-btn"        data-tab="receber" onclick="setTab('receber')">Contas a Receber</button>
     <button class="tab-btn"        data-tab="exec"    onclick="setTab('exec')">Painel Executivo</button>
+  </div>
+
+  <!-- ============ VISAO GERAL ============ -->
+  <div class="tab-panel active" id="panel-geral">
+    <div class="kpis" id="kpis-geral"></div>
+    <div class="card" style="margin-bottom:24px;">
+      <div class="section-title">Vendas</div>
+      <div class="kpis" id="kpis-vendas" style="margin-bottom:0;"></div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:24px;">
+      <div class="section-title" style="padding:16px 16px 0;">Ranking de clientes (por valor vendido)</div>
+      <table class="tbl" style="margin-top:12px;">
+        <thead><tr>
+          <th>Cliente</th><th class="r">Contratos</th><th class="r">Vendido</th>
+          <th class="r">Orc. aprovados</th><th class="r">% mao de obra</th>
+        </tr></thead>
+        <tbody id="tb-rank-cli"></tbody>
+      </table>
+      <div id="empty-rank" class="empty" style="display:none;"><p>Sem vendas registradas</p></div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="section-title" style="padding:16px 16px 0;">Equipamentos mais vendidos (orcamentos aprovados)</div>
+      <table class="tbl" style="margin-top:12px;">
+        <thead><tr>
+          <th>Equipamento</th><th>Categoria</th><th class="r">Qtd</th><th class="r">Valor</th>
+        </tr></thead>
+        <tbody id="tb-rank-equip"></tbody>
+      </table>
+      <div id="empty-equip" class="empty" style="display:none;"><p>Nenhum equipamento vendido ainda</p></div>
+    </div>
   </div>
 
   <!-- ============ PAGAR ============ -->
@@ -177,8 +208,11 @@
 <script>
 let lancs = [];
 let clientesMap = {};
+let clientesArr = [];
 let contratos = [];
-let tab = 'pagar';
+let orcamentos = [];
+let equipCount = 0;
+let tab = 'geral';
 const hojeISO = new Date().toISOString().slice(0,10);
 
 (async function init(){
@@ -187,16 +221,21 @@ const hojeISO = new Date().toISOString().slice(0,10);
 })();
 
 async function carregar(){
-  const [lc, cl, ct] = await Promise.all([
+  const [lc, cl, ct, oc, eq] = await Promise.all([
     db.from('lancamentos').select('*').order('vencimento', {nullsFirst:false}),
-    db.from('clientes').select('id,nome').order('nome'),
+    db.from('clientes').select('id,nome,entregue').order('nome'),
     db.from('contratos').select('id,numero,cliente_id,valor_total,parcelas').order('id',{ascending:false}),
+    db.from('orcamentos').select('id,cliente_id,status,total,itens'),
+    db.from('equipamentos').select('id').eq('ativo',true),
   ]);
   if(lc.error){ showToast('Erro ao carregar financeiro.', true); return; }
   lancs = lc.data || [];
+  clientesArr = cl.data || [];
   clientesMap = {};
-  (cl.data||[]).forEach(c=>clientesMap[c.id]=c.nome);
+  clientesArr.forEach(c=>clientesMap[c.id]=c.nome);
   contratos = ct.data || [];
+  orcamentos = oc.data || [];
+  equipCount = (eq.data||[]).length;
   popularFiltrosCategoria();
   render();
 }
@@ -234,8 +273,102 @@ function popularFiltrosCategoria(){
 }
 
 function render(){
+  if(tab==='geral'){ renderGeral(); return; }
   if(tab==='exec'){ renderExec(); return; }
   renderTabela(tab);
+}
+
+// ── VISAO GERAL ──
+function renderGeral(){
+  const aberto = clientesArr.filter(c=>!c.entregue).length;
+  const entregue = clientesArr.filter(c=>c.entregue).length;
+  const aprovados = orcamentos.filter(o=>o.status==='aprovado');
+  const kpi=(label,val,foot)=>`<div class="kpi"><div class="kpi-label">${label}</div><div class="kpi-value">${val}</div>${foot?`<div class="kpi-foot">${foot}</div>`:''}</div>`;
+  document.getElementById('kpis-geral').innerHTML =
+      kpi('Clientes', clientesArr.length, `${aberto} em aberto`)
+    + kpi('Em aberto', aberto)
+    + kpi('Entregues', entregue)
+    + kpi('Orcamentos', orcamentos.length, `${aprovados.length} aprovado(s)`)
+    + kpi('Contratos', contratos.length)
+    + kpi('Catalogo', equipCount, 'itens ativos');
+
+  // venda confirmada = contratos; aprovado = orcamentos aprovados
+  const totalContratos = somaValor(contratos.map(c=>({valor:c.valor_total})));
+  const totalAprovado  = somaValor(aprovados.map(o=>({valor:o.total})));
+  // mix produto x mao de obra (dos itens dos orcamentos aprovados)
+  let prodTotal=0, servTotal=0;
+  aprovados.forEach(o=>{
+    (o.itens||[]).forEach(it=>{
+      const v = Number(it.qtd||0)*Number(it.preco||0);
+      if(it.tipo==='servico') servTotal+=v; else prodTotal+=v;
+    });
+  });
+  const baseMix = prodTotal+servTotal;
+  const pctServ = baseMix>0 ? Math.round(servTotal/baseMix*100) : 0;
+  const ticket = contratos.length ? totalContratos/contratos.length : 0;
+  const kpiV=(label,val,foot)=>`<div class="kpi"><div class="kpi-label">${label}</div><div class="kpi-value">${fmtBRL(val)}</div>${foot?`<div class="kpi-foot">${foot}</div>`:''}</div>`;
+  document.getElementById('kpis-vendas').innerHTML =
+      kpiV('Vendido (contratos)', totalContratos, `${contratos.length} contrato(s)`)
+    + kpiV('Aprovado (orcamentos)', totalAprovado, `${aprovados.length} orcamento(s)`)
+    + kpiV('Ticket medio', ticket, 'por contrato')
+    + `<div class="kpi"><div class="kpi-label">Mao de obra (geral)</div><div class="kpi-value">${pctServ}%</div><div class="kpi-foot">${fmtBRL(servTotal)} de ${fmtBRL(baseMix)}</div></div>`;
+
+  renderRankingClientes(aprovados);
+  renderRankingEquip(aprovados);
+}
+
+function renderRankingClientes(aprovados){
+  const map = {};  // cliente_id -> {contratos, vendido, aprovQtd, aprovTotal, prod, serv}
+  const get = id => { const k=id||'_sem'; if(!map[k]) map[k]={contratos:0,vendido:0,aprovQtd:0,aprovTotal:0,prod:0,serv:0}; return map[k]; };
+  contratos.forEach(c=>{ const r=get(c.cliente_id); r.contratos++; r.vendido+=Number(c.valor_total||0); });
+  aprovados.forEach(o=>{
+    const r=get(o.cliente_id); r.aprovQtd++; r.aprovTotal+=Number(o.total||0);
+    (o.itens||[]).forEach(it=>{ const v=Number(it.qtd||0)*Number(it.preco||0); if(it.tipo==='servico') r.serv+=v; else r.prod+=v; });
+  });
+  let linhas = Object.entries(map).map(([k,r])=>({
+    nome: k==='_sem' ? 'Sem cliente' : (clientesMap[k]||('#'+k)),
+    ...r,
+    pctServ: (r.prod+r.serv)>0 ? Math.round(r.serv/(r.prod+r.serv)*100) : 0,
+  }));
+  linhas = linhas.filter(l=>l.contratos>0 || l.aprovQtd>0).sort((a,b)=> b.vendido-a.vendido || b.aprovTotal-a.aprovTotal);
+  const tb = document.getElementById('tb-rank-cli');
+  const empty = document.getElementById('empty-rank');
+  if(!linhas.length){ tb.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tb.innerHTML = linhas.map(l=>`
+    <tr>
+      <td style="color:var(--white);">${l.nome}</td>
+      <td class="r muted">${l.contratos}</td>
+      <td class="r val-in">${fmtBRL(l.vendido)}</td>
+      <td class="r muted">${l.aprovQtd} · ${fmtBRL(l.aprovTotal)}</td>
+      <td class="r">${(l.prod+l.serv)>0 ? l.pctServ+'%' : '-'}</td>
+    </tr>`).join('');
+}
+
+function renderRankingEquip(aprovados){
+  const map = {};  // nome -> {qtd, valor, categoria}
+  aprovados.forEach(o=>{
+    (o.itens||[]).forEach(it=>{
+      if(it.tipo==='servico') return;  // ranking so de produtos
+      const nome = it.nome||'(sem nome)';
+      if(!map[nome]) map[nome]={qtd:0, valor:0, categoria:it.categoria||'-'};
+      map[nome].qtd += Number(it.qtd||0);
+      map[nome].valor += Number(it.qtd||0)*Number(it.preco||0);
+    });
+  });
+  let linhas = Object.entries(map).map(([nome,r])=>({nome,...r}))
+    .sort((a,b)=> b.qtd-a.qtd || b.valor-a.valor).slice(0,10);
+  const tb = document.getElementById('tb-rank-equip');
+  const empty = document.getElementById('empty-equip');
+  if(!linhas.length){ tb.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tb.innerHTML = linhas.map(l=>`
+    <tr>
+      <td style="color:var(--white);">${l.nome}</td>
+      <td class="muted">${l.categoria}</td>
+      <td class="r">${l.qtd}</td>
+      <td class="r val-in">${fmtBRL(l.valor)}</td>
+    </tr>`).join('');
 }
 
 function renderTabela(tp){

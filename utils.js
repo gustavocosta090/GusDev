@@ -22,12 +22,12 @@ const EMPRESA = {
 
 // ── NAV ──
 const NAV_LINKS = [
-  {id:'dashboard',  href:'dashboard.html',  label:'Dashboard'},
-  {id:'clientes',   href:'clientes.html',   label:'Clientes'},
-  {id:'orcamentos', href:'orcamentos.html', label:'Orcamentos'},
-  {id:'contratos',  href:'contratos.html',  label:'Contratos'},
-  {id:'recibos',    href:'recibos.html',    label:'Recibos'},
-  {id:'financeiro', href:'financeiro.html', label:'Financeiro'},
+  {id:'financeiro',   href:'financeiro.html',   label:'Financeiro'},
+  {id:'clientes',     href:'clientes.html',     label:'Clientes'},
+  {id:'equipamentos', href:'equipamentos.html', label:'Equipamentos'},
+  {id:'orcamentos',   href:'orcamentos.html',   label:'Orcamentos'},
+  {id:'contratos',    href:'contratos.html',    label:'Contratos'},
+  {id:'recibos',      href:'recibos.html',      label:'Recibos'},
 ];
 
 // Logo em SVG (fallback caso logo.png nao exista na pasta)
