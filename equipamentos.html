@@ -1,4 +1,4 @@
-<!-- build: 2026-06-17b -->
+<!-- build: 2026-06-18a -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -84,7 +84,12 @@
           </select>
         </div>
       </div>
-      <div><label>Preco (R$)</label><input id="m-preco" type="number" min="0" step="0.01" placeholder="0,00"></div>
+      <div class="two-col">
+        <div><label>Preco de custo (R$)</label><input id="m-custo" type="number" min="0" step="0.01" placeholder="0,00" oninput="recalcDeCusto()"></div>
+        <div><label>Margem (%)</label><input id="m-margem" type="number" min="0" step="0.01" placeholder="0" oninput="recalcDeCusto()"></div>
+      </div>
+      <div><label>Preco de venda (R$)</label><input id="m-preco" type="number" min="0" step="0.01" placeholder="0,00" oninput="recalcDeVenda()"></div>
+      <div class="muted" id="m-margem-info" style="font-size:11px;"></div>
       <div><label>Descricao</label><textarea id="m-desc" placeholder="Especificacoes..."></textarea></div>
       <div>
         <label>Foto</label>
@@ -169,11 +174,41 @@ function novoEquip(){
   document.getElementById('m-nome').value = '';
   document.getElementById('m-tipo').value = 'produto';
   document.getElementById('m-cat').value = (filtroCat && filtroCat!=='__serv') ? filtroCat : 'seguranca';
+  document.getElementById('m-custo').value = '';
+  document.getElementById('m-margem').value = '';
   document.getElementById('m-preco').value = '';
   document.getElementById('m-desc').value = '';
+  document.getElementById('m-margem-info').textContent = '';
   resetFoto();
   document.getElementById('m-del').style.display = 'none';
   openModal('modal-equip');
+}
+
+// custo + margem -> venda
+function recalcDeCusto(){
+  const custo = parseFloat(document.getElementById('m-custo').value);
+  const margem = parseFloat(document.getElementById('m-margem').value);
+  if(!isNaN(custo) && custo>0 && !isNaN(margem)){
+    document.getElementById('m-preco').value = (custo*(1+margem/100)).toFixed(2);
+  }
+  updateMargemInfo();
+}
+// venda + custo -> margem
+function recalcDeVenda(){
+  const custo = parseFloat(document.getElementById('m-custo').value);
+  const venda = parseFloat(document.getElementById('m-preco').value);
+  if(!isNaN(custo) && custo>0 && !isNaN(venda)){
+    document.getElementById('m-margem').value = ((venda/custo-1)*100).toFixed(2);
+  }
+  updateMargemInfo();
+}
+function updateMargemInfo(){
+  const custo = parseFloat(document.getElementById('m-custo').value);
+  const venda = parseFloat(document.getElementById('m-preco').value);
+  const info = document.getElementById('m-margem-info');
+  if(!isNaN(custo) && custo>0 && !isNaN(venda) && venda>0){
+    info.textContent = `Lucro por unidade: ${fmtBRL(venda-custo)} (margem ${((venda/custo-1)*100).toFixed(1)}%).`;
+  } else { info.textContent = ''; }
 }
 
 function editarEquip(id){
@@ -184,8 +219,11 @@ function editarEquip(id){
   document.getElementById('m-nome').value = e.nome || '';
   document.getElementById('m-tipo').value = e.tipo || 'produto';
   document.getElementById('m-cat').value = e.categoria || 'outros';
+  document.getElementById('m-custo').value = e.preco_custo || '';
+  document.getElementById('m-margem').value = (e.margem!=null) ? e.margem : '';
   document.getElementById('m-preco').value = e.preco || '';
   document.getElementById('m-desc').value = e.descricao || '';
+  updateMargemInfo();
   resetFoto();
   fotoAtualUrl = e.foto_url || '';
   if(fotoAtualUrl){
@@ -230,6 +268,8 @@ async function salvarEquip(){
       nome,
       tipo: document.getElementById('m-tipo').value,
       categoria: document.getElementById('m-cat').value,
+      preco_custo: parseFloat(document.getElementById('m-custo').value) || null,
+      margem: parseFloat(document.getElementById('m-margem').value) || null,
       preco: parseFloat(document.getElementById('m-preco').value) || null,
       descricao: document.getElementById('m-desc').value.trim() || null,
       foto_url: fotoUrl || null,

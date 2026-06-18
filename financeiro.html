@@ -1,4 +1,4 @@
-<!-- build: 2026-06-18a -->
+<!-- build: 2026-06-18b -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -36,6 +36,7 @@
     <button class="tab-btn active" data-tab="geral"   onclick="setTab('geral')">Visao Geral</button>
     <button class="tab-btn"        data-tab="pagar"   onclick="setTab('pagar')">Contas a Pagar</button>
     <button class="tab-btn"        data-tab="receber" onclick="setTab('receber')">Contas a Receber</button>
+    <button class="tab-btn"        data-tab="compras" onclick="setTab('compras')">Compras</button>
     <button class="tab-btn"        data-tab="exec"    onclick="setTab('exec')">Painel Executivo</button>
   </div>
 
@@ -120,6 +121,31 @@
         <tbody id="tb-receber"></tbody>
       </table>
       <div id="empty-receber" class="empty" style="display:none;"><p>Nenhuma conta a receber</p></div>
+    </div>
+  </div>
+
+  <!-- ============ COMPRAS ============ -->
+  <div class="tab-panel" id="panel-compras">
+    <div class="kpis" id="kpis-compras"></div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="fin-toolbar" style="padding:16px 16px 0;">
+        <select id="f-vinc-compras" onchange="render()">
+          <option value="">Todas</option>
+          <option value="cliente">Vinculadas a cliente</option>
+          <option value="insumo">Insumos</option>
+        </select>
+        <div class="grow"></div>
+        <button class="btn btn-ghost btn-sm" onclick="abrirComparar()">Comparar com orcamento</button>
+        <button class="btn btn-primary btn-sm" onclick="novaCompra()">+ Nova compra</button>
+      </div>
+      <table class="tbl" style="margin-top:14px;">
+        <thead><tr>
+          <th>Item</th><th>Cliente / Insumo</th><th class="r">Qtd</th><th class="r">Custo un.</th>
+          <th class="r">Total</th><th>Fornecedor</th><th>Data</th><th>Pgto</th><th class="r">Acoes</th>
+        </tr></thead>
+        <tbody id="tb-compras"></tbody>
+      </table>
+      <div id="empty-compras" class="empty" style="display:none;"><p>Nenhuma compra registrada</p></div>
     </div>
   </div>
 
@@ -234,6 +260,69 @@
   </div>
 </div>
 
+<!-- MODAL COMPRA -->
+<div class="modal-overlay" id="modal-compra">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="pc-title">Nova compra</h3>
+      <button class="modal-close" onclick="closeModal('modal-compra')">&times;</button>
+    </div>
+    <div class="field-group">
+      <input type="hidden" id="pc-id">
+      <input type="hidden" id="pc-lancid">
+      <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--light);cursor:pointer;"><input type="checkbox" id="pc-insumo" onchange="onInsumoChange()"> E insumo (estoque geral, sem cliente)</label>
+      <div><label>Equipamento do catalogo</label><select id="pc-equip" onchange="onEquipCompra()"><option value="">- Item avulso -</option></select></div>
+      <div><label>Item / Descricao</label><input id="pc-desc" type="text" placeholder="Ex: Camera Intelbras 1230"></div>
+      <div id="pc-row-cliente"><label>Cliente</label><select id="pc-cliente" onchange="carregarOrcCompra()"></select></div>
+      <div id="pc-row-orc"><label>Orcamento do cliente</label><select id="pc-orc"><option value="">- Nenhum -</option></select></div>
+      <div class="two-col">
+        <div><label>Quantidade</label><input id="pc-qtd" type="number" min="1" value="1" oninput="previewCompra()"></div>
+        <div><label>Custo unitario (R$)</label><input id="pc-custo" type="number" min="0" step="0.01" placeholder="0,00" oninput="previewCompra()"></div>
+      </div>
+      <div id="pc-total-info" class="muted" style="font-size:12px;"></div>
+      <div class="two-col">
+        <div><label>Fornecedor</label><input id="pc-forn" type="text" placeholder="Nome do fornecedor"></div>
+        <div><label>Data</label><input id="pc-data" type="date"></div>
+      </div>
+      <div class="two-col">
+        <div><label>Forma de pagamento</label>
+          <select id="pc-forma" onchange="onFormaCompra()">
+            <option value="PIX">PIX</option>
+            <option value="Dinheiro">Dinheiro</option>
+            <option value="Cartao de Debito">Cartao de Debito</option>
+            <option value="Transferencia">Transferencia</option>
+            <option value="Cartao de Credito">Cartao de Credito</option>
+            <option value="Boleto">Boleto</option>
+          </select>
+        </div>
+        <div id="pc-row-venc"><label>Vencimento</label><input id="pc-venc" type="date"></div>
+      </div>
+      <div class="muted" id="pc-caixa-info" style="font-size:11px;line-height:1.5;"></div>
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button class="btn btn-gold btn-block" onclick="salvarCompra()">Salvar</button>
+        <button class="btn btn-danger" id="pc-del" onclick="excluirCompra()" style="display:none;">Excluir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL COMPARAR COM ORCAMENTO -->
+<div class="modal-overlay" id="modal-comparar">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Comparar compras x orcamento</h3>
+      <button class="modal-close" onclick="closeModal('modal-comparar')">&times;</button>
+    </div>
+    <div class="field-group">
+      <div><label>Orcamento</label><select id="co-orc" onchange="renderComparar()"></select></div>
+      <table class="tbl">
+        <thead><tr><th>Produto</th><th class="r">Orcado</th><th class="r">Comprado</th><th class="r">Falta</th></tr></thead>
+        <tbody id="co-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL GERAR DO CONTRATO -->
 <div class="modal-overlay" id="modal-gerar">
   <div class="modal">
@@ -267,6 +356,8 @@ let clientesMap = {};
 let clientesArr = [];
 let contratos = [];
 let orcamentos = [];
+let equipCatalogo = [];
+let compras = [];
 let equipCount = 0;
 let tab = 'geral';
 const hojeISO = new Date().toISOString().slice(0,10);
@@ -277,12 +368,13 @@ const hojeISO = new Date().toISOString().slice(0,10);
 })();
 
 async function carregar(){
-  const [lc, cl, ct, oc, eq] = await Promise.all([
+  const [lc, cl, ct, oc, eq, cp] = await Promise.all([
     db.from('lancamentos').select('*').order('vencimento', {nullsFirst:false}),
     db.from('clientes').select('id,nome,entregue').order('nome'),
     db.from('contratos').select('id,numero,cliente_id,valor_total,parcelas').order('id',{ascending:false}),
-    db.from('orcamentos').select('id,cliente_id,status,total,itens'),
-    db.from('equipamentos').select('id').eq('ativo',true),
+    db.from('orcamentos').select('id,numero,cliente_id,status,total,itens'),
+    db.from('equipamentos').select('id,nome,categoria,preco_custo').eq('ativo',true).order('nome'),
+    db.from('compras').select('*').order('data',{nullsFirst:false}),
   ]);
   if(lc.error){ showToast('Erro ao carregar financeiro.', true); return; }
   lancs = lc.data || [];
@@ -291,7 +383,9 @@ async function carregar(){
   clientesArr.forEach(c=>clientesMap[c.id]=c.nome);
   contratos = ct.data || [];
   orcamentos = oc.data || [];
-  equipCount = (eq.data||[]).length;
+  equipCatalogo = eq.data || [];
+  compras = cp.error ? [] : (cp.data || []);
+  equipCount = equipCatalogo.length;
   popularFiltrosCategoria();
   render();
 }
@@ -331,7 +425,241 @@ function popularFiltrosCategoria(){
 function render(){
   if(tab==='geral'){ renderGeral(); return; }
   if(tab==='exec'){ renderExec(); return; }
+  if(tab==='compras'){ renderCompras(); return; }
   renderTabela(tab);
+}
+
+// ── COMPRAS ──
+function compraTotal(c){ return (Number(c.quantidade)||0)*(Number(c.custo_unit)||0); }
+function lancDe(id){ return lancs.find(l=>l.id===id); }
+
+function renderCompras(){
+  const filtro = document.getElementById('f-vinc-compras').value;
+  let lista = compras.slice();
+  if(filtro==='insumo')  lista = lista.filter(c=>c.insumo);
+  if(filtro==='cliente') lista = lista.filter(c=>!c.insumo);
+
+  const noMes = compras.filter(c=>mesAtual(c.data));
+  const kpi=(label,val,foot)=>`<div class="kpi"><div class="kpi-label">${label}</div><div class="kpi-value">${fmtBRL(val)}</div>${foot?`<div class="kpi-foot">${foot}</div>`:''}</div>`;
+  document.getElementById('kpis-compras').innerHTML =
+      kpi('Compras no mes', somaCompras(noMes), `${noMes.length} compra(s)`)
+    + kpi('Para clientes', somaCompras(compras.filter(c=>!c.insumo)))
+    + kpi('Insumos', somaCompras(compras.filter(c=>c.insumo)))
+    + kpi('Total comprado', somaCompras(compras));
+
+  const tb = document.getElementById('tb-compras');
+  const empty = document.getElementById('empty-compras');
+  if(!lista.length){ tb.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tb.innerHTML = lista.map(c=>{
+    const lanc = c.lancamento_id ? lancDe(c.lancamento_id) : null;
+    const stTxt = lanc ? (lanc.pago ? '<span class="badge ok">Pago</span>' : '<span class="badge open">Em aberto</span>') : '<span class="muted">-</span>';
+    const quem = c.insumo ? '<span class="muted">Insumo</span>' : (clientesMap[c.cliente_id]||'<span class="muted">-</span>');
+    return `<tr>
+      <td style="color:var(--white);">${c.descricao}</td>
+      <td>${quem}</td>
+      <td class="r">${c.quantidade}</td>
+      <td class="r muted">${fmtBRL(c.custo_unit)}</td>
+      <td class="r val-out">${fmtBRL(compraTotal(c))}</td>
+      <td class="muted">${c.fornecedor||'-'}</td>
+      <td class="muted">${c.data?fmtDataCurta(c.data):'-'}</td>
+      <td>${c.forma_pagamento||'-'}<div>${stTxt}</div></td>
+      <td><div class="row-actions"><button class="btn btn-primary btn-sm" onclick="editarCompra(${c.id})">Editar</button></div></td>
+    </tr>`;
+  }).join('');
+}
+function somaCompras(arr){ return arr.reduce((s,c)=>s+compraTotal(c),0); }
+
+const FORMA_APRAZO = ['Cartao de Credito','Boleto'];  // geram conta a pagar em aberto
+
+function onInsumoChange(){
+  const ins = document.getElementById('pc-insumo').checked;
+  document.getElementById('pc-row-cliente').style.display = ins ? 'none' : 'block';
+  document.getElementById('pc-row-orc').style.display    = ins ? 'none' : 'block';
+}
+function onEquipCompra(){
+  const id = document.getElementById('pc-equip').value;
+  if(!id) return;
+  const e = equipCatalogo.find(x=>String(x.id)===String(id));
+  if(!e) return;
+  document.getElementById('pc-desc').value = e.nome || '';
+  if(e.preco_custo){ document.getElementById('pc-custo').value = e.preco_custo; previewCompra(); }
+}
+function onFormaCompra(){
+  const aprazo = FORMA_APRAZO.includes(document.getElementById('pc-forma').value);
+  document.getElementById('pc-row-venc').style.display = aprazo ? 'block' : 'none';
+  document.getElementById('pc-caixa-info').textContent = aprazo
+    ? 'Entra em Contas a Pagar EM ABERTO (no vencimento).'
+    : 'Entra em Contas a Pagar como PAGO (na data da compra).';
+}
+function previewCompra(){
+  const qtd = parseFloat(document.getElementById('pc-qtd').value)||0;
+  const custo = parseFloat(document.getElementById('pc-custo').value)||0;
+  document.getElementById('pc-total-info').textContent = (qtd>0&&custo>0) ? `Total: ${fmtBRL(qtd*custo)}` : '';
+}
+async function carregarOrcCompra(){
+  const cid = document.getElementById('pc-cliente').value;
+  const sel = document.getElementById('pc-orc');
+  const doCliente = orcamentos.filter(o=>String(o.cliente_id)===String(cid));
+  sel.innerHTML = '<option value="">- Nenhum -</option>' + doCliente.map(o=>{
+    const st = o.status==='aprovado'?'aprovado':(o.status==='recusado'?'recusado':'aberto');
+    return `<option value="${o.id}">${o.numero||('#'+o.id)} - ${st} (${fmtBRL(o.total)})</option>`;
+  }).join('');
+}
+
+function novaCompra(){
+  document.getElementById('pc-title').textContent = 'Nova compra';
+  ['pc-id','pc-lancid','pc-desc','pc-custo','pc-forn','pc-venc'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('pc-insumo').checked = false;
+  document.getElementById('pc-equip').innerHTML = '<option value="">- Item avulso -</option>'
+    + equipCatalogo.map(e=>`<option value="${e.id}">${e.nome}</option>`).join('');
+  document.getElementById('pc-equip').value = '';
+  document.getElementById('pc-qtd').value = '1';
+  document.getElementById('pc-data').value = hojeISO;
+  document.getElementById('pc-forma').value = 'PIX';
+  document.getElementById('pc-total-info').textContent = '';
+  document.getElementById('pc-del').style.display = 'none';
+  onInsumoChange(); onFormaCompra();
+  carregarClientesSelect(document.getElementById('pc-cliente'), '').then(carregarOrcCompra);
+  openModal('modal-compra');
+}
+
+async function editarCompra(id){
+  const c = compras.find(x=>x.id===id); if(!c) return;
+  document.getElementById('pc-title').textContent = 'Editar compra';
+  document.getElementById('pc-id').value = c.id;
+  document.getElementById('pc-lancid').value = c.lancamento_id || '';
+  document.getElementById('pc-insumo').checked = !!c.insumo;
+  document.getElementById('pc-equip').innerHTML = '<option value="">- Item avulso -</option>'
+    + equipCatalogo.map(e=>`<option value="${e.id}" ${String(e.id)===String(c.equipamento_id)?'selected':''}>${e.nome}</option>`).join('');
+  document.getElementById('pc-desc').value = c.descricao||'';
+  document.getElementById('pc-qtd').value = c.quantidade||1;
+  document.getElementById('pc-custo').value = c.custo_unit||'';
+  document.getElementById('pc-forn').value = c.fornecedor||'';
+  document.getElementById('pc-data').value = c.data||hojeISO;
+  document.getElementById('pc-forma').value = c.forma_pagamento||'PIX';
+  const lanc = c.lancamento_id ? lancDe(c.lancamento_id) : null;
+  document.getElementById('pc-venc').value = (lanc && lanc.vencimento) || '';
+  document.getElementById('pc-del').style.display = 'block';
+  onInsumoChange(); onFormaCompra(); previewCompra();
+  await carregarClientesSelect(document.getElementById('pc-cliente'), c.cliente_id||'');
+  await carregarOrcCompra();
+  document.getElementById('pc-orc').value = c.orcamento_id || '';
+  openModal('modal-compra');
+}
+
+function dadosLancCompra(c, compraId){
+  const aprazo = FORMA_APRAZO.includes(c.forma);
+  const quem = c.insumo ? '' : (clientesMap[c.cliente_id] ? ' - '+clientesMap[c.cliente_id] : '');
+  return {
+    tipo:'pagar',
+    descricao:`Compra: ${c.descricao}${quem}`,
+    categoria: c.insumo ? 'Insumo' : 'Compras',
+    fornecedor: c.forn || null,
+    valor: c.total,
+    vencimento: aprazo ? (c.venc || addMeses(c.data||hojeISO,1)) : (c.data||hojeISO),
+    forma_pagamento: c.forma,
+    pago: !aprazo,
+    pago_em: aprazo ? null : (c.data||hojeISO),
+    origem:'compra', origem_id: compraId,
+    atualizado_em: new Date().toISOString(),
+  };
+}
+
+async function salvarCompra(){
+  const insumo = document.getElementById('pc-insumo').checked;
+  const descricao = document.getElementById('pc-desc').value.trim();
+  if(!descricao){ showToast('Informe o item.', true); return; }
+  const qtd = parseFloat(document.getElementById('pc-qtd').value)||1;
+  const custo = parseFloat(document.getElementById('pc-custo').value);
+  if(isNaN(custo)||custo<0){ showToast('Informe o custo unitario.', true); return; }
+  const clienteId = insumo ? null : (document.getElementById('pc-cliente').value || null);
+  const c = {
+    descricao, insumo,
+    cliente_id: clienteId,
+    equipamento_id: document.getElementById('pc-equip').value || null,
+    orcamento_id: insumo ? null : (document.getElementById('pc-orc').value || null),
+    qtd, custo,
+    forn: document.getElementById('pc-forn').value.trim() || null,
+    data: document.getElementById('pc-data').value || hojeISO,
+    forma: document.getElementById('pc-forma').value,
+    venc: document.getElementById('pc-venc').value || null,
+    total: qtd*custo,
+  };
+  const reg = {
+    descricao:c.descricao, insumo:c.insumo, cliente_id:c.cliente_id,
+    equipamento_id:c.equipamento_id, orcamento_id:c.orcamento_id,
+    quantidade:c.qtd, custo_unit:c.custo, fornecedor:c.forn, data:c.data,
+    forma_pagamento:c.forma, atualizado_em:new Date().toISOString(),
+  };
+  const id = document.getElementById('pc-id').value;
+  const lancId = document.getElementById('pc-lancid').value;
+  try{
+    if(id){
+      const r = await db.from('compras').update(reg).eq('id', id); if(r.error) throw r.error;
+      const ldata = dadosLancCompra(c, id);
+      if(lancId){ const r2 = await db.from('lancamentos').update(ldata).eq('id', lancId); if(r2.error) throw r2.error; }
+      else { const r2 = await db.from('lancamentos').insert(ldata).select('id').single(); if(r2.error) throw r2.error; await db.from('compras').update({lancamento_id:r2.data.id}).eq('id', id); }
+    } else {
+      const r = await db.from('compras').insert(reg).select('id').single(); if(r.error) throw r.error;
+      const novoId = r.data.id;
+      const r2 = await db.from('lancamentos').insert(dadosLancCompra(c, novoId)).select('id').single(); if(r2.error) throw r2.error;
+      await db.from('compras').update({lancamento_id:r2.data.id}).eq('id', novoId);
+    }
+    showToast('Compra salva e lancada em Contas a Pagar.');
+    closeModal('modal-compra');
+    await carregar();
+  }catch(err){ showToast('Erro ao salvar: '+(err.message||err), true); }
+}
+
+async function excluirCompra(){
+  const id = document.getElementById('pc-id').value; if(!id) return;
+  if(!confirm('Excluir esta compra? O lancamento em Contas a Pagar vinculado tambem sera removido.')) return;
+  const lancId = document.getElementById('pc-lancid').value;
+  if(lancId) await db.from('lancamentos').delete().eq('id', lancId);
+  const { error } = await db.from('compras').delete().eq('id', id);
+  if(error){ showToast('Erro ao excluir.', true); return; }
+  showToast('Compra excluida.');
+  closeModal('modal-compra');
+  await carregar();
+}
+
+// ── COMPARAR COM ORCAMENTO ──
+function norm(s){ return (s||'').trim().toLowerCase(); }
+function abrirComparar(){
+  const comOrc = orcamentos.filter(o=>(o.itens||[]).some(it=>it.tipo!=='servico'));
+  if(!comOrc.length){ showToast('Nenhum orcamento com produtos.', true); return; }
+  const sel = document.getElementById('co-orc');
+  sel.innerHTML = comOrc.map(o=>{
+    const nome = clientesMap[o.cliente_id] || 'sem cliente';
+    return `<option value="${o.id}">${o.numero||('#'+o.id)} - ${nome}</option>`;
+  }).join('');
+  renderComparar();
+  openModal('modal-comparar');
+}
+function renderComparar(){
+  const oid = document.getElementById('co-orc').value;
+  const o = orcamentos.find(x=>String(x.id)===String(oid));
+  const tb = document.getElementById('co-tbody');
+  if(!o){ tb.innerHTML=''; return; }
+  const prods = (o.itens||[]).filter(it=>it.tipo!=='servico');
+  // compras vinculadas a este orcamento, somadas por nome
+  const compradoPorNome = {};
+  compras.filter(c=>String(c.orcamento_id)===String(oid)).forEach(c=>{
+    const k = norm(c.descricao);
+    compradoPorNome[k] = (compradoPorNome[k]||0) + (Number(c.quantidade)||0);
+  });
+  tb.innerHTML = prods.map(it=>{
+    const orcada = Number(it.qtd)||0;
+    const comprada = compradoPorNome[norm(it.nome)]||0;
+    const falta = Math.max(0, orcada-comprada);
+    return `<tr>
+      <td style="color:var(--white);">${it.nome}</td>
+      <td class="r">${orcada}</td>
+      <td class="r">${comprada}</td>
+      <td class="r ${falta>0?'saldo-neg':'saldo-pos'}">${falta>0?falta:'OK'}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="4" class="muted" style="padding:12px;">Orcamento sem produtos.</td></tr>';
 }
 
 // ── VISAO GERAL ──
