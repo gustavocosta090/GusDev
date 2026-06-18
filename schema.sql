@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS clientes (
 CREATE TABLE IF NOT EXISTS equipamentos (
   id BIGSERIAL PRIMARY KEY,
   nome TEXT NOT NULL,
-  categoria TEXT,                -- cameras, automacao, som, rede, outros
+  categoria TEXT,                -- seguranca, automacao, som, rede, outros
   descricao TEXT,
   preco NUMERIC(12,2),
   foto_url TEXT,                 -- Supabase Storage
@@ -89,6 +89,79 @@ CREATE POLICY "auth_all" ON equipamentos FOR ALL TO authenticated USING (true) W
 CREATE POLICY "auth_all" ON orcamentos   FOR ALL TO authenticated USING (true) WITH CHECK (true);
 CREATE POLICY "auth_all" ON contratos    FOR ALL TO authenticated USING (true) WITH CHECK (true);
 CREATE POLICY "auth_all" ON recibos      FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- ============================================================
+-- MIGRACAO: ABA FINANCEIRA (rodar 1x no SQL Editor)
+-- Uma tabela unica cobre contas a pagar e a receber.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS lancamentos (
+  id BIGSERIAL PRIMARY KEY,
+  tipo TEXT NOT NULL,                       -- 'pagar' | 'receber'
+  descricao TEXT NOT NULL,
+  categoria TEXT,                           -- dinamica (vem dos proprios registros)
+  cliente_id BIGINT REFERENCES clientes(id) ON DELETE SET NULL,  -- usado em 'receber'
+  fornecedor TEXT,                          -- usado em 'pagar'
+  valor NUMERIC(12,2) NOT NULL DEFAULT 0,
+  vencimento DATE,
+  pago BOOLEAN DEFAULT false,               -- quitado (pago ou recebido)
+  pago_em DATE,
+  origem TEXT DEFAULT 'manual',             -- 'manual' | 'contrato'
+  origem_id BIGINT,                         -- id do contrato de origem
+  parcela_idx INT,                          -- indice da parcela (evita duplicar)
+  observacoes TEXT,
+  criado_em TIMESTAMPTZ DEFAULT now(),
+  atualizado_em TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE lancamentos ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "auth_all" ON lancamentos;
+CREATE POLICY "auth_all" ON lancamentos FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- ============================================================
+-- MIGRACAO: TIPO no catalogo (produto x servico/mao de obra)
+-- 'servico' = servico de instalacao (entra como mao de obra nas metricas)
+-- ============================================================
+ALTER TABLE equipamentos ADD COLUMN IF NOT EXISTS tipo TEXT DEFAULT 'produto';
+
+-- ============================================================
+-- MIGRACAO: renomear categoria 'cameras' -> 'seguranca' (rodar 1x)
+-- Atualiza o catalogo e os itens (JSONB) dos orcamentos ja salvos.
+-- ============================================================
+UPDATE equipamentos SET categoria = 'seguranca' WHERE categoria = 'cameras';
+
+UPDATE orcamentos
+SET itens = (
+  SELECT jsonb_agg(
+    CASE WHEN elem->>'categoria' = 'cameras'
+         THEN jsonb_set(elem, '{categoria}', '"seguranca"')
+         ELSE elem END
+  )
+  FROM jsonb_array_elements(itens) elem
+)
+WHERE itens @> '[{"categoria":"cameras"}]';
+
+-- ============================================================
+-- MIGRACAO: produtos do orcamento no contrato (rodar 1x)
+-- itens = itens vinculados do orcamento; garantia_produto = prazo dos produtos
+-- ============================================================
+ALTER TABLE contratos ADD COLUMN IF NOT EXISTS itens JSONB DEFAULT '[]';
+ALTER TABLE contratos ADD COLUMN IF NOT EXISTS garantia_produto TEXT;
+
+-- ============================================================
+-- MIGRACAO: forma de pagamento, recorrencia e parcelamento (rodar 1x)
+-- forma_pagamento (pagar/receber); recorrente = gera a proxima ao pagar;
+-- parcela_total = total de parcelas (parcela_idx ja existe).
+-- ============================================================
+ALTER TABLE lancamentos ADD COLUMN IF NOT EXISTS forma_pagamento TEXT;
+ALTER TABLE lancamentos ADD COLUMN IF NOT EXISTS recorrente BOOLEAN DEFAULT false;
+ALTER TABLE lancamentos ADD COLUMN IF NOT EXISTS parcela_total INT;
+
+-- ============================================================
+-- MIGRACAO: contrato de servico/manutencao (rodar 1x)
+-- modalidade 'padrao' | 'servico'; servico = config do pacote mensal (JSONB)
+-- ============================================================
+ALTER TABLE contratos ADD COLUMN IF NOT EXISTS modalidade TEXT DEFAULT 'padrao';
+ALTER TABLE contratos ADD COLUMN IF NOT EXISTS servico JSONB;
 
 -- ============================================================
 -- STORAGE (rodar depois de criar o bucket no painel)

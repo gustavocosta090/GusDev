@@ -1,4 +1,4 @@
-<!-- build: 2026-06-17a -->
+<!-- build: 2026-06-18a -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -10,6 +10,9 @@
 <style>
   #gen{display:grid;grid-template-columns:380px 1fr;min-height:calc(100vh - 62px);}
   #sidebar{background:var(--dark2);border-right:1px solid var(--line);padding:24px 22px;overflow-y:auto;display:flex;flex-direction:column;gap:20px;}
+  .modo-tabs{display:flex;gap:5px;flex-wrap:wrap;}
+  .modo-btn{flex:1;min-width:90px;padding:7px 9px;border:1px solid rgba(200,169,110,.25);background:transparent;color:var(--gray);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;border-radius:3px;cursor:pointer;transition:all .2s;}
+  .modo-btn.active{background:var(--accent);color:var(--dark);border-color:var(--accent);font-weight:600;}
   .parcela-chip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid rgba(200,169,110,.12);border-radius:4px;padding:7px 11px;font-size:12px;color:var(--light);}
   .parcela-chip span{flex:1;} .parcela-chip .val{color:var(--accent);font-weight:500;white-space:nowrap;}
   .parcela-chip .rm{background:none;border:none;color:rgba(200,169,110,.4);cursor:pointer;font-size:15px;}
@@ -104,6 +107,15 @@
   <aside id="sidebar">
     <button class="btn btn-ghost btn-sm btn-block" onclick="abrirSalvos()">Contratos salvos</button>
 
+    <div>
+      <div class="section-title">Tipo de contrato</div>
+      <div class="modo-tabs" id="modo-tabs">
+        <button class="modo-btn active" data-modo="orcamento" onclick="setModo('orcamento')">Do orcamento</button>
+        <button class="modo-btn" data-modo="servico" onclick="setModo('servico')">Servico / Manutencao</button>
+        <button class="modo-btn" data-modo="personalizado" onclick="setModo('personalizado')">Personalizado</button>
+      </div>
+    </div>
+
     <div class="tabs-nav">
       <button class="tab-btn active" onclick="switchTab('contrato')">Contrato</button>
       <button class="tab-btn" onclick="switchTab('intermediador')">Interm.</button>
@@ -143,6 +155,9 @@
           <div><label>Local de Execucao</label><input id="c-local" type="text"></div>
         </div>
       </div>
+
+      <!-- ===== BLOCO PADRAO (orcamento / personalizado) ===== -->
+      <div id="bloco-padrao" style="display:flex;flex-direction:column;gap:20px;">
       <div>
         <div class="section-title">Objeto</div>
         <div class="field-group">
@@ -221,6 +236,43 @@
           </div>
         </div>
       </div>
+      </div><!-- /bloco-padrao -->
+
+      <!-- ===== BLOCO SERVICO (manutencao mensal) ===== -->
+      <div id="bloco-servico" style="display:none;flex-direction:column;gap:20px;">
+        <div>
+          <div class="section-title">Pacote de Servico</div>
+          <div class="field-group">
+            <div><label>Condominio / Local atendido</label><input id="s-local" type="text" placeholder="Ex: Condominio Residencial X"></div>
+            <div class="two-col">
+              <div><label>Valor mensal (R$)</label><input id="s-mensal" type="number" min="0" step="0.01" placeholder="0,00"></div>
+              <div><label>Dia de vencimento</label><input id="s-dia" type="number" min="1" max="28" value="10"></div>
+            </div>
+            <div><label>Forma de Pagamento</label>
+              <select id="s-forma-pag">
+                <option value="PIX (CNPJ: 50.081.460/0001-60) - Banco Sicredi">PIX - CNPJ (Sicredi)</option>
+                <option value="Boleto Bancario">Boleto Bancario</option>
+                <option value="Transferencia Bancaria - Banco Sicredi">Transferencia - Sicredi</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="section-title">Escopo do Atendimento</div>
+          <div class="field-group">
+            <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--light);cursor:pointer;"><input type="checkbox" id="s-esc-rede" checked> Rede / internet</label>
+            <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--light);cursor:pointer;"><input type="checkbox" id="s-esc-cameras" checked> Cameras / CFTV</label>
+            <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--light);cursor:pointer;"><input type="checkbox" id="s-esc-app" checked> App de automacao (Condfy)</label>
+            <div><label>Itens adicionais do escopo (um por linha)</label><textarea id="s-esc-obs" style="min-height:60px;" placeholder="Ex: Controle de acesso&#10;Interfonia"></textarea></div>
+          </div>
+        </div>
+        <div>
+          <div class="section-title">Cobranca</div>
+          <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--light);cursor:pointer;"><input type="checkbox" id="s-lancar" checked> Lancar mensalidade recorrente em Contas a Receber ao salvar</label>
+          <p class="muted" style="font-size:11px;line-height:1.5;margin-top:6px;">Cria 1 lancamento recorrente (gera o proximo ao receber). Exige cliente cadastrado selecionado.</p>
+        </div>
+      </div><!-- /bloco-servico -->
+
       <div>
         <div class="section-title">Testemunhas (opcional)</div>
         <div class="field-group">
@@ -300,6 +352,15 @@ let orcamentosCliente = [];   // orcamentos do cliente selecionado
 let itensContrato = [];       // itens vinculados (do orcamento)
 let fotos = { 1:{url:'',legenda:''}, 2:{url:'',legenda:''} };
 let editId = null;
+let modalidade = 'padrao';     // 'padrao' (orcamento/personalizado) | 'servico'
+
+function setModo(modo){
+  document.querySelectorAll('.modo-btn').forEach(b=>b.classList.toggle('active', b.dataset.modo===modo));
+  modalidade = (modo==='servico') ? 'servico' : 'padrao';
+  document.getElementById('bloco-padrao').style.display   = modalidade==='servico' ? 'none' : 'flex';
+  document.getElementById('bloco-servico').style.display  = modalidade==='servico' ? 'flex' : 'none';
+  if(modo==='personalizado'){ document.getElementById('f-orcamento').value=''; itensContrato=[]; document.getElementById('itens-info').textContent=''; }
+}
 
 (async function init(){
   await renderTopbar('contratos');
@@ -423,12 +484,32 @@ function coletar(){
     exLista: document.getElementById('ex-lista').value.trim(), exObs: document.getElementById('ex-obs').value.trim(),
     foto1Legenda: document.getElementById('foto1-legenda').value.trim(),
     foto2Legenda: document.getElementById('foto2-legenda').value.trim(),
+    // servico
+    sLocal: document.getElementById('s-local').value.trim(),
+    sMensal: parseFloat(document.getElementById('s-mensal').value)||0,
+    sDia: parseInt(document.getElementById('s-dia').value)||10,
+    sFormaPag: document.getElementById('s-forma-pag').value,
+    sEscRede: document.getElementById('s-esc-rede').checked,
+    sEscCameras: document.getElementById('s-esc-cameras').checked,
+    sEscApp: document.getElementById('s-esc-app').checked,
+    sEscObs: document.getElementById('s-esc-obs').value.trim(),
+    sLancar: document.getElementById('s-lancar').checked,
   };
+}
+
+function escopoLista(d){
+  const arr = [];
+  if(d.sEscRede) arr.push('rede de dados e internet');
+  if(d.sEscCameras) arr.push('sistema de cameras de seguranca (CFTV)');
+  if(d.sEscApp) arr.push('aplicativo de automacao e gestao (Condfy)');
+  if(d.sEscObs) d.sEscObs.split('\n').filter(l=>l.trim()).forEach(l=>arr.push(l.trim()));
+  return arr;
 }
 
 function gerar(){
   const d = coletar();
   if(!d.cNome){ showToast('Informe o nome do Contratante.', true); return; }
+  if(modalidade==='servico'){ gerarServico(d); return; }
   const cNum = d.cNum || String(Date.now()).slice(-3)+'/'+new Date().getFullYear();
   const local = d.cLocal || d.cEnd || 'a ser definido';
 
@@ -578,27 +659,153 @@ function gerar(){
   document.getElementById('preview').scrollTop = 0;
 }
 
+function gerarServico(d){
+  const cNum = d.cNum || String(Date.now()).slice(-3)+'/'+new Date().getFullYear();
+  const local = d.sLocal || d.cLocal || d.cEnd || 'a ser definido';
+  const esc = escopoLista(d);
+  const letras='abcdefghijklmnopqrstuvwxyz';
+  const escIncisos = esc.length
+    ? esc.map((it,i)=>`<div class="inciso"><span class="letra">${letras[i]||(i+1)})</span><span>${it}</span></div>`).join('')
+    : '<p>Servicos de manutencao e suporte tecnico em tecnologia residencial.</p>';
+  const mensalExt = d.sMensal>0 ? ` (${extenso(d.sMensal)})` : '';
+
+  const qDoc = d.cDoc?`, inscrito(a) no CPF/CNPJ sob o no <strong>${d.cDoc}</strong>`:'';
+  const qEnd = d.cEnd?`, com sede/residencia na <strong>${d.cEnd}</strong>`:'';
+  const qEmail = d.cEmail?`, e-mail: <strong>${d.cEmail}</strong>`:'';
+  const qTel = d.cTel?`, telefone: <strong>${d.cTel}</strong>`:'';
+
+  let assTest='';
+  if(d.t1Nome || d.t2Nome){
+    const t1 = d.t1Nome?`<div class="ass-block"><div class="ass-linha"></div><div class="ass-nome">${d.t1Nome}</div>${d.t1Cpf?`<div class="ass-cpf">CPF: ${d.t1Cpf}</div>`:''}<div class="ass-cargo">Testemunha 1</div></div>`:'<div></div>';
+    const t2 = d.t2Nome?`<div class="ass-block"><div class="ass-linha"></div><div class="ass-nome">${d.t2Nome}</div>${d.t2Cpf?`<div class="ass-cpf">CPF: ${d.t2Cpf}</div>`:''}<div class="ass-cargo">Testemunha 2</div></div>`:'<div></div>';
+    assTest = `<div class="ass-label" style="margin-top:32px;">Testemunhas</div><div class="ass-grid-4">${t1}${t2}</div>`;
+  }
+
+  const doc = document.getElementById('contrato-doc');
+  doc.style.display='block';
+  document.getElementById('empty-state').style.display='none';
+  doc.innerHTML = `
+    <div class="doc-header">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">${logoHTML(64)}</div>
+      <div class="doc-meta"><div class="doc-badge">Contrato de Manutencao</div><div class="doc-num">No ${cNum}</div><div class="doc-date-header">${fmtData(d.cData)}</div></div>
+    </div>
+    <div class="doc-accent-bar"></div>
+    <div class="doc-body">
+      <div class="contrato-titulo"><h1>Contrato de Prestacao de Servicos de Manutencao e Suporte Tecnico</h1><p>Tecnologia Residencial - Atendimento Continuado</p></div>
+      <div class="partes-box">
+        <div class="parte-item"><div class="parte-role">Contratada</div><div class="parte-texto"><strong>${CONTRATADA.nome}</strong>, pessoa juridica de direito privado, inscrita no CNPJ sob o no <strong>${CONTRATADA.cnpj}</strong>, com sede na <strong>${CONTRATADA.endereco}</strong>, neste ato representada por seu socio-administrador, <strong>${CONTRATADA.representante}</strong>, doravante denominada <strong>CONTRATADA</strong>.</div></div>
+        <div class="parte-sep"></div>
+        <div class="parte-item"><div class="parte-role">Contratante</div><div class="parte-texto"><strong>${d.cNome}</strong>${qDoc}${qEnd}${qEmail}${qTel}, doravante denominado(a) <strong>CONTRATANTE</strong>.</div></div>
+      </div>
+      <div class="clausula-body" style="margin-bottom:20px;"><p>As partes acima qualificadas tem entre si justo e contratado o presente <strong>Contrato de Prestacao de Servicos de Manutencao e Suporte Tecnico</strong>, de natureza continuada, regido pelos artigos 593 a 609 do Codigo Civil Brasileiro e pelas clausulas seguintes.</p></div>
+
+      <div class="clausula"><div class="clausula-titulo">Clausula 1a - Do Objeto</div><div class="clausula-body">
+        <p>O presente contrato tem por objeto a prestacao continuada de servicos de <strong>manutencao, suporte e atendimento tecnico</strong> pela CONTRATADA, no local <strong>${local}</strong>, abrangendo:</p>
+        ${escIncisos}
+      </div></div>
+
+      <div class="clausula"><div class="clausula-titulo">Clausula 2a - Da Forma de Execucao e da Mao de Obra</div><div class="clausula-body">
+        <p>Os servicos serao prestados de forma continuada, mediante visitas tecnicas e suporte remoto, conforme demanda do CONTRATANTE.</p>
+        <p class="paragrafo"><strong>2.1</strong> - A mao de obra referente aos atendimentos e visitas tecnicas esta <strong>inclusa no valor mensal</strong>, nao havendo cobranca adicional de mao de obra por chamado.</p>
+        <p class="paragrafo"><strong>2.2</strong> - Eventuais <strong>pecas, equipamentos ou materiais de reposicao</strong> necessarios a substituicao ou ampliacao nao estao inclusos na mensalidade e serao cobrados a parte, mediante <strong>previa aprovacao</strong> do CONTRATANTE.</p>
+      </div></div>
+
+      <div class="clausula"><div class="clausula-titulo">Clausula 3a - Do Atendimento e Prazos (SLA)</div><div class="clausula-body">
+        <p><strong>3.1</strong> - Os chamados abertos pelo CONTRATANTE serao atendidos em ate <strong>48 (quarenta e oito) horas</strong> contadas da abertura do chamado.</p>
+        <p class="paragrafo"><strong>3.2</strong> - As visitas tecnicas ocorrerao em <strong>horario comercial</strong> (de segunda a sexta-feira, das 08h as 18h, exceto feriados).</p>
+        <p class="paragrafo"><strong>3.3</strong> - Atendimentos de <strong>emergencia</strong> fora do horario comercial poderao ser realizados mediante <strong>previo ajuste entre as partes</strong>, conforme disponibilidade.</p>
+      </div></div>
+
+      <div class="clausula"><div class="clausula-titulo">Clausula 4a - Do Valor, Reajuste e Pagamento</div><div class="clausula-body">
+        <p>Pela prestacao dos servicos, o CONTRATANTE pagara a CONTRATADA o valor mensal de <strong>${fmtBRL(d.sMensal)}</strong>${mensalExt}, com vencimento todo dia <strong>${d.sDia}</strong> de cada mes, por meio de <strong>${d.sFormaPag}</strong>.</p>
+        <p class="paragrafo"><strong>4.1</strong> - O valor mensal sera reajustado anualmente, a cada 12 (doze) meses, pela variacao acumulada do <strong>IPCA</strong> (IBGE), ou indice que venha a substitui-lo.</p>
+        <p class="paragrafo"><strong>4.2</strong> - O atraso no pagamento implicara multa de 2% (dois por cento) e juros de 1% (um por cento) ao mes sobre o valor em aberto.</p>
+      </div></div>
+
+      <div class="clausula"><div class="clausula-titulo">Clausula 5a - Da Vigencia</div><div class="clausula-body">
+        <p>O presente contrato vigora pelo prazo de <strong>12 (doze) meses</strong>, contados da assinatura, <strong>renovando-se automaticamente</strong> por iguais e sucessivos periodos, salvo manifestacao em contrario de qualquer das partes, por escrito, com antecedencia minima de 30 (trinta) dias.</p>
+      </div></div>
+
+      <div class="clausula"><div class="clausula-titulo">Clausula 6a - Da Rescisao</div><div class="clausula-body">
+        <p>Qualquer das partes podera rescindir o presente contrato mediante <strong>aviso previo por escrito de 30 (trinta) dias</strong>, nos termos do art. 599 do Codigo Civil.</p>
+        <p class="paragrafo"><strong>6.1</strong> - A rescisao antecipada sem o aviso previo de que trata o caput sujeitara a parte que lhe der causa ao pagamento de <strong>multa equivalente a 1 (uma) mensalidade</strong> vigente.</p>
+        <p class="paragrafo"><strong>6.2</strong> - O inadimplemento de obrigacoes contratuais por qualquer das partes autoriza a rescisao, sem prejuizo das demais cominacoes legais.</p>
+      </div></div>
+
+      <div class="clausula"><div class="clausula-titulo">Clausula 7a - Das Obrigacoes das Partes</div><div class="clausula-body">
+        <p><strong>7.1 - Da CONTRATADA:</strong> prestar os servicos com zelo, tecnica e pessoal qualificado; cumprir os prazos de atendimento; orientar o CONTRATANTE quanto ao uso adequado dos sistemas.</p>
+        <p><strong>7.2 - Do CONTRATANTE:</strong> efetuar os pagamentos nas datas avencadas; franquear o acesso ao local e aos equipamentos; aprovar previamente a aquisicao de pecas/materiais; comunicar as ocorrencias por meio dos canais de atendimento.</p>
+      </div></div>
+
+      <div class="clausula"><div class="clausula-titulo">Clausula 8a - Das Disposicoes Gerais</div><div class="clausula-body">
+        <p>O presente contrato obriga as partes e seus sucessores. Fica eleito o foro da comarca de <strong>${d.cCidade}</strong> para dirimir eventuais duvidas oriundas deste instrumento.</p>
+        <p>E, por estarem assim justas e contratadas, firmam o presente em duas vias de igual teor.</p>
+      </div></div>
+
+      <div class="assinaturas-section">
+        <div class="ass-cidade">${d.cCidade}, ${fmtData(d.cData)}.</div>
+        <div class="ass-grid">
+          <div class="ass-block"><div class="ass-linha"></div><div class="ass-nome">${CONTRATADA.representante}</div><div class="ass-cargo">CONTRATADA - ${CONTRATADA.nome}</div></div>
+          <div class="ass-block"><div class="ass-linha"></div><div class="ass-nome">${d.cNome}</div><div class="ass-cargo">CONTRATANTE</div></div>
+        </div>
+        ${assTest}
+      </div>
+    </div>
+    <div class="doc-footer">
+      <div class="footer-info"><strong>${CONTRATADA.nome}</strong>CNPJ: ${CONTRATADA.cnpj}<br>${EMPRESA.pix}</div>
+      <div class="footer-tag">Tecnologia que se integra ao seu viver.</div>
+    </div>`;
+  document.getElementById('preview').scrollTop = 0;
+}
+
+function proxVencDia(dia){
+  dia = Math.min(Math.max(parseInt(dia)||10,1),28);
+  const hoje = new Date();
+  let d = new Date(hoje.getFullYear(), hoje.getMonth(), dia);
+  if(d < hoje) d = new Date(hoje.getFullYear(), hoje.getMonth()+1, dia);
+  return d.toISOString().slice(0,10);
+}
+
 async function salvar(){
   const d = coletar();
   if(!d.cNome){ showToast('Informe o nome do Contratante.', true); return; }
+  const numero = d.cNum || String(Date.now()).slice(-3)+'/'+new Date().getFullYear();
   const reg = {
     cliente_id: d.clienteId,
-    numero: d.cNum || String(Date.now()).slice(-3)+'/'+new Date().getFullYear(),
-    data: d.cData || null, cidade: d.cCidade, tipo: d.cTipo,
+    numero,
+    data: d.cData || null, cidade: d.cCidade,
+    modalidade,
+    tipo: modalidade==='servico' ? 'manutencao e suporte tecnico' : d.cTipo,
     servicos: d.cServicos || null, materiais: d.cMateriais || null,
-    valor_total: d.cTotal, forma_pagamento: d.cFormaPag,
+    valor_total: modalidade==='servico' ? d.sMensal : d.cTotal,
+    forma_pagamento: modalidade==='servico' ? d.sFormaPag : d.cFormaPag,
     parcelas: parcelas, multa: d.cMulta, garantia: d.cGarantia, garantia_produto: d.cGarantiaProduto, suporte: d.cSuporte,
     itens: itensContrato,
+    servico: modalidade==='servico' ? {local:d.sLocal,mensal:d.sMensal,dia:d.sDia,forma:d.sFormaPag,escopo:escopoLista(d)} : null,
     intermediador: (d.iTipo&&d.iNome) ? {tipo:d.iTipo,nome:d.iNome,doc:d.iDoc,representante:d.iRepres,endereco:d.iEnd,tel:d.iTel,papel:d.iPapel,obs:d.iObs} : null,
     exigencias: d.exLista ? {titulo:d.exTitulo,lista:d.exLista,obs:d.exObs} : null,
     fotos: [ {url:fotos[1].url,legenda:d.foto1Legenda}, {url:fotos[2].url,legenda:d.foto2Legenda} ],
     testemunhas: (d.t1Nome||d.t2Nome) ? [{nome:d.t1Nome,cpf:d.t1Cpf},{nome:d.t2Nome,cpf:d.t2Cpf}] : null,
     atualizado_em: new Date().toISOString(),
   };
-  let res;
+  let res, novoId = editId;
   if(editId){ res = await db.from('contratos').update(reg).eq('id', editId); }
-  else { res = await db.from('contratos').insert(reg); }
+  else { res = await db.from('contratos').insert(reg).select('id').single(); if(res.data) novoId = res.data.id; }
   if(res.error){ showToast('Erro ao salvar: '+res.error.message, true); return; }
+
+  // mensalidade recorrente em Contas a Receber (so em contrato de servico novo)
+  if(modalidade==='servico' && d.sLancar && !editId){
+    if(!d.clienteId){ showToast('Contrato salvo. Selecione um cliente cadastrado para lancar a mensalidade recorrente.', true); return; }
+    const lanc = {
+      tipo:'receber', descricao:`Mensalidade manutencao - Contrato No ${numero}`,
+      categoria:'Manutencao', cliente_id:d.clienteId, valor:d.sMensal,
+      vencimento: proxVencDia(d.sDia), forma_pagamento:d.sFormaPag,
+      recorrente:true, pago:false, origem:'contrato', origem_id:novoId,
+    };
+    const r2 = await db.from('lancamentos').insert(lanc);
+    showToast(r2.error ? 'Contrato salvo (falha ao lancar mensalidade).' : 'Contrato salvo. Mensalidade recorrente lancada no Financeiro.', !!r2.error);
+    return;
+  }
   showToast('Contrato salvo no sistema.');
 }
 
@@ -610,7 +817,7 @@ async function abrirSalvos(){
   if(!data || !data.length){ el.innerHTML='<div class="empty"><p>Nenhum contrato salvo</p></div>'; return; }
   el.innerHTML = data.map(c=>`
     <div class="saved-row">
-      <div><div style="color:var(--white);">No ${c.numero||'-'} - ${fmtBRL(c.valor_total)}</div>
+      <div><div style="color:var(--white);">No ${c.numero||'-'} - ${fmtBRL(c.valor_total)}${c.modalidade==='servico'?' <span class="badge open">Manutencao</span>':''}</div>
         <div class="muted">${c.clientes?c.clientes.nome:'sem cliente'} · ${fmtDataCurta(c.data||c.criado_em)}</div></div>
       <div class="row-actions">
         <button class="btn btn-ghost btn-sm" onclick="carregarCon(${c.id})">Abrir</button>
@@ -648,6 +855,19 @@ async function carregarCon(id){
   [1,2].forEach(n=>{ const t=document.getElementById(`foto${n}-thumb`); g(`foto${n}-legenda`,fotos[n].legenda); if(fotos[n].url){t.src=fotos[n].url;t.style.display='block';document.getElementById(`foto${n}-hint`).textContent='Trocar foto';} });
   const ts = data.testemunhas || [];
   g('t1-nome',ts[0]?.nome);g('t1-cpf',ts[0]?.cpf);g('t2-nome',ts[1]?.nome);g('t2-cpf',ts[1]?.cpf);
+  // modalidade + servico
+  const sv = data.servico || {};
+  g('s-local', sv.local); g('s-mensal', sv.mensal); g('s-dia', sv.dia || 10);
+  if(sv.forma) g('s-forma-pag', sv.forma);
+  const escs = sv.escopo || [];
+  document.getElementById('s-esc-rede').checked    = escs.some(e=>/rede/i.test(e));
+  document.getElementById('s-esc-cameras').checked = escs.some(e=>/camera|cftv/i.test(e));
+  document.getElementById('s-esc-app').checked     = escs.some(e=>/condfy|automac/i.test(e));
+  const known = /rede|camera|cftv|condfy|automac/i;
+  g('s-esc-obs', escs.filter(e=>!known.test(e)).join('\n'));
+  document.getElementById('s-lancar').checked = false;  // ja foi lancado no cadastro
+  if(data.modalidade==='servico'){ setModo('servico'); document.querySelector('.modo-btn[data-modo="servico"]').classList.add('active'); }
+  else { setModo('orcamento'); }
   closeModal('modal-salvos');
   gerar();
 }
