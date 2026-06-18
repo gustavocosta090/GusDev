@@ -1,4 +1,4 @@
-<!-- build: 2026-06-17a -->
+<!-- build: 2026-06-17b -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -46,7 +46,7 @@
     <input class="busca" id="busca" type="text" placeholder="Buscar por nome ou descricao..." oninput="renderEquip()">
     <div class="cat-tabs" id="cat-filter">
       <button class="cat-tab active" data-cat="">Todos</button>
-      <button class="cat-tab" data-cat="cameras">Cameras</button>
+      <button class="cat-tab" data-cat="seguranca">Seguranca</button>
       <button class="cat-tab" data-cat="automacao">Automacao</button>
       <button class="cat-tab" data-cat="som">Audio</button>
       <button class="cat-tab" data-cat="rede">Rede</button>
@@ -76,7 +76,7 @@
         </div>
         <div><label>Categoria</label>
           <select id="m-cat">
-            <option value="cameras">Cameras</option>
+            <option value="seguranca">Seguranca</option>
             <option value="automacao">Automacao</option>
             <option value="som">Audio</option>
             <option value="rede">Rede</option>
@@ -168,7 +168,7 @@ function novoEquip(){
   document.getElementById('m-id').value = '';
   document.getElementById('m-nome').value = '';
   document.getElementById('m-tipo').value = 'produto';
-  document.getElementById('m-cat').value = (filtroCat && filtroCat!=='__serv') ? filtroCat : 'cameras';
+  document.getElementById('m-cat').value = (filtroCat && filtroCat!=='__serv') ? filtroCat : 'seguranca';
   document.getElementById('m-preco').value = '';
   document.getElementById('m-desc').value = '';
   resetFoto();

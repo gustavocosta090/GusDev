@@ -1,4 +1,4 @@
-<!-- build: 2026-06-16c -->
+<!-- build: 2026-06-17a -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -51,6 +51,18 @@
   .pagto-table tbody tr{border-bottom:1px solid #f0ece4;}
   .pagto-table tbody td{padding:9px 12px;font-size:12.5px;color:#2a3a4a;} .pagto-table tbody td.r{text-align:right;}
   .pagto-table tfoot td{padding:9px 12px;font-size:12.5px;background:#faf8f4;font-weight:600;color:#0d1b2a;} .pagto-table tfoot td.r{text-align:right;color:#c8a96e;}
+  .itens-table{width:100%;border-collapse:collapse;margin:10px 0;}
+  .itens-table thead tr{background:#0d1b2a;color:#f5f0e8;}
+  .itens-table thead th{padding:8px 10px;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;font-weight:400;text-align:left;}
+  .itens-table thead th.r{text-align:right;}
+  .itens-table tbody tr{border-bottom:1px solid #f0ece4;}
+  .itens-table tbody td{padding:8px 10px;font-size:12px;color:#2a3a4a;vertical-align:middle;}
+  .itens-table tbody td.r{text-align:right;}
+  .itens-table tfoot td{padding:9px 10px;font-size:12px;background:#faf8f4;font-weight:600;color:#0d1b2a;text-align:right;}
+  .itens-table tfoot td.r{color:#c8a96e;}
+  .it-img{width:42px;height:42px;object-fit:contain;border-radius:4px;border:1px solid #eee;background:#f8f8f8;display:block;}
+  .it-img-ph{width:42px;height:42px;border-radius:4px;border:1px dashed #ddd;background:#f8f8f8;}
+  .it-garantia{font-size:11px;color:#0d1b2a;white-space:nowrap;}
   .assinaturas-section{margin-top:44px;padding-top:28px;border-top:1px solid #e8e4dc;}
   .ass-cidade{font-size:13px;color:#4a5a6a;margin-bottom:40px;text-align:center;}
   .ass-grid,.ass-grid-4{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-bottom:36px;}
@@ -80,9 +92,9 @@
     #preview{padding:0;background:white;display:block;overflow:visible;}
     #empty-state{display:none!important;}
     #contrato-doc{box-shadow:none;max-width:100%;display:block!important;}
-    .doc-header,.doc-footer,.pagto-table thead tr{background:#0d1b2a!important;}
+    .doc-header,.doc-footer,.pagto-table thead tr,.itens-table thead tr{background:#0d1b2a!important;}
     .clausula-titulo,.doc-fotos-titulo{background:#f4f1ec!important;}
-    .partes-box,.pagto-table tfoot td{background:#faf8f4!important;}
+    .partes-box,.pagto-table tfoot td,.itens-table tfoot td{background:#faf8f4!important;}
     .clausula,.assinaturas-section{page-break-inside:avoid;}
   }
 </style>
@@ -103,7 +115,7 @@
       <div>
         <div class="section-title">Contratante</div>
         <div class="field-group">
-          <div><label>Cliente cadastrado</label><select id="f-cliente" onchange="prefillCliente()"></select></div>
+          <div><label>Cliente cadastrado</label><select id="f-cliente" onchange="onClienteChange()"></select></div>
           <div><label>Nome / Razao Social</label><input id="c-nome" type="text" placeholder="Ex: Joao da Silva"></div>
           <div class="two-col">
             <div><label>CPF / CNPJ</label><input id="c-doc" type="text"></div>
@@ -146,6 +158,8 @@
           </div>
           <div><label>Descricao dos Servicos</label><textarea id="c-servicos" style="min-height:90px;"></textarea></div>
           <div><label>Materiais Fornecidos pela Contratada</label><textarea id="c-materiais" style="min-height:64px;"></textarea></div>
+          <div><label>Vincular orcamento (produtos)</label><select id="f-orcamento" onchange="vincularOrcamento()"><option value="">- Selecione o cliente primeiro -</option></select></div>
+          <div id="itens-info" class="muted" style="font-size:12px;"></div>
         </div>
       </div>
       <div>
@@ -188,7 +202,13 @@
               <option value="90 (noventa) dias">90 dias</option>
               <option value="180 (cento e oitenta) dias">180 dias</option>
               <option value="12 (doze) meses">12 meses</option>
+            </select>
+          </div>
+          <div><label>Garantia dos Produtos</label>
+            <select id="c-garantia-produto">
+              <option value="12 (doze) meses">12 meses</option>
               <option value="24 (vinte e quatro) meses">24 meses</option>
+              <option value="36 (trinta e seis) meses">36 meses</option>
             </select>
           </div>
           <div><label>Suporte Pos-Instalacao</label>
@@ -276,6 +296,8 @@ const CONTRATADA = {
 };
 let parcelas = [];
 let clientesCache = [];
+let orcamentosCliente = [];   // orcamentos do cliente selecionado
+let itensContrato = [];       // itens vinculados (do orcamento)
 let fotos = { 1:{url:'',legenda:''}, 2:{url:'',legenda:''} };
 let editId = null;
 
@@ -288,8 +310,13 @@ let editId = null;
   sel.innerHTML = '<option value="">- Selecione (ou digite abaixo) -</option>'
     + clientesCache.map(c=>`<option value="${c.id}" ${String(c.id)===String(preId)?'selected':''}>${c.nome}</option>`).join('');
   document.getElementById('c-data').valueAsDate = new Date();
-  if(preId) prefillCliente();
+  if(preId) onClienteChange();
 })();
+
+function onClienteChange(){
+  prefillCliente();
+  carregarOrcamentosCliente();
+}
 
 function prefillCliente(){
   const id = document.getElementById('f-cliente').value;
@@ -300,6 +327,33 @@ function prefillCliente(){
   document.getElementById('c-end').value = c.endereco||'';
   document.getElementById('c-email').value = c.email||'';
   document.getElementById('c-tel').value = c.telefone||'';
+}
+
+async function carregarOrcamentosCliente(){
+  const id = document.getElementById('f-cliente').value;
+  const sel = document.getElementById('f-orcamento');
+  if(!id){ orcamentosCliente=[]; sel.innerHTML='<option value="">- Selecione o cliente primeiro -</option>'; return; }
+  const { data, error } = await db.from('orcamentos')
+    .select('id,numero,status,total,itens,criado_em').eq('cliente_id', id).order('criado_em',{ascending:false});
+  if(error){ showToast('Erro ao carregar orcamentos do cliente.', true); return; }
+  orcamentosCliente = data || [];
+  const stLabel = s => s==='aprovado' ? 'aprovado' : (s==='recusado' ? 'recusado' : 'aberto');
+  sel.innerHTML = '<option value="">- Nenhum -</option>'
+    + orcamentosCliente.map(o=>`<option value="${o.id}">${o.numero||('#'+o.id)} - ${stLabel(o.status)} - ${fmtBRL(o.total)}</option>`).join('');
+}
+
+function vincularOrcamento(){
+  const id = document.getElementById('f-orcamento').value;
+  const info = document.getElementById('itens-info');
+  if(!id){ itensContrato=[]; info.textContent=''; return; }
+  const o = orcamentosCliente.find(x=>String(x.id)===String(id));
+  itensContrato = (o && o.itens) ? o.itens : [];
+  const nProd = itensContrato.filter(it=>it.tipo!=='servico').length;
+  const nServ = itensContrato.filter(it=>it.tipo==='servico').length;
+  info.textContent = `${itensContrato.length} item(ns) vinculado(s) (${nProd} produto(s), ${nServ} servico(s)).`;
+  // preenche o valor total se estiver vazio
+  const tot = document.getElementById('c-total');
+  if(o && (!tot.value || parseFloat(tot.value)===0)) tot.value = o.total || '';
 }
 
 function switchTab(name){
@@ -357,6 +411,7 @@ function coletar(){
     cFormaPag: document.getElementById('c-forma-pag').value,
     cMulta: document.getElementById('c-multa').value,
     cGarantia: document.getElementById('c-garantia').value,
+    cGarantiaProduto: document.getElementById('c-garantia-produto').value,
     cSuporte: document.getElementById('c-suporte').value,
     t1Nome: document.getElementById('t1-nome').value.trim(), t1Cpf: document.getElementById('t1-cpf').value.trim(),
     t2Nome: document.getElementById('t2-nome').value.trim(), t2Cpf: document.getElementById('t2-cpf').value.trim(),
@@ -424,6 +479,33 @@ function gerar(){
   const materiaisFmt = d.cMateriais ? `<p class="paragrafo">Equipamentos e materiais fornecidos pela Contratada: ${d.cMateriais}.</p>` : '';
   const inicioFmt = d.cInicio ? `com inicio previsto para <strong>${fmtData(d.cInicio)}</strong>, ` : '';
 
+  // Relacao de equipamentos e servicos (do orcamento vinculado)
+  let itensHTML = '';
+  if(itensContrato.length){
+    const rows = itensContrato.map(it=>{
+      const serv = it.tipo==='servico';
+      const tot = (Number(it.qtd)||0)*(Number(it.preco)||0);
+      const imgCell = it.img ? `<img src="${it.img}" class="it-img" onerror="this.style.display='none'">` : `<div class="it-img-ph"></div>`;
+      const gar = serv ? d.cGarantia : d.cGarantiaProduto;
+      return `<tr>
+        <td>${imgCell}</td>
+        <td>${it.nome||''}${serv?' <em style="color:#8a9bb0;">(servico)</em>':''}</td>
+        <td class="r">${it.qtd||0}</td>
+        <td class="r">${fmtBRL(it.preco)}</td>
+        <td class="r">${fmtBRL(tot)}</td>
+        <td class="r"><span class="it-garantia">${gar}</span></td>
+      </tr>`;
+    }).join('');
+    const totalItens = itensContrato.reduce((s,it)=>s+(Number(it.qtd)||0)*(Number(it.preco)||0),0);
+    itensHTML = `
+      <p><strong>1.2 - Relacao de Equipamentos e Servicos:</strong></p>
+      <table class="itens-table">
+        <thead><tr><th style="width:50px;"></th><th>Descricao</th><th class="r" style="width:8%">Qtd</th><th class="r" style="width:15%">Unit.</th><th class="r" style="width:15%">Total</th><th class="r" style="width:20%">Garantia</th></tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr><td colspan="4" class="r">Total dos itens</td><td class="r">${fmtBRL(totalItens)}</td><td></td></tr></tfoot>
+      </table>`;
+  }
+
   let assTest='';
   if(d.t1Nome || d.t2Nome){
     const t1 = d.t1Nome?`<div class="ass-block"><div class="ass-linha"></div><div class="ass-nome">${d.t1Nome}</div>${d.t1Cpf?`<div class="ass-cpf">CPF: ${d.t1Cpf}</div>`:''}<div class="ass-cargo">Testemunha 1</div></div>`:'<div></div>';
@@ -453,6 +535,7 @@ function gerar(){
       <div class="clausula"><div class="clausula-titulo">Clausula 1a - Do Objeto</div><div class="clausula-body">
         <p>O presente contrato tem por objeto a ${d.cTipo}, a ser executada no endereco: <strong>${local}</strong>, ${inicioFmt}com prazo de conclusao de <strong>${d.cPrazo}</strong> a contar do inicio efetivo dos servicos.</p>
         <p><strong>1.1 - Descricao dos Servicos:</strong></p>${servicosFmt}${materiaisFmt}
+        ${itensHTML}
         <p class="paragrafo">Os materiais nao expressamente indicados como de responsabilidade da CONTRATADA serao fornecidos pelo CONTRATANTE, salvo acordo posterior.</p>
       </div>${fotosHTML}</div>
 
@@ -468,8 +551,8 @@ function gerar(){
       </div></div>
 
       <div class="clausula"><div class="clausula-titulo">Clausula 4a - Da Garantia e Suporte</div><div class="clausula-body">
-        <p>A CONTRATADA oferece garantia de <strong>${d.cGarantia}</strong> sobre os servicos executados, contados da conclusao. Inclui-se <strong>${d.cSuporte}</strong>.</p>
-        <p class="paragrafo">A garantia nao cobre defeitos decorrentes de mau uso, intervencao de terceiros, surtos eletricos, descargas atmosfericas ou caso fortuito/forca maior.</p>
+        <p>A CONTRATADA oferece garantia de <strong>${d.cGarantiaProduto}</strong> sobre os produtos e equipamentos fornecidos e de <strong>${d.cGarantia}</strong> sobre os servicos executados, ambas contadas a partir da conclusao dos servicos. Inclui-se <strong>${d.cSuporte}</strong>.</p>
+        <p class="paragrafo">A garantia dos produtos observa tambem os termos e prazos do fabricante. A garantia nao cobre defeitos decorrentes de mau uso, intervencao de terceiros, surtos eletricos, descargas atmosfericas ou caso fortuito/forca maior.</p>
       </div></div>
 
       ${intClausula}
@@ -504,7 +587,8 @@ async function salvar(){
     data: d.cData || null, cidade: d.cCidade, tipo: d.cTipo,
     servicos: d.cServicos || null, materiais: d.cMateriais || null,
     valor_total: d.cTotal, forma_pagamento: d.cFormaPag,
-    parcelas: parcelas, multa: d.cMulta, garantia: d.cGarantia, suporte: d.cSuporte,
+    parcelas: parcelas, multa: d.cMulta, garantia: d.cGarantia, garantia_produto: d.cGarantiaProduto, suporte: d.cSuporte,
+    itens: itensContrato,
     intermediador: (d.iTipo&&d.iNome) ? {tipo:d.iTipo,nome:d.iNome,doc:d.iDoc,representante:d.iRepres,endereco:d.iEnd,tel:d.iTel,papel:d.iPapel,obs:d.iObs} : null,
     exigencias: d.exLista ? {titulo:d.exTitulo,lista:d.exLista,obs:d.exObs} : null,
     fotos: [ {url:fotos[1].url,legenda:d.foto1Legenda}, {url:fotos[2].url,legenda:d.foto2Legenda} ],
@@ -542,12 +626,19 @@ async function carregarCon(id){
   const g = (i,v)=>{ const el=document.getElementById(i); if(el) el.value = v||''; };
   document.getElementById('f-cliente').value = data.cliente_id || '';
   prefillCliente();
+  await carregarOrcamentosCliente();
   g('c-num', data.numero); if(data.data) g('c-data', data.data);
   g('c-cidade', data.cidade); g('c-tipo', data.tipo); g('c-servicos', data.servicos);
   g('c-materiais', data.materiais); g('c-total', data.valor_total);
   g('c-forma-pag', data.forma_pagamento); g('c-multa', data.multa);
-  g('c-garantia', data.garantia); g('c-suporte', data.suporte);
+  g('c-garantia', data.garantia); g('c-garantia-produto', data.garantia_produto || '12 (doze) meses');
+  g('c-suporte', data.suporte);
   parcelas = data.parcelas || []; renderParcelas();
+  itensContrato = data.itens || [];
+  const nProd = itensContrato.filter(it=>it.tipo!=='servico').length;
+  const nServ = itensContrato.filter(it=>it.tipo==='servico').length;
+  document.getElementById('itens-info').textContent = itensContrato.length
+    ? `${itensContrato.length} item(ns) vinculado(s) (${nProd} produto(s), ${nServ} servico(s)).` : '';
   const it = data.intermediador;
   if(it){ g('i-tipo',it.tipo);g('i-nome',it.nome);g('i-doc',it.doc);g('i-representante',it.representante);g('i-end',it.endereco);g('i-tel',it.tel);g('i-papel',it.papel);g('i-obs',it.obs); }
   const ex = data.exigencias;

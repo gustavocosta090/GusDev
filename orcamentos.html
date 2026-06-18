@@ -1,4 +1,4 @@
-<!-- build: 2026-06-17a -->
+<!-- build: 2026-06-17b -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -112,7 +112,7 @@
     <div>
       <div class="section-title">Adicionar Itens</div>
       <div class="category-tabs" id="cat-tabs">
-        <button class="cat-tab active" data-cat="cameras">Cameras</button>
+        <button class="cat-tab active" data-cat="seguranca">Seguranca</button>
         <button class="cat-tab" data-cat="automacao">Automacao</button>
         <button class="cat-tab" data-cat="som">Audio</button>
         <button class="cat-tab" data-cat="rede">Rede</button>
@@ -186,12 +186,12 @@
 <script src="utils.js"></script>
 <script>
 let items = [];
-let activeCategory = 'cameras';
-let catalog = { cameras:[], automacao:[], som:[], rede:[], outros:[] };
+let activeCategory = 'seguranca';
+let catalog = { seguranca:[], automacao:[], som:[], rede:[], outros:[] };
 let editId = null;  // id do orcamento em edicao (se carregado dos salvos)
 
 const catMeta = {
-  cameras:{label:'Cameras, Portaria e Controle de Acesso'},
+  seguranca:{label:'Seguranca (CFTV, Facial, Fechaduras e Controle de Acesso)'},
   automacao:{label:'Automacao Residencial'},
   som:{label:'Som Ambiente e Home Theater'},
   rede:{label:'Rede e Infraestrutura'},
@@ -207,7 +207,7 @@ const catMeta = {
 
 async function carregarCatalogo(){
   const { data } = await db.from('equipamentos').select('*').eq('ativo',true).order('nome');
-  catalog = { cameras:[], automacao:[], som:[], rede:[], outros:[] };
+  catalog = { seguranca:[], automacao:[], som:[], rede:[], outros:[] };
   (data||[]).forEach(e=>{
     const cat = catalog[e.categoria] ? e.categoria : 'outros';
     catalog[cat].push({ name:e.nome, img:e.foto_url||'', desc:e.descricao||'', price:e.preco||0, tipo:e.tipo||'produto' });
