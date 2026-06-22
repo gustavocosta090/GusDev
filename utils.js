@@ -15,7 +15,7 @@ const EMPRESA = {
   nome:        'Auron Home Systems',
   responsavel: 'Gustavo Martins Costa',
   cnpj:        '50.081.460/0001-60',
-  endereco:    'Rua Tenente Eulalio Guerra, no 502, Cuiaba - MT',
+  endereco:    'Rua Tenente Eulálio Guerra, nº 502, Cuiabá - MT',
   pix:         '50.081.460/0001-60 (CNPJ) - Banco Sicredi',
   banco:       'Banco Sicredi',
 };
@@ -25,7 +25,7 @@ const NAV_LINKS = [
   {id:'financeiro',   href:'financeiro.html',   label:'Financeiro'},
   {id:'clientes',     href:'clientes.html',     label:'Clientes'},
   {id:'equipamentos', href:'equipamentos.html', label:'Equipamentos'},
-  {id:'orcamentos',   href:'orcamentos.html',   label:'Orcamentos'},
+  {id:'orcamentos',   href:'orcamentos.html',   label:'Orçamentos'},
   {id:'contratos',    href:'contratos.html',    label:'Contratos'},
   {id:'recibos',      href:'recibos.html',      label:'Recibos'},
 ];
@@ -94,7 +94,7 @@ function today(){
 function fmtData(str){
   if(!str) return '-';
   const [y,m,d] = str.split('-');
-  const meses = ['janeiro','fevereiro','marco','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
   return `${parseInt(d)} de ${meses[parseInt(m)-1]} de ${y}`;
 }
 function fmtDataCurta(str){
@@ -108,21 +108,22 @@ function fmtDataCurta(str){
 function extenso(valor){
   const inteiro = Math.floor(valor);
   const cents = Math.round((valor - inteiro)*100);
-  const unidades=['','um','dois','tres','quatro','cinco','seis','sete','oito','nove','dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];
+  const unidades=['','um','dois','três','quatro','cinco','seis','sete','oito','nove','dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];
   const dezenas=['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];
   const centenas=['','cem','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
   function g3(n){
     if(n===0)return'';if(n===100)return'cem';
     let r='';const c=Math.floor(n/100),res=n%100;
-    if(c)r+=centenas[c];if(c&&res)r+=' e ';
+    if(c)r+=(c===1&&res)?'cento':centenas[c];if(c&&res)r+=' e ';
     if(res<20)r+=unidades[res];
     else{r+=dezenas[Math.floor(res/10)];if(res%10)r+=' e '+unidades[res%10];}
     return r;
   }
   if(inteiro===0&&cents===0)return'zero reais';
   let partes=[],n=inteiro,gi=0;
-  const grupos=['','mil','milhao','bilhao'];
-  while(n>0){const g=n%1000;if(g){let t=g3(g);if(gi>0)t+=' '+grupos[gi]+(g>1&&gi>1?'es':'');partes.unshift(t);}n=Math.floor(n/1000);gi++;}
+  const grupos=['','mil','milhão','bilhão'];
+  const gruposP=['','mil','milhões','bilhões'];
+  while(n>0){const g=n%1000;if(g){let t=g3(g);if(gi>0)t+=' '+((g>1&&gi>1)?gruposP[gi]:grupos[gi]);partes.unshift(t);}n=Math.floor(n/1000);gi++;}
   let r=partes.join(', ')+' '+(inteiro===1?'real':'reais');
   if(cents)r+=' e '+g3(cents)+' '+(cents===1?'centavo':'centavos');
   return r;
