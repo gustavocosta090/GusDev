@@ -1,4 +1,4 @@
-<!-- build: 2026-06-18d -->
+<!-- build: 2026-06-18e -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -162,7 +162,7 @@
       <table class="tbl" style="margin-top:14px;">
         <thead><tr>
           <th>Cliente</th><th class="r">Receita</th><th class="r">Custo produtos</th>
-          <th class="r">Custos atend.</th><th class="r">Lucro real</th><th class="r">Margem</th>
+          <th class="r">Custos atend.</th><th class="r">Lucro real</th><th class="r">Margem</th><th class="r">Ações</th>
         </tr></thead>
         <tbody id="tb-lucro"></tbody>
       </table>
@@ -577,6 +577,7 @@ function renderLucro(){
       <td class="r val-out">${fmtBRL(l.custoAtend)}</td>
       <td class="r ${cls(l.lucro)}" style="font-weight:600;">${fmtBRL(l.lucro)}</td>
       <td class="r ${l.margem!=null?cls(l.margem):''}">${l.margem!=null?l.margem+'%':'-'}</td>
+      <td><div class="row-actions"><button class="btn btn-primary btn-sm" onclick="abrirAtend('${l.cid}')">+ Custos</button></div></td>
     </tr>`).join('');
 }
 
@@ -616,7 +617,7 @@ function previewAtend(){
   const res = parseFloat(document.getElementById('at-reserva').value)||0;
   document.getElementById('at-total-info').textContent = `Total do atendimento: ${fmtBRL(desloc+alm+ins+res)}`;
 }
-function abrirAtend(){
+function abrirAtend(cid){
   ['at-desloc','at-insumos'].forEach(i=>document.getElementById(i).value='');
   document.getElementById('at-km').value='0';
   document.getElementById('at-alm-qtd').value='0';
@@ -626,7 +627,7 @@ function abrirAtend(){
   document.getElementById('at-status').value = 'comprometido';
   document.getElementById('at-desloc-info').textContent='';
   document.getElementById('at-total-info').textContent='';
-  carregarClientesSelect(document.getElementById('at-cliente'), '');
+  carregarClientesSelect(document.getElementById('at-cliente'), cid || '');
   openModal('modal-atend');
 }
 async function salvarAtend(){
