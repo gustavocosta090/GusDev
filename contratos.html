@@ -1,4 +1,4 @@
-<!-- build: 2026-06-18a -->
+<!-- build: 2026-06-18b -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -111,7 +111,7 @@
       <div class="section-title">Tipo de contrato</div>
       <div class="modo-tabs" id="modo-tabs">
         <button class="modo-btn active" data-modo="orcamento" onclick="setModo('orcamento')">Do orcamento</button>
-        <button class="modo-btn" data-modo="servico" onclick="setModo('servico')">Servico / Manutencao</button>
+        <button class="modo-btn" data-modo="servico" onclick="setModo('servico')">Serviço / Manutenção</button>
         <button class="modo-btn" data-modo="personalizado" onclick="setModo('personalizado')">Personalizado</button>
       </div>
     </div>
@@ -128,12 +128,12 @@
         <div class="section-title">Contratante</div>
         <div class="field-group">
           <div><label>Cliente cadastrado</label><select id="f-cliente" onchange="onClienteChange()"></select></div>
-          <div><label>Nome / Razao Social</label><input id="c-nome" type="text" placeholder="Ex: Joao da Silva"></div>
+          <div><label>Nome / Razão Social</label><input id="c-nome" type="text" placeholder="Ex: João da Silva"></div>
           <div class="two-col">
             <div><label>CPF / CNPJ</label><input id="c-doc" type="text"></div>
             <div><label>RG</label><input id="c-rg" type="text"></div>
           </div>
-          <div><label>Endereco Completo</label><textarea id="c-end" style="min-height:50px;"></textarea></div>
+          <div><label>Endereço Completo</label><textarea id="c-end" style="min-height:50px;"></textarea></div>
           <div class="two-col">
             <div><label>E-mail</label><input id="c-email" type="text"></div>
             <div><label>Telefone</label><input id="c-tel" type="text"></div>
@@ -143,16 +143,16 @@
       <div>
         <div class="section-title">Dados do Contrato</div>
         <div class="field-group">
-          <div><label>Numero</label><input id="c-num" type="text" placeholder="Auto (001/2026)"></div>
+          <div><label>Número</label><input id="c-num" type="text" placeholder="Auto (001/2026)"></div>
           <div class="two-col">
             <div><label>Data</label><input id="c-data" type="date"></div>
             <div><label>Cidade</label><input id="c-cidade" type="text" value="Cuiaba"></div>
           </div>
           <div class="two-col">
-            <div><label>Prazo de Execucao</label><input id="c-prazo" type="text" placeholder="30 dias uteis"></div>
-            <div><label>Inicio Previsto</label><input id="c-inicio" type="date"></div>
+            <div><label>Prazo de Execução</label><input id="c-prazo" type="text" placeholder="30 dias úteis"></div>
+            <div><label>Início Previsto</label><input id="c-inicio" type="date"></div>
           </div>
-          <div><label>Local de Execucao</label><input id="c-local" type="text"></div>
+          <div><label>Local de Execução</label><input id="c-local" type="text"></div>
         </div>
       </div>
 
@@ -161,19 +161,19 @@
       <div>
         <div class="section-title">Objeto</div>
         <div class="field-group">
-          <div><label>Tipo de Servico</label>
+          <div><label>Tipo de Serviço</label>
             <select id="c-tipo">
-              <option value="instalacao e configuracao de sistema de cameras de seguranca (CFTV)">Cameras CFTV</option>
-              <option value="instalacao de sistema de automacao residencial">Automacao Residencial</option>
-              <option value="instalacao de sistema de som ambiente e home theater">Som / Home Theater</option>
-              <option value="instalacao de rede estruturada e cabeamento">Rede Estruturada</option>
-              <option value="instalacao de sistema de alarme e seguranca eletronica">Alarme e Seguranca</option>
-              <option value="prestacao de servicos de tecnologia residencial integrada">Tecnologia Integrada</option>
+              <option value="instalação e configuração de sistema de câmeras de segurança (CFTV)">Câmeras CFTV</option>
+              <option value="instalação de sistema de automação residencial">Automação Residencial</option>
+              <option value="instalação de sistema de som ambiente e home theater">Som / Home Theater</option>
+              <option value="instalação de rede estruturada e cabeamento">Rede Estruturada</option>
+              <option value="instalação de sistema de alarme e segurança eletrônica">Alarme e Segurança</option>
+              <option value="prestação de serviços de tecnologia residencial integrada">Tecnologia Integrada</option>
             </select>
           </div>
-          <div><label>Descricao dos Servicos</label><textarea id="c-servicos" style="min-height:90px;"></textarea></div>
+          <div><label>Descrição dos Serviços</label><textarea id="c-servicos" style="min-height:90px;"></textarea></div>
           <div><label>Materiais Fornecidos pela Contratada</label><textarea id="c-materiais" style="min-height:64px;"></textarea></div>
-          <div><label>Vincular orcamento (produtos)</label><select id="f-orcamento" onchange="vincularOrcamento()"><option value="">- Selecione o cliente primeiro -</option></select></div>
+          <div><label>Vincular orçamento (produtos)</label><select id="f-orcamento" onchange="vincularOrcamento()"><option value="">- Selecione o cliente primeiro -</option></select></div>
           <div id="itens-info" class="muted" style="font-size:12px;"></div>
         </div>
       </div>
@@ -184,10 +184,10 @@
           <div><label>Forma de Pagamento</label>
             <select id="c-forma-pag">
               <option value="PIX (CNPJ: 50.081.460/0001-60) - Banco Sicredi">PIX - CNPJ (Sicredi)</option>
-              <option value="Transferencia Bancaria - Banco Sicredi">Transferencia - Sicredi</option>
+              <option value="Transferência Bancária - Banco Sicredi">Transferência - Sicredi</option>
               <option value="Dinheiro">Dinheiro</option>
-              <option value="Cartao de Credito">Cartao de Credito</option>
-              <option value="Boleto Bancario">Boleto Bancario</option>
+              <option value="Cartão de Crédito">Cartão de Crédito</option>
+              <option value="Boleto Bancário">Boleto Bancário</option>
             </select>
           </div>
           <div>
@@ -201,9 +201,9 @@
           </div>
           <div><label>Multa por Atraso</label>
             <select id="c-multa">
-              <option value="2% ao mes">2% ao mes</option>
-              <option value="1% ao mes">1% ao mes</option>
-              <option value="juros de 1% ao mes + multa de 2%">1% juro + 2% multa</option>
+              <option value="2% ao mês">2% ao mês</option>
+              <option value="1% ao mês">1% ao mês</option>
+              <option value="juros de 1% ao mês + multa de 2%">1% juro + 2% multa</option>
               <option value="a ser negociada entre as partes">A negociar</option>
             </select>
           </div>
@@ -212,7 +212,7 @@
       <div>
         <div class="section-title">Garantia e Suporte</div>
         <div class="field-group">
-          <div><label>Garantia dos Servicos</label>
+          <div><label>Garantia dos Serviços</label>
             <select id="c-garantia">
               <option value="90 (noventa) dias">90 dias</option>
               <option value="180 (cento e oitenta) dias">180 dias</option>
@@ -226,12 +226,12 @@
               <option value="36 (trinta e seis) meses">36 meses</option>
             </select>
           </div>
-          <div><label>Suporte Pos-Instalacao</label>
+          <div><label>Suporte Pós-Instalação</label>
             <select id="c-suporte">
               <option value="30 (trinta) dias de suporte remoto gratuito">30 dias remoto gratuito</option>
-              <option value="90 (noventa) dias de servico gratuito">90 dias visita gratuita</option>
-              <option value="suporte mediante contrato de manutencao">Mediante contrato</option>
-              <option value="nao incluso">Nao incluso</option>
+              <option value="90 (noventa) dias de serviço gratuito">90 dias visita gratuita</option>
+              <option value="suporte mediante contrato de manutenção">Mediante contrato</option>
+              <option value="não incluso">Não incluso</option>
             </select>
           </div>
         </div>
@@ -241,9 +241,9 @@
       <!-- ===== BLOCO SERVICO (manutencao mensal) ===== -->
       <div id="bloco-servico" style="display:none;flex-direction:column;gap:20px;">
         <div>
-          <div class="section-title">Pacote de Servico</div>
+          <div class="section-title">Pacote de Serviço</div>
           <div class="field-group">
-            <div><label>Condominio / Local atendido</label><input id="s-local" type="text" placeholder="Ex: Condominio Residencial X"></div>
+            <div><label>Condomínio / Local atendido</label><input id="s-local" type="text" placeholder="Ex: Condomínio Residencial X"></div>
             <div class="two-col">
               <div><label>Valor mensal (R$)</label><input id="s-mensal" type="number" min="0" step="0.01" placeholder="0,00"></div>
               <div><label>Dia de vencimento</label><input id="s-dia" type="number" min="1" max="28" value="10"></div>
@@ -251,8 +251,8 @@
             <div><label>Forma de Pagamento</label>
               <select id="s-forma-pag">
                 <option value="PIX (CNPJ: 50.081.460/0001-60) - Banco Sicredi">PIX - CNPJ (Sicredi)</option>
-                <option value="Boleto Bancario">Boleto Bancario</option>
-                <option value="Transferencia Bancaria - Banco Sicredi">Transferencia - Sicredi</option>
+                <option value="Boleto Bancário">Boleto Bancário</option>
+                <option value="Transferência Bancária - Banco Sicredi">Transferência - Sicredi</option>
               </select>
             </div>
           </div>
@@ -261,15 +261,15 @@
           <div class="section-title">Escopo do Atendimento</div>
           <div class="field-group">
             <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--light);cursor:pointer;"><input type="checkbox" id="s-esc-rede" checked> Rede / internet</label>
-            <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--light);cursor:pointer;"><input type="checkbox" id="s-esc-cameras" checked> Cameras / CFTV</label>
-            <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--light);cursor:pointer;"><input type="checkbox" id="s-esc-app" checked> App de automacao (Condfy)</label>
+            <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--light);cursor:pointer;"><input type="checkbox" id="s-esc-cameras" checked> Câmeras / CFTV</label>
+            <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--light);cursor:pointer;"><input type="checkbox" id="s-esc-app" checked> App de automação (Condfy)</label>
             <div><label>Itens adicionais do escopo (um por linha)</label><textarea id="s-esc-obs" style="min-height:60px;" placeholder="Ex: Controle de acesso&#10;Interfonia"></textarea></div>
           </div>
         </div>
         <div>
-          <div class="section-title">Cobranca</div>
-          <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--light);cursor:pointer;"><input type="checkbox" id="s-lancar" checked> Lancar mensalidade recorrente em Contas a Receber ao salvar</label>
-          <p class="muted" style="font-size:11px;line-height:1.5;margin-top:6px;">Cria 1 lancamento recorrente (gera o proximo ao receber). Exige cliente cadastrado selecionado.</p>
+          <div class="section-title">Cobrança</div>
+          <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--light);cursor:pointer;"><input type="checkbox" id="s-lancar" checked> Lançar mensalidade recorrente em Contas a Receber ao salvar</label>
+          <p class="muted" style="font-size:11px;line-height:1.5;margin-top:6px;">Cria 1 lançamento recorrente (gera o próximo ao receber). Exige cliente cadastrado selecionado.</p>
         </div>
       </div><!-- /bloco-servico -->
 
@@ -283,30 +283,30 @@
     </div>
 
     <div id="tab-intermediador" class="tab-panel" style="flex-direction:column;gap:14px;">
-      <p class="muted" style="line-height:1.6;">Preencha apenas se houve um intermediario na venda.</p>
+      <p class="muted" style="line-height:1.6;">Preencha apenas se houve um intermediário na venda.</p>
       <div class="field-group">
-        <div><label>Tipo</label><select id="i-tipo"><option value="">- Nenhum -</option><option value="pj">Pessoa Juridica</option><option value="pf">Pessoa Fisica</option></select></div>
-        <div><label>Nome / Razao Social</label><input id="i-nome" type="text"></div>
+        <div><label>Tipo</label><select id="i-tipo"><option value="">- Nenhum -</option><option value="pj">Pessoa Jurídica</option><option value="pf">Pessoa Física</option></select></div>
+        <div><label>Nome / Razão Social</label><input id="i-nome" type="text"></div>
         <div><label>CPF / CNPJ</label><input id="i-doc" type="text"></div>
         <div><label>Representante (se empresa)</label><input id="i-representante" type="text"></div>
-        <div><label>Endereco</label><textarea id="i-end" style="min-height:50px;"></textarea></div>
+        <div><label>Endereço</label><textarea id="i-end" style="min-height:50px;"></textarea></div>
         <div><label>Telefone</label><input id="i-tel" type="text"></div>
-        <div><label>Papel</label><select id="i-papel"><option value="intermediacao na venda">Intermediacao na venda</option><option value="indicacao comercial">Indicacao comercial</option><option value="parceiro revendedor">Parceiro revendedor</option><option value="representante comercial">Representante comercial</option></select></div>
+        <div><label>Papel</label><select id="i-papel"><option value="intermediação na venda">Intermediação na venda</option><option value="indicação comercial">Indicação comercial</option><option value="parceiro revendedor">Parceiro revendedor</option><option value="representante comercial">Representante comercial</option></select></div>
         <div><label>Observacao</label><textarea id="i-obs" style="min-height:64px;"></textarea></div>
       </div>
     </div>
 
     <div id="tab-exigencias" class="tab-panel" style="flex-direction:column;gap:14px;">
-      <p class="muted" style="line-height:1.6;">Requisitos tecnicos que o local deve atender. Viram clausula no contrato.</p>
+      <p class="muted" style="line-height:1.6;">Requisitos técnicos que o local deve atender. Viram cláusula no contrato.</p>
       <div class="field-group">
-        <div><label>Titulo da Clausula</label><input id="ex-titulo" type="text" value="Requisitos Tecnicos para Execucao dos Servicos"></div>
-        <div><label>Exigencias (uma por linha)</label><textarea id="ex-lista" style="min-height:170px;" placeholder="Ponto de energia 220V com disjuntor exclusivo&#10;Acesso livre ao forro&#10;..."></textarea></div>
-        <div><label>Observacao Final</label><textarea id="ex-obs" style="min-height:56px;"></textarea></div>
+        <div><label>Título da Cláusula</label><input id="ex-titulo" type="text" value="Requisitos Técnicos para Execução dos Serviços"></div>
+        <div><label>Exigências (uma por linha)</label><textarea id="ex-lista" style="min-height:170px;" placeholder="Ponto de energia 220V com disjuntor exclusivo&#10;Acesso livre ao forro&#10;..."></textarea></div>
+        <div><label>Observação Final</label><textarea id="ex-obs" style="min-height:56px;"></textarea></div>
       </div>
     </div>
 
     <div id="tab-fotos" class="tab-panel" style="flex-direction:column;gap:16px;">
-      <p class="muted" style="line-height:1.6;">As fotos aparecem apos a descricao dos servicos. Sobem pro Storage do Supabase.</p>
+      <p class="muted" style="line-height:1.6;">As fotos aparecem após a descrição dos serviços. Sobem pro Storage do Supabase.</p>
       <div>
         <label>Foto 1</label>
         <label class="upload-box" for="foto1-input"><input type="file" id="foto1-input" accept="image/*" onchange="onFoto(this,1)"><span class="muted" id="foto1-hint">Clique para enviar</span><img id="foto1-thumb" class="foto-thumb"></label>
@@ -396,7 +396,7 @@ async function carregarOrcamentosCliente(){
   if(!id){ orcamentosCliente=[]; sel.innerHTML='<option value="">- Selecione o cliente primeiro -</option>'; return; }
   const { data, error } = await db.from('orcamentos')
     .select('id,numero,status,total,itens,criado_em').eq('cliente_id', id).order('criado_em',{ascending:false});
-  if(error){ showToast('Erro ao carregar orcamentos do cliente.', true); return; }
+  if(error){ showToast('Erro ao carregar orçamentos do cliente.', true); return; }
   orcamentosCliente = data || [];
   const stLabel = s => s==='aprovado' ? 'aprovado' : (s==='recusado' ? 'recusado' : 'aberto');
   sel.innerHTML = '<option value="">- Nenhum -</option>'
@@ -411,7 +411,7 @@ function vincularOrcamento(){
   itensContrato = (o && o.itens) ? o.itens : [];
   const nProd = itensContrato.filter(it=>it.tipo!=='servico').length;
   const nServ = itensContrato.filter(it=>it.tipo==='servico').length;
-  info.textContent = `${itensContrato.length} item(ns) vinculado(s) (${nProd} produto(s), ${nServ} servico(s)).`;
+  info.textContent = `${itensContrato.length} item(ns) vinculado(s) (${nProd} produto(s), ${nServ} serviço(s)).`;
   // preenche o valor total se estiver vazio
   const tot = document.getElementById('c-total');
   if(o && (!tot.value || parseFloat(tot.value)===0)) tot.value = o.total || '';
@@ -516,14 +516,14 @@ function gerar(){
   // Intermediador
   let intParte='', intClausula='';
   if(d.iTipo && d.iNome){
-    const qd = d.iDoc?`, inscrito(a) no CPF/CNPJ sob o no <strong>${d.iDoc}</strong>`:'';
-    const qe = d.iEnd?`, com endereco em <strong>${d.iEnd}</strong>`:'';
+    const qd = d.iDoc?`, inscrito(a) no CPF/CNPJ sob o nº <strong>${d.iDoc}</strong>`:'';
+    const qe = d.iEnd?`, com endereço em <strong>${d.iEnd}</strong>`:'';
     const qt = d.iTel?`, telefone: <strong>${d.iTel}</strong>`:'';
     const qr = (d.iTipo==='pj'&&d.iRepres)?`, neste ato representada por <strong>${d.iRepres}</strong>`:'';
-    const td = d.iTipo==='pj'?'pessoa juridica de direito privado':'pessoa fisica';
+    const td = d.iTipo==='pj'?'pessoa jurídica de direito privado':'pessoa física';
     intParte = `<div class="parte-sep"></div><div class="parte-item"><div class="parte-role" style="color:#b8851a;">Intermediador</div><div class="parte-texto"><strong>${d.iNome}</strong>, ${td}${qd}${qe}${qr}${qt}, doravante denominado(a) <strong>INTERMEDIADOR</strong>.</div></div>`;
-    const obsT = d.iObs || `O presente contrato foi firmado com ${d.iPapel} por parte do INTERMEDIADOR acima qualificado, que atuou exclusivamente na aproximacao das partes, sem assumir responsabilidade tecnica, financeira ou contratual.`;
-    intClausula = `<div class="clausula"><div class="clausula-titulo">Clausula - Da Intermediacao</div><div class="clausula-body"><p>O presente contrato contou com a <strong>${d.iPapel}</strong> de <strong>${d.iNome}</strong>${qd}, doravante denominado(a) <strong>INTERMEDIADOR</strong>.</p><p class="paragrafo">${obsT}</p><p class="paragrafo">A participacao do INTERMEDIADOR limita-se a aproximacao das partes, nao gerando vinculo empregaticio, societario ou de representacao permanente com a CONTRATADA, nem responsabilidade solidaria ou subsidiaria pelas obrigacoes deste contrato.</p></div></div>`;
+    const obsT = d.iObs || `O presente contrato foi firmado com ${d.iPapel} por parte do INTERMEDIADOR acima qualificado, que atuou exclusivamente na aproximação das partes, sem assumir responsabilidade técnica, financeira ou contratual.`;
+    intClausula = `<div class="clausula"><div class="clausula-titulo">Cláusula - Da Intermediação</div><div class="clausula-body"><p>O presente contrato contou com a <strong>${d.iPapel}</strong> de <strong>${d.iNome}</strong>${qd}, doravante denominado(a) <strong>INTERMEDIADOR</strong>.</p><p class="paragrafo">${obsT}</p><p class="paragrafo">A participação do INTERMEDIADOR limita-se à aproximação das partes, não gerando vínculo empregatício, societário ou de representação permanente com a CONTRATADA, nem responsabilidade solidária ou subsidiária pelas obrigações deste contrato.</p></div></div>`;
   }
 
   // Exigencias
@@ -532,18 +532,18 @@ function gerar(){
     const itens = d.exLista.split('\n').filter(l=>l.trim());
     const letras='abcdefghijklmnopqrstuvwxyz';
     const incisos = itens.map((it,i)=>`<div class="inciso"><span class="letra">${letras[i]||(i+1)})</span><span>${it.trim()}</span></div>`).join('');
-    exClausula = `<div class="clausula"><div class="clausula-titulo">${d.exTitulo}</div><div class="clausula-body"><p>Para a correta execucao dos servicos, o CONTRATANTE devera garantir que o local atenda aos seguintes requisitos tecnicos minimos:</p>${incisos}${d.exObs?`<p class="paragrafo">${d.exObs}</p>`:''}</div></div>`;
+    exClausula = `<div class="clausula"><div class="clausula-titulo">${d.exTitulo}</div><div class="clausula-body"><p>Para a correta execução dos serviços, o CONTRATANTE deverá garantir que o local atenda aos seguintes requisitos técnicos mínimos:</p>${incisos}${d.exObs?`<p class="paragrafo">${d.exObs}</p>`:''}</div></div>`;
   }
 
   // Fotos
   let fotosHTML='';
   if(fotos[1].url || fotos[2].url){
     const item = (url,leg)=> url?`<div class="doc-foto-item"><img src="${url}"><div class="doc-foto-caption">${leg||''}</div></div>`:'';
-    fotosHTML = `<div class="doc-fotos-section"><div class="doc-fotos-titulo">Registro Fotografico</div><div class="doc-fotos-grid">${item(fotos[1].url,d.foto1Legenda)}${item(fotos[2].url,d.foto2Legenda)}</div></div>`;
+    fotosHTML = `<div class="doc-fotos-section"><div class="doc-fotos-titulo">Registro Fotográfico</div><div class="doc-fotos-grid">${item(fotos[1].url,d.foto1Legenda)}${item(fotos[2].url,d.foto2Legenda)}</div></div>`;
   }
 
-  const qDoc = d.cDoc?`, portador do CPF/CNPJ no <strong>${d.cDoc}</strong>`:'';
-  const qRg = d.cRg?`, RG no <strong>${d.cRg}</strong>`:'';
+  const qDoc = d.cDoc?`, portador do CPF/CNPJ nº <strong>${d.cDoc}</strong>`:'';
+  const qRg = d.cRg?`, RG nº <strong>${d.cRg}</strong>`:'';
   const qEnd = d.cEnd?`, residente/sediado na <strong>${d.cEnd}</strong>`:'';
   const qEmail = d.cEmail?`, e-mail: <strong>${d.cEmail}</strong>`:'';
   const qTel = d.cTel?`, telefone: <strong>${d.cTel}</strong>`:'';
@@ -551,14 +551,14 @@ function gerar(){
   let parcelasHTML;
   if(parcelas.length){
     const rows = parcelas.map((p,i)=>`<tr><td>${i+1}a</td><td>${p.desc}</td><td class="r">${p.val>0?fmtBRL(p.val):'-'}</td></tr>`).join('');
-    parcelasHTML = `<table class="pagto-table"><thead><tr><th style="width:40px;">#</th><th>Condicao</th><th class="r" style="width:120px;">Valor</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td colspan="2" style="text-align:right;">Total</td><td class="r">${fmtBRL(d.cTotal)}</td></tr></tfoot></table>`;
+    parcelasHTML = `<table class="pagto-table"><thead><tr><th style="width:40px;">#</th><th>Condição</th><th class="r" style="width:120px;">Valor</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td colspan="2" style="text-align:right;">Total</td><td class="r">${fmtBRL(d.cTotal)}</td></tr></tfoot></table>`;
   } else {
     parcelasHTML = `<p>Valor total de <strong>${fmtBRL(d.cTotal)}</strong>, a ser pago via ${d.cFormaPag}.</p>`;
   }
 
   const servicosFmt = d.cServicos ? d.cServicos.split('\n').filter(l=>l.trim()).map(l=>`<p>${l}</p>`).join('') : '<p>Conforme proposta comercial aceita pelas partes.</p>';
   const materiaisFmt = d.cMateriais ? `<p class="paragrafo">Equipamentos e materiais fornecidos pela Contratada: ${d.cMateriais}.</p>` : '';
-  const inicioFmt = d.cInicio ? `com inicio previsto para <strong>${fmtData(d.cInicio)}</strong>, ` : '';
+  const inicioFmt = d.cInicio ? `com início previsto para <strong>${fmtData(d.cInicio)}</strong>, ` : '';
 
   // Relacao de equipamentos e servicos (do orcamento vinculado)
   let itensHTML = '';
@@ -570,7 +570,7 @@ function gerar(){
       const gar = serv ? d.cGarantia : d.cGarantiaProduto;
       return `<tr>
         <td>${imgCell}</td>
-        <td>${it.nome||''}${serv?' <em style="color:#8a9bb0;">(servico)</em>':''}</td>
+        <td>${it.nome||''}${serv?' <em style="color:#8a9bb0;">(serviço)</em>':''}</td>
         <td class="r">${it.qtd||0}</td>
         <td class="r">${fmtBRL(it.preco)}</td>
         <td class="r">${fmtBRL(tot)}</td>
@@ -579,9 +579,9 @@ function gerar(){
     }).join('');
     const totalItens = itensContrato.reduce((s,it)=>s+(Number(it.qtd)||0)*(Number(it.preco)||0),0);
     itensHTML = `
-      <p><strong>1.2 - Relacao de Equipamentos e Servicos:</strong></p>
+      <p><strong>1.2 - Relação de Equipamentos e Serviços:</strong></p>
       <table class="itens-table">
-        <thead><tr><th style="width:50px;"></th><th>Descricao</th><th class="r" style="width:8%">Qtd</th><th class="r" style="width:15%">Unit.</th><th class="r" style="width:15%">Total</th><th class="r" style="width:20%">Garantia</th></tr></thead>
+        <thead><tr><th style="width:50px;"></th><th>Descrição</th><th class="r" style="width:8%">Qtd</th><th class="r" style="width:15%">Unit.</th><th class="r" style="width:15%">Total</th><th class="r" style="width:20%">Garantia</th></tr></thead>
         <tbody>${rows}</tbody>
         <tfoot><tr><td colspan="4" class="r">Total dos itens</td><td class="r">${fmtBRL(totalItens)}</td><td></td></tr></tfoot>
       </table>`;
@@ -600,46 +600,46 @@ function gerar(){
   doc.innerHTML = `
     <div class="doc-header">
       <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">${logoHTML(64)}</div>
-      <div class="doc-meta"><div class="doc-badge">Contrato de Prestacao de Servicos</div><div class="doc-num">No ${cNum}</div><div class="doc-date-header">${fmtData(d.cData)}</div></div>
+      <div class="doc-meta"><div class="doc-badge">Contrato de Prestação de Serviços</div><div class="doc-num">Nº ${cNum}</div><div class="doc-date-header">${fmtData(d.cData)}</div></div>
     </div>
     <div class="doc-accent-bar"></div>
     <div class="doc-body">
-      <div class="contrato-titulo"><h1>Contrato de Prestacao de Servicos</h1><p>Tecnologia Residencial - ${d.cTipo.charAt(0).toUpperCase()+d.cTipo.slice(1)}</p></div>
+      <div class="contrato-titulo"><h1>Contrato de Prestação de Serviços</h1><p>Tecnologia Residencial - ${d.cTipo.charAt(0).toUpperCase()+d.cTipo.slice(1)}</p></div>
       <div class="partes-box">
-        <div class="parte-item"><div class="parte-role">Contratada</div><div class="parte-texto"><strong>${CONTRATADA.nome}</strong>, pessoa juridica de direito privado, inscrita no CNPJ sob o no <strong>${CONTRATADA.cnpj}</strong>, com sede na <strong>${CONTRATADA.endereco}</strong>, neste ato representada por seu socio-administrador, <strong>${CONTRATADA.representante}</strong>, doravante denominada <strong>CONTRATADA</strong>.</div></div>
+        <div class="parte-item"><div class="parte-role">Contratada</div><div class="parte-texto"><strong>${CONTRATADA.nome}</strong>, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº <strong>${CONTRATADA.cnpj}</strong>, com sede na <strong>${CONTRATADA.endereco}</strong>, neste ato representada por seu sócio-administrador, <strong>${CONTRATADA.representante}</strong>, doravante denominada <strong>CONTRATADA</strong>.</div></div>
         <div class="parte-sep"></div>
         <div class="parte-item"><div class="parte-role">Contratante</div><div class="parte-texto"><strong>${d.cNome}</strong>${qDoc}${qRg}${qEnd}${qEmail}${qTel}, doravante denominado(a) <strong>CONTRATANTE</strong>.</div></div>
         ${intParte}
       </div>
-      <div class="clausula-body" style="margin-bottom:20px;"><p>As partes acima qualificadas tem entre si justo e contratado o presente <strong>Contrato de Prestacao de Servicos</strong>, que se regera pelas clausulas e condicoes a seguir.</p></div>
+      <div class="clausula-body" style="margin-bottom:20px;"><p>As partes acima qualificadas têm entre si justo e contratado o presente <strong>Contrato de Prestação de Serviços</strong>, que se regerá pelas cláusulas e condições a seguir.</p></div>
 
-      <div class="clausula"><div class="clausula-titulo">Clausula 1a - Do Objeto</div><div class="clausula-body">
-        <p>O presente contrato tem por objeto a ${d.cTipo}, a ser executada no endereco: <strong>${local}</strong>, ${inicioFmt}com prazo de conclusao de <strong>${d.cPrazo}</strong> a contar do inicio efetivo dos servicos.</p>
-        <p><strong>1.1 - Descricao dos Servicos:</strong></p>${servicosFmt}${materiaisFmt}
+      <div class="clausula"><div class="clausula-titulo">Cláusula 1ª - Do Objeto</div><div class="clausula-body">
+        <p>O presente contrato tem por objeto a ${d.cTipo}, a ser executada no endereço: <strong>${local}</strong>, ${inicioFmt}com prazo de conclusão de <strong>${d.cPrazo}</strong> a contar do início efetivo dos serviços.</p>
+        <p><strong>1.1 - Descrição dos Serviços:</strong></p>${servicosFmt}${materiaisFmt}
         ${itensHTML}
-        <p class="paragrafo">Os materiais nao expressamente indicados como de responsabilidade da CONTRATADA serao fornecidos pelo CONTRATANTE, salvo acordo posterior.</p>
+        <p class="paragrafo">Os materiais não expressamente indicados como de responsabilidade da CONTRATADA serão fornecidos pelo CONTRATANTE, salvo acordo posterior.</p>
       </div>${fotosHTML}</div>
 
       ${exClausula}
 
-      <div class="clausula"><div class="clausula-titulo">Clausula 2a - Do Valor e Forma de Pagamento</div><div class="clausula-body">
+      <div class="clausula"><div class="clausula-titulo">Cláusula 2ª - Do Valor e Forma de Pagamento</div><div class="clausula-body">
         ${parcelasHTML}
-        <p class="paragrafo">Em caso de atraso no pagamento, incidira multa de <strong>${d.cMulta}</strong> sobre o valor em aberto.</p>
+        <p class="paragrafo">Em caso de atraso no pagamento, incidirá multa de <strong>${d.cMulta}</strong> sobre o valor em aberto.</p>
       </div></div>
 
-      <div class="clausula"><div class="clausula-titulo">Clausula 3a - Do Prazo e Execucao</div><div class="clausula-body">
-        <p>Os servicos serao executados no prazo de <strong>${d.cPrazo}</strong>, podendo ser prorrogado mediante acordo entre as partes em caso de impedimentos alheios a CONTRATADA.</p>
+      <div class="clausula"><div class="clausula-titulo">Cláusula 3ª - Do Prazo e Execução</div><div class="clausula-body">
+        <p>Os serviços serão executados no prazo de <strong>${d.cPrazo}</strong>, podendo ser prorrogado mediante acordo entre as partes em caso de impedimentos alheios à CONTRATADA.</p>
       </div></div>
 
-      <div class="clausula"><div class="clausula-titulo">Clausula 4a - Da Garantia e Suporte</div><div class="clausula-body">
-        <p>A CONTRATADA oferece garantia de <strong>${d.cGarantiaProduto}</strong> sobre os produtos e equipamentos fornecidos e de <strong>${d.cGarantia}</strong> sobre os servicos executados, ambas contadas a partir da conclusao dos servicos. Inclui-se <strong>${d.cSuporte}</strong>.</p>
-        <p class="paragrafo">A garantia dos produtos observa tambem os termos e prazos do fabricante. A garantia nao cobre defeitos decorrentes de mau uso, intervencao de terceiros, surtos eletricos, descargas atmosfericas ou caso fortuito/forca maior.</p>
+      <div class="clausula"><div class="clausula-titulo">Cláusula 4ª - Da Garantia e Suporte</div><div class="clausula-body">
+        <p>A CONTRATADA oferece garantia de <strong>${d.cGarantiaProduto}</strong> sobre os produtos e equipamentos fornecidos e de <strong>${d.cGarantia}</strong> sobre os serviços executados, ambas contadas a partir da conclusão dos serviços. Inclui-se <strong>${d.cSuporte}</strong>.</p>
+        <p class="paragrafo">A garantia dos produtos observa também os termos e prazos do fabricante. A garantia não cobre defeitos decorrentes de mau uso, intervenção de terceiros, surtos elétricos, descargas atmosféricas ou caso fortuito/força maior.</p>
       </div></div>
 
       ${intClausula}
 
-      <div class="clausula"><div class="clausula-titulo">Clausula 5a - Das Disposicoes Gerais</div><div class="clausula-body">
-        <p>O presente contrato obriga as partes e seus sucessores. Fica eleito o foro da comarca de <strong>${d.cCidade}</strong> para dirimir eventuais duvidas oriundas deste instrumento.</p>
+      <div class="clausula"><div class="clausula-titulo">Cláusula 5ª - Das Disposições Gerais</div><div class="clausula-body">
+        <p>O presente contrato obriga as partes e seus sucessores. Fica eleito o foro da comarca de <strong>${d.cCidade}</strong> para dirimir eventuais dúvidas oriundas deste instrumento.</p>
         <p>E, por estarem assim justas e contratadas, firmam o presente em duas vias de igual teor.</p>
       </div></div>
 
@@ -666,11 +666,11 @@ function gerarServico(d){
   const letras='abcdefghijklmnopqrstuvwxyz';
   const escIncisos = esc.length
     ? esc.map((it,i)=>`<div class="inciso"><span class="letra">${letras[i]||(i+1)})</span><span>${it}</span></div>`).join('')
-    : '<p>Servicos de manutencao e suporte tecnico em tecnologia residencial.</p>';
+    : '<p>Serviços de manutenção e suporte técnico em tecnologia residencial.</p>';
   const mensalExt = d.sMensal>0 ? ` (${extenso(d.sMensal)})` : '';
 
-  const qDoc = d.cDoc?`, inscrito(a) no CPF/CNPJ sob o no <strong>${d.cDoc}</strong>`:'';
-  const qEnd = d.cEnd?`, com sede/residencia na <strong>${d.cEnd}</strong>`:'';
+  const qDoc = d.cDoc?`, inscrito(a) no CPF/CNPJ sob o nº <strong>${d.cDoc}</strong>`:'';
+  const qEnd = d.cEnd?`, com sede/residência na <strong>${d.cEnd}</strong>`:'';
   const qEmail = d.cEmail?`, e-mail: <strong>${d.cEmail}</strong>`:'';
   const qTel = d.cTel?`, telefone: <strong>${d.cTel}</strong>`:'';
 
@@ -687,58 +687,58 @@ function gerarServico(d){
   doc.innerHTML = `
     <div class="doc-header">
       <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">${logoHTML(64)}</div>
-      <div class="doc-meta"><div class="doc-badge">Contrato de Manutencao</div><div class="doc-num">No ${cNum}</div><div class="doc-date-header">${fmtData(d.cData)}</div></div>
+      <div class="doc-meta"><div class="doc-badge">Contrato de Manutenção</div><div class="doc-num">Nº ${cNum}</div><div class="doc-date-header">${fmtData(d.cData)}</div></div>
     </div>
     <div class="doc-accent-bar"></div>
     <div class="doc-body">
-      <div class="contrato-titulo"><h1>Contrato de Prestacao de Servicos de Manutencao e Suporte Tecnico</h1><p>Tecnologia Residencial - Atendimento Continuado</p></div>
+      <div class="contrato-titulo"><h1>Contrato de Prestação de Serviços de Manutenção e Suporte Técnico</h1><p>Tecnologia Residencial - Atendimento Continuado</p></div>
       <div class="partes-box">
-        <div class="parte-item"><div class="parte-role">Contratada</div><div class="parte-texto"><strong>${CONTRATADA.nome}</strong>, pessoa juridica de direito privado, inscrita no CNPJ sob o no <strong>${CONTRATADA.cnpj}</strong>, com sede na <strong>${CONTRATADA.endereco}</strong>, neste ato representada por seu socio-administrador, <strong>${CONTRATADA.representante}</strong>, doravante denominada <strong>CONTRATADA</strong>.</div></div>
+        <div class="parte-item"><div class="parte-role">Contratada</div><div class="parte-texto"><strong>${CONTRATADA.nome}</strong>, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº <strong>${CONTRATADA.cnpj}</strong>, com sede na <strong>${CONTRATADA.endereco}</strong>, neste ato representada por seu sócio-administrador, <strong>${CONTRATADA.representante}</strong>, doravante denominada <strong>CONTRATADA</strong>.</div></div>
         <div class="parte-sep"></div>
         <div class="parte-item"><div class="parte-role">Contratante</div><div class="parte-texto"><strong>${d.cNome}</strong>${qDoc}${qEnd}${qEmail}${qTel}, doravante denominado(a) <strong>CONTRATANTE</strong>.</div></div>
       </div>
-      <div class="clausula-body" style="margin-bottom:20px;"><p>As partes acima qualificadas tem entre si justo e contratado o presente <strong>Contrato de Prestacao de Servicos de Manutencao e Suporte Tecnico</strong>, de natureza continuada, regido pelos artigos 593 a 609 do Codigo Civil Brasileiro e pelas clausulas seguintes.</p></div>
+      <div class="clausula-body" style="margin-bottom:20px;"><p>As partes acima qualificadas têm entre si justo e contratado o presente <strong>Contrato de Prestação de Serviços de Manutenção e Suporte Técnico</strong>, de natureza continuada, regido pelos artigos 593 a 609 do Código Civil Brasileiro e pelas cláusulas seguintes.</p></div>
 
-      <div class="clausula"><div class="clausula-titulo">Clausula 1a - Do Objeto</div><div class="clausula-body">
-        <p>O presente contrato tem por objeto a prestacao continuada de servicos de <strong>manutencao, suporte e atendimento tecnico</strong> pela CONTRATADA, no local <strong>${local}</strong>, abrangendo:</p>
+      <div class="clausula"><div class="clausula-titulo">Cláusula 1ª - Do Objeto</div><div class="clausula-body">
+        <p>O presente contrato tem por objeto a prestação continuada de serviços de <strong>manutenção, suporte e atendimento técnico</strong> pela CONTRATADA, no local <strong>${local}</strong>, abrangendo:</p>
         ${escIncisos}
       </div></div>
 
-      <div class="clausula"><div class="clausula-titulo">Clausula 2a - Da Forma de Execucao e da Mao de Obra</div><div class="clausula-body">
-        <p>Os servicos serao prestados de forma continuada, mediante visitas tecnicas e suporte remoto, conforme demanda do CONTRATANTE.</p>
-        <p class="paragrafo"><strong>2.1</strong> - A mao de obra referente aos atendimentos e visitas tecnicas esta <strong>inclusa no valor mensal</strong>, nao havendo cobranca adicional de mao de obra por chamado.</p>
-        <p class="paragrafo"><strong>2.2</strong> - Eventuais <strong>pecas, equipamentos ou materiais de reposicao</strong> necessarios a substituicao ou ampliacao nao estao inclusos na mensalidade e serao cobrados a parte, mediante <strong>previa aprovacao</strong> do CONTRATANTE.</p>
+      <div class="clausula"><div class="clausula-titulo">Cláusula 2ª - Da Forma de Execução e da Mão de Obra</div><div class="clausula-body">
+        <p>Os serviços serão prestados de forma continuada, mediante visitas técnicas e suporte remoto, conforme demanda do CONTRATANTE.</p>
+        <p class="paragrafo"><strong>2.1</strong> - A mão de obra referente aos atendimentos e visitas técnicas está <strong>inclusa no valor mensal</strong>, não havendo cobrança adicional de mão de obra por chamado.</p>
+        <p class="paragrafo"><strong>2.2</strong> - Eventuais <strong>peças, equipamentos ou materiais de reposição</strong> necessários à substituição ou ampliação não estão inclusos na mensalidade e serão cobrados à parte, mediante <strong>prévia aprovação</strong> do CONTRATANTE.</p>
       </div></div>
 
-      <div class="clausula"><div class="clausula-titulo">Clausula 3a - Do Atendimento e Prazos (SLA)</div><div class="clausula-body">
-        <p><strong>3.1</strong> - Os chamados abertos pelo CONTRATANTE serao atendidos em ate <strong>48 (quarenta e oito) horas</strong> contadas da abertura do chamado.</p>
-        <p class="paragrafo"><strong>3.2</strong> - As visitas tecnicas ocorrerao em <strong>horario comercial</strong> (de segunda a sexta-feira, das 08h as 18h, exceto feriados).</p>
-        <p class="paragrafo"><strong>3.3</strong> - Atendimentos de <strong>emergencia</strong> fora do horario comercial poderao ser realizados mediante <strong>previo ajuste entre as partes</strong>, conforme disponibilidade.</p>
+      <div class="clausula"><div class="clausula-titulo">Cláusula 3ª - Do Atendimento e Prazos (SLA)</div><div class="clausula-body">
+        <p><strong>3.1</strong> - Os chamados abertos pelo CONTRATANTE serão atendidos em até <strong>48 (quarenta e oito) horas</strong> contadas da abertura do chamado.</p>
+        <p class="paragrafo"><strong>3.2</strong> - As visitas técnicas ocorrerão em <strong>horário comercial</strong> (de segunda a sexta-feira, das 08h às 18h, exceto feriados).</p>
+        <p class="paragrafo"><strong>3.3</strong> - Atendimentos de <strong>emergência</strong> fora do horário comercial poderão ser realizados mediante <strong>prévio ajuste entre as partes</strong>, conforme disponibilidade.</p>
       </div></div>
 
-      <div class="clausula"><div class="clausula-titulo">Clausula 4a - Do Valor, Reajuste e Pagamento</div><div class="clausula-body">
-        <p>Pela prestacao dos servicos, o CONTRATANTE pagara a CONTRATADA o valor mensal de <strong>${fmtBRL(d.sMensal)}</strong>${mensalExt}, com vencimento todo dia <strong>${d.sDia}</strong> de cada mes, por meio de <strong>${d.sFormaPag}</strong>.</p>
-        <p class="paragrafo"><strong>4.1</strong> - O valor mensal sera reajustado anualmente, a cada 12 (doze) meses, pela variacao acumulada do <strong>IPCA</strong> (IBGE), ou indice que venha a substitui-lo.</p>
-        <p class="paragrafo"><strong>4.2</strong> - O atraso no pagamento implicara multa de 2% (dois por cento) e juros de 1% (um por cento) ao mes sobre o valor em aberto.</p>
+      <div class="clausula"><div class="clausula-titulo">Cláusula 4ª - Do Valor, Reajuste e Pagamento</div><div class="clausula-body">
+        <p>Pela prestação dos serviços, o CONTRATANTE pagará à CONTRATADA o valor mensal de <strong>${fmtBRL(d.sMensal)}</strong>${mensalExt}, com vencimento todo dia <strong>${d.sDia}</strong> de cada mês, por meio de <strong>${d.sFormaPag}</strong>.</p>
+        <p class="paragrafo"><strong>4.1</strong> - O valor mensal será reajustado anualmente, a cada 12 (doze) meses, pela variação acumulada do <strong>IPCA</strong> (IBGE), ou índice que venha a substituí-lo.</p>
+        <p class="paragrafo"><strong>4.2</strong> - O atraso no pagamento implicará multa de 2% (dois por cento) e juros de 1% (um por cento) ao mês sobre o valor em aberto.</p>
       </div></div>
 
-      <div class="clausula"><div class="clausula-titulo">Clausula 5a - Da Vigencia</div><div class="clausula-body">
-        <p>O presente contrato vigora pelo prazo de <strong>12 (doze) meses</strong>, contados da assinatura, <strong>renovando-se automaticamente</strong> por iguais e sucessivos periodos, salvo manifestacao em contrario de qualquer das partes, por escrito, com antecedencia minima de 30 (trinta) dias.</p>
+      <div class="clausula"><div class="clausula-titulo">Cláusula 5ª - Da Vigência</div><div class="clausula-body">
+        <p>O presente contrato vigora pelo prazo de <strong>12 (doze) meses</strong>, contados da assinatura, <strong>renovando-se automaticamente</strong> por iguais e sucessivos períodos, salvo manifestação em contrário de qualquer das partes, por escrito, com antecedência mínima de 30 (trinta) dias.</p>
       </div></div>
 
-      <div class="clausula"><div class="clausula-titulo">Clausula 6a - Da Rescisao</div><div class="clausula-body">
-        <p>Qualquer das partes podera rescindir o presente contrato mediante <strong>aviso previo por escrito de 30 (trinta) dias</strong>, nos termos do art. 599 do Codigo Civil.</p>
-        <p class="paragrafo"><strong>6.1</strong> - A rescisao antecipada sem o aviso previo de que trata o caput sujeitara a parte que lhe der causa ao pagamento de <strong>multa equivalente a 1 (uma) mensalidade</strong> vigente.</p>
-        <p class="paragrafo"><strong>6.2</strong> - O inadimplemento de obrigacoes contratuais por qualquer das partes autoriza a rescisao, sem prejuizo das demais cominacoes legais.</p>
+      <div class="clausula"><div class="clausula-titulo">Cláusula 6ª - Da Rescisão</div><div class="clausula-body">
+        <p>Qualquer das partes poderá rescindir o presente contrato mediante <strong>aviso prévio por escrito de 30 (trinta) dias</strong>, nos termos do art. 599 do Código Civil.</p>
+        <p class="paragrafo"><strong>6.1</strong> - A rescisão antecipada sem o aviso prévio de que trata o caput sujeitará a parte que lhe der causa ao pagamento de <strong>multa equivalente a 1 (uma) mensalidade</strong> vigente.</p>
+        <p class="paragrafo"><strong>6.2</strong> - O inadimplemento de obrigações contratuais por qualquer das partes autoriza a rescisão, sem prejuízo das demais cominações legais.</p>
       </div></div>
 
-      <div class="clausula"><div class="clausula-titulo">Clausula 7a - Das Obrigacoes das Partes</div><div class="clausula-body">
-        <p><strong>7.1 - Da CONTRATADA:</strong> prestar os servicos com zelo, tecnica e pessoal qualificado; cumprir os prazos de atendimento; orientar o CONTRATANTE quanto ao uso adequado dos sistemas.</p>
-        <p><strong>7.2 - Do CONTRATANTE:</strong> efetuar os pagamentos nas datas avencadas; franquear o acesso ao local e aos equipamentos; aprovar previamente a aquisicao de pecas/materiais; comunicar as ocorrencias por meio dos canais de atendimento.</p>
+      <div class="clausula"><div class="clausula-titulo">Cláusula 7ª - Das Obrigações das Partes</div><div class="clausula-body">
+        <p><strong>7.1 - Da CONTRATADA:</strong> prestar os serviços com zelo, técnica e pessoal qualificado; cumprir os prazos de atendimento; orientar o CONTRATANTE quanto ao uso adequado dos sistemas.</p>
+        <p><strong>7.2 - Do CONTRATANTE:</strong> efetuar os pagamentos nas datas avençadas; franquear o acesso ao local e aos equipamentos; aprovar previamente a aquisição de peças/materiais; comunicar as ocorrências por meio dos canais de atendimento.</p>
       </div></div>
 
-      <div class="clausula"><div class="clausula-titulo">Clausula 8a - Das Disposicoes Gerais</div><div class="clausula-body">
-        <p>O presente contrato obriga as partes e seus sucessores. Fica eleito o foro da comarca de <strong>${d.cCidade}</strong> para dirimir eventuais duvidas oriundas deste instrumento.</p>
+      <div class="clausula"><div class="clausula-titulo">Cláusula 8ª - Das Disposições Gerais</div><div class="clausula-body">
+        <p>O presente contrato obriga as partes e seus sucessores. Fica eleito o foro da comarca de <strong>${d.cCidade}</strong> para dirimir eventuais dúvidas oriundas deste instrumento.</p>
         <p>E, por estarem assim justas e contratadas, firmam o presente em duas vias de igual teor.</p>
       </div></div>
 
@@ -795,15 +795,15 @@ async function salvar(){
 
   // mensalidade recorrente em Contas a Receber (so em contrato de servico novo)
   if(modalidade==='servico' && d.sLancar && !editId){
-    if(!d.clienteId){ showToast('Contrato salvo. Selecione um cliente cadastrado para lancar a mensalidade recorrente.', true); return; }
+    if(!d.clienteId){ showToast('Contrato salvo. Selecione um cliente cadastrado para lançar a mensalidade recorrente.', true); return; }
     const lanc = {
-      tipo:'receber', descricao:`Mensalidade manutencao - Contrato No ${numero}`,
-      categoria:'Manutencao', cliente_id:d.clienteId, valor:d.sMensal,
+      tipo:'receber', descricao:`Mensalidade manutenção - Contrato Nº ${numero}`,
+      categoria:'Manutenção', cliente_id:d.clienteId, valor:d.sMensal,
       vencimento: proxVencDia(d.sDia), forma_pagamento:d.sFormaPag,
       recorrente:true, pago:false, origem:'contrato', origem_id:novoId,
     };
     const r2 = await db.from('lancamentos').insert(lanc);
-    showToast(r2.error ? 'Contrato salvo (falha ao lancar mensalidade).' : 'Contrato salvo. Mensalidade recorrente lancada no Financeiro.', !!r2.error);
+    showToast(r2.error ? 'Contrato salvo (falha ao lançar mensalidade).' : 'Contrato salvo. Mensalidade recorrente lançada no Financeiro.', !!r2.error);
     return;
   }
   showToast('Contrato salvo no sistema.');
@@ -817,7 +817,7 @@ async function abrirSalvos(){
   if(!data || !data.length){ el.innerHTML='<div class="empty"><p>Nenhum contrato salvo</p></div>'; return; }
   el.innerHTML = data.map(c=>`
     <div class="saved-row">
-      <div><div style="color:var(--white);">No ${c.numero||'-'} - ${fmtBRL(c.valor_total)}${c.modalidade==='servico'?' <span class="badge open">Manutencao</span>':''}</div>
+      <div><div style="color:var(--white);">Nº ${c.numero||'-'} - ${fmtBRL(c.valor_total)}${c.modalidade==='servico'?' <span class="badge open">Manutenção</span>':''}</div>
         <div class="muted">${c.clientes?c.clientes.nome:'sem cliente'} · ${fmtDataCurta(c.data||c.criado_em)}</div></div>
       <div class="row-actions">
         <button class="btn btn-ghost btn-sm" onclick="carregarCon(${c.id})">Abrir</button>
@@ -845,7 +845,7 @@ async function carregarCon(id){
   const nProd = itensContrato.filter(it=>it.tipo!=='servico').length;
   const nServ = itensContrato.filter(it=>it.tipo==='servico').length;
   document.getElementById('itens-info').textContent = itensContrato.length
-    ? `${itensContrato.length} item(ns) vinculado(s) (${nProd} produto(s), ${nServ} servico(s)).` : '';
+    ? `${itensContrato.length} item(ns) vinculado(s) (${nProd} produto(s), ${nServ} serviço(s)).` : '';
   const it = data.intermediador;
   if(it){ g('i-tipo',it.tipo);g('i-nome',it.nome);g('i-doc',it.doc);g('i-representante',it.representante);g('i-end',it.endereco);g('i-tel',it.tel);g('i-papel',it.papel);g('i-obs',it.obs); }
   const ex = data.exigencias;
@@ -877,7 +877,7 @@ async function excluirCon(id){
   const { error } = await db.from('contratos').delete().eq('id', id);
   if(error){ showToast('Erro ao excluir.', true); return; }
   if(editId===id) editId=null;
-  showToast('Contrato excluido.');
+  showToast('Contrato excluído.');
   abrirSalvos();
 }
 </script>

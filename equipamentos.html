@@ -1,4 +1,4 @@
-<!-- build: 2026-06-18a -->
+<!-- build: 2026-06-18c -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -37,21 +37,21 @@
   <div class="page-head">
     <div>
       <div class="page-title">Equipamentos</div>
-      <div class="page-sub">Catalogo de produtos e servicos</div>
+      <div class="page-sub">Catálogo de produtos e serviços</div>
     </div>
     <button class="btn btn-primary" onclick="novoEquip()">+ Novo equipamento</button>
   </div>
 
   <div class="equip-toolbar">
-    <input class="busca" id="busca" type="text" placeholder="Buscar por nome ou descricao..." oninput="renderEquip()">
+    <input class="busca" id="busca" type="text" placeholder="Buscar por nome ou descrição..." oninput="renderEquip()">
     <div class="cat-tabs" id="cat-filter">
       <button class="cat-tab active" data-cat="">Todos</button>
-      <button class="cat-tab" data-cat="seguranca">Seguranca</button>
-      <button class="cat-tab" data-cat="automacao">Automacao</button>
-      <button class="cat-tab" data-cat="som">Audio</button>
+      <button class="cat-tab" data-cat="seguranca">Segurança</button>
+      <button class="cat-tab" data-cat="automacao">Automação</button>
+      <button class="cat-tab" data-cat="som">Áudio</button>
       <button class="cat-tab" data-cat="rede">Rede</button>
       <button class="cat-tab" data-cat="outros">Outros</button>
-      <button class="cat-tab" data-cat="__serv">Servicos</button>
+      <button class="cat-tab" data-cat="__serv">Serviços</button>
     </div>
   </div>
   <div class="equip-grid" id="equip-grid"></div>
@@ -66,31 +66,31 @@
     </div>
     <div class="field-group">
       <input type="hidden" id="m-id">
-      <div><label>Nome</label><input id="m-nome" type="text" placeholder="Ex: Camera Intelbras 1230 Dome"></div>
+      <div><label>Nome</label><input id="m-nome" type="text" placeholder="Ex: Câmera Intelbras 1230 Dome"></div>
       <div class="two-col">
         <div><label>Tipo</label>
           <select id="m-tipo">
             <option value="produto">Produto (equipamento)</option>
-            <option value="servico">Servico (mao de obra / instalacao)</option>
+            <option value="servico">Serviço (mão de obra / instalação)</option>
           </select>
         </div>
         <div><label>Categoria</label>
           <select id="m-cat">
-            <option value="seguranca">Seguranca</option>
-            <option value="automacao">Automacao</option>
-            <option value="som">Audio</option>
+            <option value="seguranca">Segurança</option>
+            <option value="automacao">Automação</option>
+            <option value="som">Áudio</option>
             <option value="rede">Rede</option>
             <option value="outros">Outros</option>
           </select>
         </div>
       </div>
       <div class="two-col">
-        <div><label>Preco de custo (R$)</label><input id="m-custo" type="number" min="0" step="0.01" placeholder="0,00" oninput="recalcDeCusto()"></div>
+        <div><label>Preço de custo (R$)</label><input id="m-custo" type="number" min="0" step="0.01" placeholder="0,00" oninput="recalcDeCusto()"></div>
         <div><label>Margem (%)</label><input id="m-margem" type="number" min="0" step="0.01" placeholder="0" oninput="recalcDeCusto()"></div>
       </div>
-      <div><label>Preco de venda (R$)</label><input id="m-preco" type="number" min="0" step="0.01" placeholder="0,00" oninput="recalcDeVenda()"></div>
+      <div><label>Preço de venda (R$)</label><input id="m-preco" type="number" min="0" step="0.01" placeholder="0,00" oninput="recalcDeVenda()"></div>
       <div class="muted" id="m-margem-info" style="font-size:11px;"></div>
-      <div><label>Descricao</label><textarea id="m-desc" placeholder="Especificacoes..."></textarea></div>
+      <div><label>Descrição</label><textarea id="m-desc" placeholder="Especificações..."></textarea></div>
       <div>
         <label>Foto</label>
         <label class="upload-box" for="m-foto-input">
@@ -136,6 +136,22 @@ document.querySelectorAll('#cat-filter .cat-tab').forEach(b=>{
   });
 });
 
+const CAT_LABEL = { seguranca:'Segurança', automacao:'Automação', som:'Áudio', rede:'Rede', outros:'Outros' };
+
+// dias desde a ultima cotacao do custo (null se nao houver)
+function diasCotacao(iso){
+  if(!iso) return null;
+  const d = new Date(iso+'T00:00:00');
+  return Math.floor((Date.now()-d.getTime())/86400000);
+}
+function cotacaoHTML(e){
+  if(e.preco_custo==null) return '';
+  const dias = diasCotacao(e.custo_atualizado_em);
+  if(dias==null) return '<div class="ec-cotacao" style="font-size:10px;color:#a67c00;margin-top:4px;">Custo sem cotacao</div>';
+  const venc = dias>90;
+  return `<div class="ec-cotacao" style="font-size:10px;margin-top:4px;color:${venc?'#e05555':'var(--gray)'};">Custo cotado em ${fmtDataCurta(e.custo_atualizado_em)}${venc?' (vencida)':''}</div>`;
+}
+
 function renderEquip(){
   const grid = document.getElementById('equip-grid');
   const q = document.getElementById('busca').value.trim().toLowerCase();
@@ -154,12 +170,13 @@ function renderEquip(){
       ${e.foto_url ? `<img class="ec-img" src="${e.foto_url}" alt="${e.nome}">` : `<div class="ec-img-ph">&#128247;</div>`}
       <div class="ec-body">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
-          <span class="ec-cat">${e.categoria||''}</span>
-          <span class="ec-tag ${serv?'serv':''}">${serv?'Servico':'Produto'}</span>
+          <span class="ec-cat">${CAT_LABEL[e.categoria]||e.categoria||''}</span>
+          <span class="ec-tag ${serv?'serv':''}">${serv?'Serviço':'Produto'}</span>
         </div>
         <div class="ec-name">${e.nome}</div>
         ${e.descricao?`<div class="ec-desc">${e.descricao}</div>`:''}
         ${e.preco?`<div class="ec-price">${fmtBRL(e.preco)}</div>`:''}
+        ${cotacaoHTML(e)}
       </div>
       <div class="ec-actions">
         <button class="btn btn-ghost btn-sm btn-block" onclick="editarEquip(${e.id})">Editar</button>
@@ -264,18 +281,25 @@ async function salvarEquip(){
   try{
     let fotoUrl = fotoAtualUrl;
     if(fotoNovaBlob){ fotoUrl = await uploadFotoEquip(fotoNovaBlob); }
+    const custoNovo = parseFloat(document.getElementById('m-custo').value) || null;
+    const id = document.getElementById('m-id').value;
+    const ex = id ? equipamentos.find(x=>String(x.id)===String(id)) : null;
     const reg = {
       nome,
       tipo: document.getElementById('m-tipo').value,
       categoria: document.getElementById('m-cat').value,
-      preco_custo: parseFloat(document.getElementById('m-custo').value) || null,
+      preco_custo: custoNovo,
       margem: parseFloat(document.getElementById('m-margem').value) || null,
       preco: parseFloat(document.getElementById('m-preco').value) || null,
       descricao: document.getElementById('m-desc').value.trim() || null,
       foto_url: fotoUrl || null,
       atualizado_em: new Date().toISOString(),
     };
-    const id = document.getElementById('m-id').value;
+    // grava a data da cotacao do custo quando o custo e novo ou mudou
+    const custoAntigo = ex ? Number(ex.preco_custo||0) : null;
+    if(custoNovo != null && (ex===null || Number(custoNovo) !== custoAntigo)){
+      reg.custo_atualizado_em = new Date().toISOString().slice(0,10);
+    }
     let res;
     if(id){ res = await db.from('equipamentos').update(reg).eq('id', id); }
     else  { res = await db.from('equipamentos').insert(reg); }

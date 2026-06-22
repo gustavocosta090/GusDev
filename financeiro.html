@@ -1,4 +1,4 @@
-<!-- build: 2026-06-18b -->
+<!-- build: 2026-06-18d -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -33,10 +33,11 @@
   </div>
 
   <div class="tabs-nav">
-    <button class="tab-btn active" data-tab="geral"   onclick="setTab('geral')">Visao Geral</button>
+    <button class="tab-btn active" data-tab="geral"   onclick="setTab('geral')">Visão Geral</button>
     <button class="tab-btn"        data-tab="pagar"   onclick="setTab('pagar')">Contas a Pagar</button>
     <button class="tab-btn"        data-tab="receber" onclick="setTab('receber')">Contas a Receber</button>
     <button class="tab-btn"        data-tab="compras" onclick="setTab('compras')">Compras</button>
+    <button class="tab-btn"        data-tab="lucro"   onclick="setTab('lucro')">Lucro por Cliente</button>
     <button class="tab-btn"        data-tab="exec"    onclick="setTab('exec')">Painel Executivo</button>
   </div>
 
@@ -52,14 +53,14 @@
       <table class="tbl" style="margin-top:12px;">
         <thead><tr>
           <th>Cliente</th><th class="r">Contratos</th><th class="r">Vendido</th>
-          <th class="r">Orc. aprovados</th><th class="r">% mao de obra</th>
+          <th class="r">Orç. aprovados</th><th class="r">% mão de obra</th>
         </tr></thead>
         <tbody id="tb-rank-cli"></tbody>
       </table>
       <div id="empty-rank" class="empty" style="display:none;"><p>Sem vendas registradas</p></div>
     </div>
     <div class="card" style="padding:0;overflow:hidden;">
-      <div class="section-title" style="padding:16px 16px 0;">Equipamentos mais vendidos (orcamentos aprovados)</div>
+      <div class="section-title" style="padding:16px 16px 0;">Equipamentos mais vendidos (orçamentos aprovados)</div>
       <table class="tbl" style="margin-top:12px;">
         <thead><tr>
           <th>Equipamento</th><th>Categoria</th><th class="r">Qtd</th><th class="r">Valor</th>
@@ -88,8 +89,8 @@
       </div>
       <table class="tbl" style="margin-top:14px;">
         <thead><tr>
-          <th>Descricao</th><th>Categoria</th><th>Fornecedor</th><th>Vencimento</th>
-          <th class="r">Valor</th><th>Status</th><th class="r">Acoes</th>
+          <th>Descrição</th><th>Categoria</th><th>Fornecedor</th><th>Vencimento</th>
+          <th class="r">Valor</th><th>Status</th><th class="r">Ações</th>
         </tr></thead>
         <tbody id="tb-pagar"></tbody>
       </table>
@@ -115,8 +116,8 @@
       </div>
       <table class="tbl" style="margin-top:14px;">
         <thead><tr>
-          <th>Descricao</th><th>Categoria</th><th>Cliente</th><th>Vencimento</th>
-          <th class="r">Valor</th><th>Status</th><th class="r">Acoes</th>
+          <th>Descrição</th><th>Categoria</th><th>Cliente</th><th>Vencimento</th>
+          <th class="r">Valor</th><th>Status</th><th class="r">Ações</th>
         </tr></thead>
         <tbody id="tb-receber"></tbody>
       </table>
@@ -135,13 +136,13 @@
           <option value="insumo">Insumos</option>
         </select>
         <div class="grow"></div>
-        <button class="btn btn-ghost btn-sm" onclick="abrirComparar()">Comparar com orcamento</button>
+        <button class="btn btn-ghost btn-sm" onclick="abrirComparar()">Comparar com orçamento</button>
         <button class="btn btn-primary btn-sm" onclick="novaCompra()">+ Nova compra</button>
       </div>
       <table class="tbl" style="margin-top:14px;">
         <thead><tr>
           <th>Item</th><th>Cliente / Insumo</th><th class="r">Qtd</th><th class="r">Custo un.</th>
-          <th class="r">Total</th><th>Fornecedor</th><th>Data</th><th>Pgto</th><th class="r">Acoes</th>
+          <th class="r">Total</th><th>Fornecedor</th><th>Data</th><th>Pgto</th><th class="r">Ações</th>
         </tr></thead>
         <tbody id="tb-compras"></tbody>
       </table>
@@ -149,19 +150,40 @@
     </div>
   </div>
 
+  <!-- ============ LUCRO POR CLIENTE ============ -->
+  <div class="tab-panel" id="panel-lucro">
+    <div class="kpis" id="kpis-lucro"></div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="fin-toolbar" style="padding:16px 16px 0;">
+        <div class="grow"></div>
+        <button class="btn btn-ghost btn-sm" onclick="abrirConfig()">Configurações</button>
+        <button class="btn btn-primary btn-sm" onclick="abrirAtend()">+ Custos de atendimento</button>
+      </div>
+      <table class="tbl" style="margin-top:14px;">
+        <thead><tr>
+          <th>Cliente</th><th class="r">Receita</th><th class="r">Custo produtos</th>
+          <th class="r">Custos atend.</th><th class="r">Lucro real</th><th class="r">Margem</th>
+        </tr></thead>
+        <tbody id="tb-lucro"></tbody>
+      </table>
+      <div id="empty-lucro" class="empty" style="display:none;"><p>Sem dados de lucro ainda</p></div>
+    </div>
+    <p class="muted" style="font-size:11px;margin-top:10px;line-height:1.5;">Receita = contratos + recibos do cliente. Custo de produtos = compras do cliente (real) ou, na falta, custo do catalogo x qtd do orcamento aprovado. Custos de atendimento = saidas vinculadas ao cliente (deslocamento, almoco, insumos, reserva).</p>
+  </div>
+
   <!-- ============ EXECUTIVO ============ -->
   <div class="tab-panel" id="panel-exec">
     <div class="kpis" id="kpis-exec"></div>
     <div class="card" style="margin-bottom:24px;">
-      <div class="section-title">Entradas x Saidas por mes (por vencimento)</div>
+      <div class="section-title">Entradas x Saídas por mês (por vencimento)</div>
       <svg class="exec-chart" id="chart" viewBox="0 0 800 260" preserveAspectRatio="xMidYMid meet"></svg>
       <div class="chart-legend">
         <span><span class="dot" style="background:#7fd18c;"></span>Entradas (a receber)</span>
-        <span><span class="dot" style="background:#e88;"></span>Saidas (a pagar)</span>
+        <span><span class="dot" style="background:#e88;"></span>Saídas (a pagar)</span>
       </div>
     </div>
     <div class="card">
-      <div class="section-title">Vencidos e a vencer (proximos 7 dias)</div>
+      <div class="section-title">Vencidos e a vencer (próximos 7 dias)</div>
       <div id="alertas"></div>
     </div>
   </div>
@@ -171,15 +193,15 @@
 <div class="modal-overlay" id="modal-lanc">
   <div class="modal">
     <div class="modal-head">
-      <h3 id="m-title">Novo lancamento</h3>
+      <h3 id="m-title">Novo lançamento</h3>
       <button class="modal-close" onclick="closeModal('modal-lanc')">&times;</button>
     </div>
     <div class="field-group">
       <input type="hidden" id="m-id">
       <input type="hidden" id="m-tipo">
-      <div><label>Descricao</label><input id="m-desc" type="text" placeholder="Ex: Mensalidade internet"></div>
+      <div><label>Descrição</label><input id="m-desc" type="text" placeholder="Ex: Mensalidade internet"></div>
       <div class="two-col">
-        <div><label>Categoria</label><input id="m-cat" type="text" list="cats" placeholder="Ex: Fornecedor, Salario, Servico"><datalist id="cats"></datalist></div>
+        <div><label>Categoria</label><input id="m-cat" type="text" list="cats" placeholder="Ex: Fornecedor, Salário, Serviço"><datalist id="cats"></datalist></div>
         <div><label>Valor (R$)</label><input id="m-valor" type="number" min="0" step="0.01" placeholder="0,00"></div>
       </div>
       <div class="two-col">
@@ -193,16 +215,16 @@
             <option value="">-</option>
             <option value="PIX">PIX</option>
             <option value="Boleto">Boleto</option>
-            <option value="Cartao de Credito">Cartao de Credito</option>
-            <option value="Cartao de Debito">Cartao de Debito</option>
+            <option value="Cartão de Crédito">Cartão de Crédito</option>
+            <option value="Cartão de Débito">Cartão de Débito</option>
             <option value="Dinheiro">Dinheiro</option>
-            <option value="Transferencia">Transferencia</option>
+            <option value="Transferência">Transferência</option>
           </select>
         </div>
         <div id="row-recorrente"><label>Recorrente (mensal)</label>
           <select id="m-recorrente">
-            <option value="false">Nao</option>
-            <option value="true">Sim - gera a proxima ao pagar</option>
+            <option value="false">Não</option>
+            <option value="true">Sim - gera a próxima ao pagar</option>
           </select>
         </div>
       </div>
@@ -215,7 +237,7 @@
         </div>
         <div id="row-pagoem"><label id="lbl-pagoem">Pago em</label><input id="m-pagoem" type="date"></div>
       </div>
-      <div><label>Observacoes</label><textarea id="m-obs" placeholder="Notas"></textarea></div>
+      <div><label>Observações</label><textarea id="m-obs" placeholder="Notas"></textarea></div>
       <div style="display:flex;gap:10px;margin-top:8px;">
         <button class="btn btn-gold btn-block" id="m-save" onclick="salvar()">Salvar</button>
         <button class="btn btn-danger" id="m-del" onclick="excluir()" style="display:none;">Excluir</button>
@@ -228,28 +250,28 @@
 <div class="modal-overlay" id="modal-parcelar">
   <div class="modal">
     <div class="modal-head">
-      <h3>Lancar compra parcelada</h3>
+      <h3>Lançar compra parcelada</h3>
       <button class="modal-close" onclick="closeModal('modal-parcelar')">&times;</button>
     </div>
     <div class="field-group">
-      <div><label>Descricao</label><input id="pp-desc" type="text" placeholder="Ex: Compra de equipamentos"></div>
+      <div><label>Descrição</label><input id="pp-desc" type="text" placeholder="Ex: Compra de equipamentos"></div>
       <div class="two-col">
         <div><label>Categoria</label><input id="pp-cat" type="text" list="cats" placeholder="Ex: Material"></div>
         <div><label>Fornecedor</label><input id="pp-forn" type="text" placeholder="Nome do fornecedor"></div>
       </div>
       <div class="two-col">
         <div><label>Valor de cada parcela (R$)</label><input id="pp-valor" type="number" min="0" step="0.01" placeholder="0,00" oninput="previewParcelar()"></div>
-        <div><label>Numero de parcelas</label><input id="pp-num" type="number" min="1" value="2" oninput="previewParcelar()"></div>
+        <div><label>Número de parcelas</label><input id="pp-num" type="number" min="1" value="2" oninput="previewParcelar()"></div>
       </div>
       <div class="two-col">
-        <div><label>1o vencimento</label><input id="pp-venc" type="date" oninput="previewParcelar()"></div>
+        <div><label>1º vencimento</label><input id="pp-venc" type="date" oninput="previewParcelar()"></div>
         <div><label>Forma de pagamento</label>
           <select id="pp-forma">
             <option value="Boleto">Boleto</option>
-            <option value="Cartao de Credito">Cartao de Credito</option>
+            <option value="Cartão de Crédito">Cartão de Crédito</option>
             <option value="PIX">PIX</option>
-            <option value="Cartao de Debito">Cartao de Debito</option>
-            <option value="Transferencia">Transferencia</option>
+            <option value="Cartão de Débito">Cartão de Débito</option>
+            <option value="Transferência">Transferência</option>
             <option value="Dinheiro">Dinheiro</option>
           </select>
         </div>
@@ -270,14 +292,14 @@
     <div class="field-group">
       <input type="hidden" id="pc-id">
       <input type="hidden" id="pc-lancid">
-      <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--light);cursor:pointer;"><input type="checkbox" id="pc-insumo" onchange="onInsumoChange()"> E insumo (estoque geral, sem cliente)</label>
-      <div><label>Equipamento do catalogo</label><select id="pc-equip" onchange="onEquipCompra()"><option value="">- Item avulso -</option></select></div>
-      <div><label>Item / Descricao</label><input id="pc-desc" type="text" placeholder="Ex: Camera Intelbras 1230"></div>
+      <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--light);cursor:pointer;"><input type="checkbox" id="pc-insumo" onchange="onInsumoChange()"> É insumo (estoque geral, sem cliente)</label>
+      <div><label>Equipamento do catálogo</label><select id="pc-equip" onchange="onEquipCompra()"><option value="">- Item avulso -</option></select></div>
+      <div><label>Item / Descrição</label><input id="pc-desc" type="text" placeholder="Ex: Câmera Intelbras 1230"></div>
       <div id="pc-row-cliente"><label>Cliente</label><select id="pc-cliente" onchange="carregarOrcCompra()"></select></div>
-      <div id="pc-row-orc"><label>Orcamento do cliente</label><select id="pc-orc"><option value="">- Nenhum -</option></select></div>
+      <div id="pc-row-orc"><label>Orçamento do cliente</label><select id="pc-orc"><option value="">- Nenhum -</option></select></div>
       <div class="two-col">
         <div><label>Quantidade</label><input id="pc-qtd" type="number" min="1" value="1" oninput="previewCompra()"></div>
-        <div><label>Custo unitario (R$)</label><input id="pc-custo" type="number" min="0" step="0.01" placeholder="0,00" oninput="previewCompra()"></div>
+        <div><label>Custo unitário (R$)</label><input id="pc-custo" type="number" min="0" step="0.01" placeholder="0,00" oninput="previewCompra()"></div>
       </div>
       <div id="pc-total-info" class="muted" style="font-size:12px;"></div>
       <div class="two-col">
@@ -289,9 +311,9 @@
           <select id="pc-forma" onchange="onFormaCompra()">
             <option value="PIX">PIX</option>
             <option value="Dinheiro">Dinheiro</option>
-            <option value="Cartao de Debito">Cartao de Debito</option>
-            <option value="Transferencia">Transferencia</option>
-            <option value="Cartao de Credito">Cartao de Credito</option>
+            <option value="Cartão de Débito">Cartão de Débito</option>
+            <option value="Transferência">Transferência</option>
+            <option value="Cartão de Crédito">Cartão de Crédito</option>
             <option value="Boleto">Boleto</option>
           </select>
         </div>
@@ -310,15 +332,70 @@
 <div class="modal-overlay" id="modal-comparar">
   <div class="modal">
     <div class="modal-head">
-      <h3>Comparar compras x orcamento</h3>
+      <h3>Comparar compras x orçamento</h3>
       <button class="modal-close" onclick="closeModal('modal-comparar')">&times;</button>
     </div>
     <div class="field-group">
-      <div><label>Orcamento</label><select id="co-orc" onchange="renderComparar()"></select></div>
+      <div><label>Orçamento</label><select id="co-orc" onchange="renderComparar()"></select></div>
       <table class="tbl">
-        <thead><tr><th>Produto</th><th class="r">Orcado</th><th class="r">Comprado</th><th class="r">Falta</th></tr></thead>
+        <thead><tr><th>Produto</th><th class="r">Orçado</th><th class="r">Comprado</th><th class="r">Falta</th></tr></thead>
         <tbody id="co-tbody"></tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIGURACOES -->
+<div class="modal-overlay" id="modal-config">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Configurações</h3>
+      <button class="modal-close" onclick="closeModal('modal-config')">&times;</button>
+    </div>
+    <div class="field-group">
+      <div class="two-col">
+        <div><label>Preço da gasolina (R$/litro)</label><input id="cfg-gasolina" type="number" min="0" step="0.01"></div>
+        <div><label>Consumo do veículo (km/l)</label><input id="cfg-consumo" type="number" min="0" step="0.1"></div>
+      </div>
+      <div><label>Reserva padrão por atendimento (R$)</label><input id="cfg-reserva" type="number" min="0" step="0.01"></div>
+      <button class="btn btn-gold btn-block" onclick="salvarConfig()">Salvar configurações</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CUSTOS DE ATENDIMENTO -->
+<div class="modal-overlay" id="modal-atend">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Custos de atendimento</h3>
+      <button class="modal-close" onclick="closeModal('modal-atend')">&times;</button>
+    </div>
+    <div class="field-group">
+      <div><label>Cliente</label><select id="at-cliente"></select></div>
+      <div class="two-col">
+        <div><label>Data</label><input id="at-data" type="date"></div>
+        <div><label>Status</label>
+          <select id="at-status">
+            <option value="comprometido">Comprometido (reservado)</option>
+            <option value="pago">Já pago</option>
+          </select>
+        </div>
+      </div>
+      <div class="two-col">
+        <div><label>Distância total (km ida+volta)</label><input id="at-km" type="number" min="0" step="0.1" value="0" oninput="previewAtend()"></div>
+        <div><label>Deslocamento (R$)</label><input id="at-desloc" type="number" min="0" step="0.01" placeholder="auto"></div>
+      </div>
+      <div class="muted" id="at-desloc-info" style="font-size:11px;"></div>
+      <div class="two-col">
+        <div><label>Almoço - nº pessoas</label><input id="at-alm-qtd" type="number" min="0" value="0" oninput="previewAtend()"></div>
+        <div><label>Almoço - R$/pessoa</label><input id="at-alm-val" type="number" min="0" step="0.01" value="0" oninput="previewAtend()"></div>
+      </div>
+      <div class="two-col">
+        <div><label>Insumos utilizados (R$)</label><input id="at-insumos" type="number" min="0" step="0.01" value="0"></div>
+        <div><label>Reserva / geral (R$)</label><input id="at-reserva" type="number" min="0" step="0.01"></div>
+      </div>
+      <div id="at-total-info" class="muted" style="font-size:12px;"></div>
+      <button class="btn btn-gold btn-block" onclick="salvarAtend()">Lançar custos</button>
     </div>
   </div>
 </div>
@@ -333,7 +410,7 @@
     <div class="field-group">
       <div><label>Contrato</label><select id="g-contrato" onchange="previewContrato()"></select></div>
       <div class="two-col">
-        <div><label>1o vencimento</label><input id="g-venc" type="date"></div>
+        <div><label>1º vencimento</label><input id="g-venc" type="date"></div>
         <div><label>Intervalo</label>
           <select id="g-int">
             <option value="1">Mensal</option>
@@ -358,6 +435,8 @@ let contratos = [];
 let orcamentos = [];
 let equipCatalogo = [];
 let compras = [];
+let recibos = [];
+let config = {};
 let equipCount = 0;
 let tab = 'geral';
 const hojeISO = new Date().toISOString().slice(0,10);
@@ -368,13 +447,15 @@ const hojeISO = new Date().toISOString().slice(0,10);
 })();
 
 async function carregar(){
-  const [lc, cl, ct, oc, eq, cp] = await Promise.all([
+  const [lc, cl, ct, oc, eq, cp, rb, cf] = await Promise.all([
     db.from('lancamentos').select('*').order('vencimento', {nullsFirst:false}),
     db.from('clientes').select('id,nome,entregue').order('nome'),
     db.from('contratos').select('id,numero,cliente_id,valor_total,parcelas').order('id',{ascending:false}),
     db.from('orcamentos').select('id,numero,cliente_id,status,total,itens'),
     db.from('equipamentos').select('id,nome,categoria,preco_custo').eq('ativo',true).order('nome'),
     db.from('compras').select('*').order('data',{nullsFirst:false}),
+    db.from('recibos').select('id,cliente_id,total'),
+    db.from('config').select('chave,valor'),
   ]);
   if(lc.error){ showToast('Erro ao carregar financeiro.', true); return; }
   lancs = lc.data || [];
@@ -385,6 +466,8 @@ async function carregar(){
   orcamentos = oc.data || [];
   equipCatalogo = eq.data || [];
   compras = cp.error ? [] : (cp.data || []);
+  recibos = rb.error ? [] : (rb.data || []);
+  config = {}; if(!cf.error) (cf.data||[]).forEach(c=>config[c.chave]=c.valor);
   equipCount = equipCatalogo.length;
   popularFiltrosCategoria();
   render();
@@ -426,7 +509,152 @@ function render(){
   if(tab==='geral'){ renderGeral(); return; }
   if(tab==='exec'){ renderExec(); return; }
   if(tab==='compras'){ renderCompras(); return; }
+  if(tab==='lucro'){ renderLucro(); return; }
   renderTabela(tab);
+}
+
+// ── LUCRO POR CLIENTE ──
+function cfgNum(chave, def){ const v=parseFloat(config[chave]); return isNaN(v)?def:v; }
+// custo de atendimento = lancamentos a pagar vinculados a um cliente
+function custosAtendCliente(cid){
+  return somaValor(lancs.filter(l=>l.tipo==='pagar' && String(l.cliente_id)===String(cid)));
+}
+function custoProdutosCliente(cid){
+  const real = somaCompras(compras.filter(c=>String(c.cliente_id)===String(cid)));
+  if(real>0) return real;
+  // fallback teorico: custo do catalogo x qtd nos orcamentos aprovados do cliente
+  const custoPorNome = {};
+  equipCatalogo.forEach(e=>{ if(e.preco_custo!=null) custoPorNome[norm(e.nome)] = Number(e.preco_custo); });
+  let teorico = 0;
+  orcamentos.filter(o=>o.status==='aprovado' && String(o.cliente_id)===String(cid)).forEach(o=>{
+    (o.itens||[]).forEach(it=>{ if(it.tipo==='servico') return; const c=custoPorNome[norm(it.nome)]; if(c) teorico += c*(Number(it.qtd)||0); });
+  });
+  return teorico;
+}
+function receitaCliente(cid){
+  const c = somaValor(contratos.filter(x=>String(x.cliente_id)===String(cid)).map(x=>({valor:x.valor_total})));
+  const r = somaValor(recibos.filter(x=>String(x.cliente_id)===String(cid)).map(x=>({valor:x.total})));
+  return c + r;
+}
+
+function renderLucro(){
+  // clientes com qualquer movimento
+  const ids = new Set();
+  contratos.forEach(c=>c.cliente_id&&ids.add(String(c.cliente_id)));
+  recibos.forEach(r=>r.cliente_id&&ids.add(String(r.cliente_id)));
+  compras.forEach(c=>c.cliente_id&&ids.add(String(c.cliente_id)));
+  lancs.forEach(l=>l.tipo==='pagar'&&l.cliente_id&&ids.add(String(l.cliente_id)));
+
+  let linhas = [...ids].map(cid=>{
+    const receita = receitaCliente(cid);
+    const custoProd = custoProdutosCliente(cid);
+    const custoAtend = custosAtendCliente(cid);
+    const lucro = receita - custoProd - custoAtend;
+    return { cid, nome: clientesMap[cid]||('#'+cid), receita, custoProd, custoAtend, lucro,
+             margem: receita>0 ? Math.round(lucro/receita*100) : null };
+  }).filter(l=>l.receita>0 || l.custoProd>0 || l.custoAtend>0)
+    .sort((a,b)=> b.lucro-a.lucro);
+
+  const totReceita = linhas.reduce((s,l)=>s+l.receita,0);
+  const totLucro = linhas.reduce((s,l)=>s+l.lucro,0);
+  const cls = v=> v>=0?'saldo-pos':'saldo-neg';
+  const kpi=(label,val,c,foot)=>`<div class="kpi"><div class="kpi-label">${label}</div><div class="kpi-value ${c||''}">${fmtBRL(val)}</div>${foot?`<div class="kpi-foot">${foot}</div>`:''}</div>`;
+  document.getElementById('kpis-lucro').innerHTML =
+      kpi('Receita total', totReceita, '', `${linhas.length} cliente(s)`)
+    + kpi('Custo produtos', linhas.reduce((s,l)=>s+l.custoProd,0), '')
+    + kpi('Custos atendimento', linhas.reduce((s,l)=>s+l.custoAtend,0), '')
+    + kpi('Lucro real total', totLucro, cls(totLucro), totReceita>0?`margem ${Math.round(totLucro/totReceita*100)}%`:'');
+
+  const tb = document.getElementById('tb-lucro');
+  const empty = document.getElementById('empty-lucro');
+  if(!linhas.length){ tb.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tb.innerHTML = linhas.map(l=>`
+    <tr>
+      <td style="color:var(--white);">${l.nome}</td>
+      <td class="r val-in">${fmtBRL(l.receita)}</td>
+      <td class="r val-out">${fmtBRL(l.custoProd)}</td>
+      <td class="r val-out">${fmtBRL(l.custoAtend)}</td>
+      <td class="r ${cls(l.lucro)}" style="font-weight:600;">${fmtBRL(l.lucro)}</td>
+      <td class="r ${l.margem!=null?cls(l.margem):''}">${l.margem!=null?l.margem+'%':'-'}</td>
+    </tr>`).join('');
+}
+
+// ── CONFIGURACOES ──
+function abrirConfig(){
+  document.getElementById('cfg-gasolina').value = cfgNum('gasolina_litro',6);
+  document.getElementById('cfg-consumo').value = cfgNum('consumo_kml',10);
+  document.getElementById('cfg-reserva').value = cfgNum('reserva_padrao',150);
+  openModal('modal-config');
+}
+async function salvarConfig(){
+  const rows = [
+    { chave:'gasolina_litro', valor:String(parseFloat(document.getElementById('cfg-gasolina').value)||0) },
+    { chave:'consumo_kml',    valor:String(parseFloat(document.getElementById('cfg-consumo').value)||0) },
+    { chave:'reserva_padrao', valor:String(parseFloat(document.getElementById('cfg-reserva').value)||0) },
+  ];
+  const { error } = await db.from('config').upsert(rows, { onConflict:'chave' });
+  if(error){ showToast('Erro ao salvar config: '+(error.message||''), true); return; }
+  showToast('Configurações salvas.');
+  closeModal('modal-config');
+  await carregar();
+}
+
+// ── CUSTOS DE ATENDIMENTO ──
+function atendDesloc(){
+  const km = parseFloat(document.getElementById('at-km').value)||0;
+  const consumo = cfgNum('consumo_kml',10) || 10;
+  const litro = cfgNum('gasolina_litro',6);
+  return (km/consumo)*litro;
+}
+function previewAtend(){
+  const calc = atendDesloc();
+  document.getElementById('at-desloc-info').textContent = calc>0 ? `Deslocamento calculado: ${fmtBRL(calc)} (${cfgNum('consumo_kml',10)} km/l a ${fmtBRL(cfgNum('gasolina_litro',6))}/l). Pode sobrescrever no campo ao lado.` : '';
+  const alm = (parseFloat(document.getElementById('at-alm-qtd').value)||0)*(parseFloat(document.getElementById('at-alm-val').value)||0);
+  const desloc = parseFloat(document.getElementById('at-desloc').value) || calc;
+  const ins = parseFloat(document.getElementById('at-insumos').value)||0;
+  const res = parseFloat(document.getElementById('at-reserva').value)||0;
+  document.getElementById('at-total-info').textContent = `Total do atendimento: ${fmtBRL(desloc+alm+ins+res)}`;
+}
+function abrirAtend(){
+  ['at-desloc','at-insumos'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('at-km').value='0';
+  document.getElementById('at-alm-qtd').value='0';
+  document.getElementById('at-alm-val').value='0';
+  document.getElementById('at-reserva').value = cfgNum('reserva_padrao',150);
+  document.getElementById('at-data').value = hojeISO;
+  document.getElementById('at-status').value = 'comprometido';
+  document.getElementById('at-desloc-info').textContent='';
+  document.getElementById('at-total-info').textContent='';
+  carregarClientesSelect(document.getElementById('at-cliente'), '');
+  openModal('modal-atend');
+}
+async function salvarAtend(){
+  const cid = document.getElementById('at-cliente').value;
+  if(!cid){ showToast('Selecione o cliente.', true); return; }
+  const data = document.getElementById('at-data').value || hojeISO;
+  const comprometido = document.getElementById('at-status').value === 'comprometido';
+  const desloc = (parseFloat(document.getElementById('at-desloc').value) || atendDesloc());
+  const alm = (parseFloat(document.getElementById('at-alm-qtd').value)||0)*(parseFloat(document.getElementById('at-alm-val').value)||0);
+  const ins = parseFloat(document.getElementById('at-insumos').value)||0;
+  const res = parseFloat(document.getElementById('at-reserva').value)||0;
+  const nome = clientesMap[cid] || '';
+  const itens = [
+    {cat:'Deslocamento', val:desloc}, {cat:'Almoço', val:alm},
+    {cat:'Insumos', val:ins}, {cat:'Reserva', val:res},
+  ].filter(x=>x.val>0);
+  if(!itens.length){ showToast('Informe ao menos um custo.', true); return; }
+  const novos = itens.map(x=>({
+    tipo:'pagar', descricao:`${x.cat} - ${nome}`, categoria:x.cat,
+    cliente_id:cid, valor:x.val, vencimento:data,
+    pago: !comprometido, pago_em: comprometido?null:data,
+    comprometido, origem:'atendimento',
+  }));
+  const { error } = await db.from('lancamentos').insert(novos);
+  if(error){ showToast('Erro ao lançar: '+(error.message||''), true); return; }
+  showToast(`${novos.length} custo(s) lançado(s).`);
+  closeModal('modal-atend');
+  await carregar();
 }
 
 // ── COMPRAS ──
@@ -442,7 +670,7 @@ function renderCompras(){
   const noMes = compras.filter(c=>mesAtual(c.data));
   const kpi=(label,val,foot)=>`<div class="kpi"><div class="kpi-label">${label}</div><div class="kpi-value">${fmtBRL(val)}</div>${foot?`<div class="kpi-foot">${foot}</div>`:''}</div>`;
   document.getElementById('kpis-compras').innerHTML =
-      kpi('Compras no mes', somaCompras(noMes), `${noMes.length} compra(s)`)
+      kpi('Compras no mês', somaCompras(noMes), `${noMes.length} compra(s)`)
     + kpi('Para clientes', somaCompras(compras.filter(c=>!c.insumo)))
     + kpi('Insumos', somaCompras(compras.filter(c=>c.insumo)))
     + kpi('Total comprado', somaCompras(compras));
@@ -470,7 +698,7 @@ function renderCompras(){
 }
 function somaCompras(arr){ return arr.reduce((s,c)=>s+compraTotal(c),0); }
 
-const FORMA_APRAZO = ['Cartao de Credito','Boleto'];  // geram conta a pagar em aberto
+const FORMA_APRAZO = ['Cartão de Crédito','Boleto'];  // geram conta a pagar em aberto
 
 function onInsumoChange(){
   const ins = document.getElementById('pc-insumo').checked;
@@ -614,7 +842,7 @@ async function salvarCompra(){
 
 async function excluirCompra(){
   const id = document.getElementById('pc-id').value; if(!id) return;
-  if(!confirm('Excluir esta compra? O lancamento em Contas a Pagar vinculado tambem sera removido.')) return;
+  if(!confirm('Excluir esta compra? O lançamento em Contas a Pagar vinculado também será removido.')) return;
   const lancId = document.getElementById('pc-lancid').value;
   if(lancId) await db.from('lancamentos').delete().eq('id', lancId);
   const { error } = await db.from('compras').delete().eq('id', id);
@@ -628,7 +856,7 @@ async function excluirCompra(){
 function norm(s){ return (s||'').trim().toLowerCase(); }
 function abrirComparar(){
   const comOrc = orcamentos.filter(o=>(o.itens||[]).some(it=>it.tipo!=='servico'));
-  if(!comOrc.length){ showToast('Nenhum orcamento com produtos.', true); return; }
+  if(!comOrc.length){ showToast('Nenhum orçamento com produtos.', true); return; }
   const sel = document.getElementById('co-orc');
   sel.innerHTML = comOrc.map(o=>{
     const nome = clientesMap[o.cliente_id] || 'sem cliente';
@@ -672,9 +900,9 @@ function renderGeral(){
       kpi('Clientes', clientesArr.length, `${aberto} em aberto`)
     + kpi('Em aberto', aberto)
     + kpi('Entregues', entregue)
-    + kpi('Orcamentos', orcamentos.length, `${aprovados.length} aprovado(s)`)
+    + kpi('Orçamentos', orcamentos.length, `${aprovados.length} aprovado(s)`)
     + kpi('Contratos', contratos.length)
-    + kpi('Catalogo', equipCount, 'itens ativos');
+    + kpi('Catálogo', equipCount, 'itens ativos');
 
   // venda confirmada = contratos; aprovado = orcamentos aprovados
   const totalContratos = somaValor(contratos.map(c=>({valor:c.valor_total})));
@@ -693,9 +921,9 @@ function renderGeral(){
   const kpiV=(label,val,foot)=>`<div class="kpi"><div class="kpi-label">${label}</div><div class="kpi-value">${fmtBRL(val)}</div>${foot?`<div class="kpi-foot">${foot}</div>`:''}</div>`;
   document.getElementById('kpis-vendas').innerHTML =
       kpiV('Vendido (contratos)', totalContratos, `${contratos.length} contrato(s)`)
-    + kpiV('Aprovado (orcamentos)', totalAprovado, `${aprovados.length} orcamento(s)`)
-    + kpiV('Ticket medio', ticket, 'por contrato')
-    + `<div class="kpi"><div class="kpi-label">Mao de obra (geral)</div><div class="kpi-value">${pctServ}%</div><div class="kpi-foot">${fmtBRL(servTotal)} de ${fmtBRL(baseMix)}</div></div>`;
+    + kpiV('Aprovado (orçamentos)', totalAprovado, `${aprovados.length} orçamento(s)`)
+    + kpiV('Ticket médio', ticket, 'por contrato')
+    + `<div class="kpi"><div class="kpi-label">Mão de obra (geral)</div><div class="kpi-value">${pctServ}%</div><div class="kpi-foot">${fmtBRL(servTotal)} de ${fmtBRL(baseMix)}</div></div>`;
 
   renderRankingClientes(aprovados);
   renderRankingEquip(aprovados);
@@ -767,7 +995,7 @@ function renderTabela(tp){
   const aberto  = doTipo.filter(l=>!l.pago);
   const vencido = aberto.filter(l=>l.vencimento && l.vencimento < hojeISO);
   const quitMes = doTipo.filter(l=>l.pago && mesAtual(l.pago_em||l.vencimento));
-  const lblQuit = tp==='pagar' ? 'Pago no mes' : 'Recebido no mes';
+  const lblQuit = tp==='pagar' ? 'Pago no mês' : 'Recebido no mês';
   const kpi=(label,val,cls,foot)=>`<div class="kpi"><div class="kpi-label">${label}</div><div class="kpi-value ${cls||''}">${fmtBRL(val)}</div>${foot?`<div class="kpi-foot">${foot}</div>`:''}</div>`;
   document.getElementById('kpis-'+tp).innerHTML =
       kpi('Em aberto', somaValor(aberto), '', `${aberto.length} conta(s)`)
@@ -782,12 +1010,14 @@ function renderTabela(tp){
   const valCls = tp==='pagar' ? 'val-out' : 'val-in';
   tbody.innerHTML = lista.map(l=>{
     const st = statusLanc(l);
-    const terceiro = tp==='pagar' ? (l.fornecedor||'-') : (clientesMap[l.cliente_id]||'-');
+    const terceiro = tp==='pagar' ? (l.fornecedor || (l.cliente_id?clientesMap[l.cliente_id]:'') || '-') : (clientesMap[l.cliente_id]||'-');
     const subs = [];
     if(l.forma_pagamento) subs.push(l.forma_pagamento);
+    if(l.comprometido && !l.pago) subs.push('comprometido');
     if(l.recorrente) subs.push('recorrente');
     else if(l.origem==='recorrente') subs.push('recorrente (paga)');
     if(l.origem==='contrato') subs.push('do contrato');
+    if(l.origem==='atendimento') subs.push('atendimento');
     return `<tr>
       <td><div style="color:var(--white);">${l.descricao}</div>${subs.length?`<div class="muted">${subs.join(' · ')}</div>`:''}</td>
       <td class="muted">${l.categoria||'-'}</td>
@@ -830,7 +1060,7 @@ async function togglePago(id, val){
       pago: false, origem: 'recorrente',
     };
     const r2 = await db.from('lancamentos').insert(prox);
-    if(!r2.error) msg = 'Baixa registrada. Proxima conta recorrente gerada.';
+    if(!r2.error) msg = 'Baixa registrada. Próxima conta recorrente gerada.';
   }
   showToast(msg);
   await carregar();
@@ -913,17 +1143,17 @@ async function salvar(){
   if(id){ res = await db.from('lancamentos').update(reg).eq('id', id); }
   else  { reg.origem='manual'; res = await db.from('lancamentos').insert(reg); }
   if(res.error){ showToast('Erro ao salvar: '+(res.error.message||''), true); return; }
-  showToast('Lancamento salvo.');
+  showToast('Lançamento salvo.');
   closeModal('modal-lanc');
   await carregar();
 }
 
 async function excluir(){
   const id = document.getElementById('m-id').value; if(!id) return;
-  if(!confirm('Excluir este lancamento?')) return;
+  if(!confirm('Excluir este lançamento?')) return;
   const { error } = await db.from('lancamentos').delete().eq('id', id);
   if(error){ showToast('Erro ao excluir.', true); return; }
-  showToast('Lancamento excluido.');
+  showToast('Lançamento excluído.');
   closeModal('modal-lanc');
   await carregar();
 }
@@ -942,7 +1172,7 @@ function previewParcelar(){
   const n = parseInt(document.getElementById('pp-num').value)||0;
   const box = document.getElementById('pp-preview');
   if(valor<=0 || n<=0){ box.textContent=''; return; }
-  box.innerHTML = `Serao criadas <strong>${n}</strong> parcela(s) de <strong>${fmtBRL(valor)}</strong> = total <strong>${fmtBRL(valor*n)}</strong> (mensais a partir do 1o vencimento).`;
+  box.innerHTML = `Serão criadas <strong>${n}</strong> parcela(s) de <strong>${fmtBRL(valor)}</strong> = total <strong>${fmtBRL(valor*n)}</strong> (mensais a partir do 1º vencimento).`;
 }
 async function gerarParcelas(){
   const descricao = document.getElementById('pp-desc').value.trim();
@@ -950,7 +1180,7 @@ async function gerarParcelas(){
   const valor = parseFloat(document.getElementById('pp-valor').value);
   const n = parseInt(document.getElementById('pp-num').value);
   if(isNaN(valor)||valor<=0){ showToast('Informe o valor da parcela.', true); return; }
-  if(isNaN(n)||n<1){ showToast('Numero de parcelas invalido.', true); return; }
+  if(isNaN(n)||n<1){ showToast('Número de parcelas inválido.', true); return; }
   const baseVenc = document.getElementById('pp-venc').value;
   const cat = document.getElementById('pp-cat').value.trim() || null;
   const forn = document.getElementById('pp-forn').value.trim() || null;
@@ -998,10 +1228,10 @@ function previewContrato(){
   const box = document.getElementById('g-preview');
   if(!c){ box.textContent=''; return; }
   const ps = parcelasDoContrato(c);
-  if(!ps.length){ box.innerHTML='<span class="val-out">Este contrato nao tem parcelas nem valor total.</span>'; return; }
+  if(!ps.length){ box.innerHTML='<span class="val-out">Este contrato não tem parcelas nem valor total.</span>'; return; }
   const jaExiste = lancs.some(l=>l.origem==='contrato' && String(l.origem_id)===String(c.id));
-  box.innerHTML = `Serao criados <strong>${ps.length}</strong> lancamento(s) a receber, total <strong>${fmtBRL(somaValor(ps.map(p=>({valor:p.val}))))}</strong>.`
-    + (jaExiste ? '<br><span class="val-out">Atencao: ja existem lancamentos gerados deste contrato. As parcelas ja geradas serao ignoradas.</span>' : '');
+  box.innerHTML = `Serão criados <strong>${ps.length}</strong> lançamento(s) a receber, total <strong>${fmtBRL(somaValor(ps.map(p=>({valor:p.val}))))}</strong>.`
+    + (jaExiste ? '<br><span class="val-out">Atenção: já existem lançamentos gerados deste contrato. As parcelas já geradas serão ignoradas.</span>' : '');
 }
 
 async function gerarDoContrato(){
@@ -1036,7 +1266,7 @@ async function gerarDoContrato(){
   if(!novos.length){ showToast('Nada novo a gerar (parcelas ja existem).'); closeModal('modal-gerar'); return; }
   const { error } = await db.from('lancamentos').insert(novos);
   if(error){ showToast('Erro ao gerar: '+(error.message||''), true); return; }
-  showToast(`${novos.length} lancamento(s) gerado(s).`);
+  showToast(`${novos.length} lançamento(s) gerado(s).`);
   closeModal('modal-gerar');
   await carregar();
 }
@@ -1049,15 +1279,17 @@ function renderExec(){
   const pagRealizado = somaValor(pagar.filter(l=>l.pago));
   const saldoReal = recRealizado - pagRealizado;
   const aReceber = somaValor(receb.filter(l=>!l.pago));
-  const aPagar   = somaValor(pagar.filter(l=>!l.pago));
-  const saldoProj = saldoReal + aReceber - aPagar;
+  const aPagar   = somaValor(pagar.filter(l=>!l.pago && !l.comprometido));
+  const comprometido = somaValor(pagar.filter(l=>!l.pago && l.comprometido));
+  const saldoProj = saldoReal + aReceber - aPagar - comprometido;
   const cls = v => v>=0 ? 'saldo-pos' : 'saldo-neg';
   const kpi=(label,val,c,foot)=>`<div class="kpi"><div class="kpi-label">${label}</div><div class="kpi-value ${c||''}">${fmtBRL(val)}</div>${foot?`<div class="kpi-foot">${foot}</div>`:''}</div>`;
   document.getElementById('kpis-exec').innerHTML =
-      kpi('Saldo realizado', saldoReal, cls(saldoReal), 'recebido - pago')
+      kpi('Lucro real (caixa)', saldoReal, cls(saldoReal), 'recebido - pago')
+    + kpi('Comprometido', comprometido, comprometido>0?'saldo-neg':'', 'reservado, nao pago')
     + kpi('A receber', aReceber, '', 'em aberto')
     + kpi('A pagar', aPagar, '', 'em aberto')
-    + kpi('Saldo projetado', saldoProj, cls(saldoProj), 'realizado + a receber - a pagar');
+    + kpi('Saldo projetado', saldoProj, cls(saldoProj), 'real + a receber - a pagar - comprometido');
 
   renderChart();
   renderAlertas();
@@ -1076,7 +1308,7 @@ function renderChart(){
   let meses = Object.keys(map).sort();
   if(meses.length>12) meses = meses.slice(-12);
   const svg = document.getElementById('chart');
-  if(!meses.length){ svg.innerHTML = '<text x="400" y="130" fill="#8a9bb0" font-size="14" text-anchor="middle" font-family="Jost">Sem lancamentos com vencimento</text>'; return; }
+  if(!meses.length){ svg.innerHTML = '<text x="400" y="130" fill="#8a9bb0" font-size="14" text-anchor="middle" font-family="Jost">Sem lançamentos com vencimento</text>'; return; }
 
   const W=800, H=260, padL=8, padR=8, padT=14, padB=34;
   const plotW = W - padL - padR, plotH = H - padT - padB;
@@ -1093,7 +1325,7 @@ function renderChart(){
     const hs = (map[m].saida/max)*plotH;
     const xe = cx - barW - 2, xs = cx + 2;
     parts.push(`<rect x="${xe.toFixed(1)}" y="${(padT+plotH-he).toFixed(1)}" width="${barW.toFixed(1)}" height="${he.toFixed(1)}" rx="2" fill="#7fd18c"><title>Entradas ${fmtBRL(map[m].entrada)}</title></rect>`);
-    parts.push(`<rect x="${xs.toFixed(1)}" y="${(padT+plotH-hs).toFixed(1)}" width="${barW.toFixed(1)}" height="${hs.toFixed(1)}" rx="2" fill="#e88"><title>Saidas ${fmtBRL(map[m].saida)}</title></rect>`);
+    parts.push(`<rect x="${xs.toFixed(1)}" y="${(padT+plotH-hs).toFixed(1)}" width="${barW.toFixed(1)}" height="${hs.toFixed(1)}" rx="2" fill="#e88"><title>Saídas ${fmtBRL(map[m].saida)}</title></rect>`);
     const [yy,mm] = m.split('-');
     parts.push(`<text x="${cx.toFixed(1)}" y="${H-12}" fill="#8a9bb0" font-size="11" text-anchor="middle" font-family="Jost">${nomesMes[parseInt(mm)-1]}/${yy.slice(2)}</text>`);
   });
@@ -1106,7 +1338,7 @@ function renderAlertas(){
   let lista = lancs.filter(l=>!l.pago && l.vencimento && l.vencimento <= limISO);
   lista.sort((a,b)=> (a.vencimento<b.vencimento?-1:1));
   const box = document.getElementById('alertas');
-  if(!lista.length){ box.innerHTML = '<div class="muted" style="padding:8px 0;">Nada vencido ou vencendo nos proximos 7 dias.</div>'; return; }
+  if(!lista.length){ box.innerHTML = '<div class="muted" style="padding:8px 0;">Nada vencido ou vencendo nos próximos 7 dias.</div>'; return; }
   box.innerHTML = lista.map(l=>{
     const venc = l.vencimento < hojeISO;
     const tipoTxt = l.tipo==='receber' ? 'A receber' : 'A pagar';

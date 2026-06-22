@@ -164,6 +164,56 @@ ALTER TABLE contratos ADD COLUMN IF NOT EXISTS modalidade TEXT DEFAULT 'padrao';
 ALTER TABLE contratos ADD COLUMN IF NOT EXISTS servico JSONB;
 
 -- ============================================================
+-- MIGRACAO: custo/margem no equipamento + compras (rodar 1x)
+-- preco = preco de venda; preco_custo = custo; margem = markup % sobre custo.
+-- ============================================================
+ALTER TABLE equipamentos ADD COLUMN IF NOT EXISTS preco_custo NUMERIC(12,2);
+ALTER TABLE equipamentos ADD COLUMN IF NOT EXISTS margem NUMERIC(5,2);
+
+CREATE TABLE IF NOT EXISTS compras (
+  id BIGSERIAL PRIMARY KEY,
+  descricao TEXT NOT NULL,
+  insumo BOOLEAN DEFAULT false,                 -- true = insumo geral (sem cliente)
+  cliente_id BIGINT REFERENCES clientes(id) ON DELETE SET NULL,
+  equipamento_id BIGINT REFERENCES equipamentos(id) ON DELETE SET NULL,
+  orcamento_id BIGINT REFERENCES orcamentos(id) ON DELETE SET NULL,
+  quantidade NUMERIC(12,2) DEFAULT 1,
+  custo_unit NUMERIC(12,2) DEFAULT 0,
+  fornecedor TEXT,
+  data DATE,
+  forma_pagamento TEXT,
+  lancamento_id BIGINT REFERENCES lancamentos(id) ON DELETE SET NULL,  -- conta a pagar gerada
+  observacoes TEXT,
+  criado_em TIMESTAMPTZ DEFAULT now(),
+  atualizado_em TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE compras ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "auth_all" ON compras;
+CREATE POLICY "auth_all" ON compras FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- ============================================================
+-- MIGRACAO: lucro real por cliente (rodar 1x)
+-- custo_atualizado_em = data da ultima cotacao do custo;
+-- comprometido = custo de atendimento reservado/previsto (ainda nao pago);
+-- config = parametros globais (gasolina, consumo, reserva).
+-- ============================================================
+ALTER TABLE equipamentos ADD COLUMN IF NOT EXISTS custo_atualizado_em DATE;
+ALTER TABLE lancamentos  ADD COLUMN IF NOT EXISTS comprometido BOOLEAN DEFAULT false;
+
+CREATE TABLE IF NOT EXISTS config (
+  chave TEXT PRIMARY KEY,
+  valor TEXT
+);
+ALTER TABLE config ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "auth_all" ON config;
+CREATE POLICY "auth_all" ON config FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+INSERT INTO config (chave, valor) VALUES
+  ('gasolina_litro','6.00'), ('consumo_kml','10'), ('reserva_padrao','150')
+  ON CONFLICT (chave) DO NOTHING;
+
+-- ============================================================
 -- STORAGE (rodar depois de criar o bucket no painel)
 -- Storage > New bucket > nome: "equipamentos" > marcar Public
 -- Policies para upload/update/delete por usuarios logados:

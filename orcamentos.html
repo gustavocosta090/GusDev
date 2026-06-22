@@ -1,10 +1,10 @@
-<!-- build: 2026-06-17b -->
+<!-- build: 2026-06-18b -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Auron — Orcamentos</title>
+<title>Auron — Orçamentos</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Jost:wght@200;300;400;500;600&family=Josefin+Sans:wght@100;200;300&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="app-shell.css">
 <style>
@@ -83,7 +83,7 @@
 <div id="gen">
   <aside id="sidebar">
     <div style="display:flex;gap:8px;">
-      <button class="btn btn-ghost btn-sm btn-block" onclick="abrirSalvos()">Orcamentos salvos</button>
+      <button class="btn btn-ghost btn-sm btn-block" onclick="abrirSalvos()">Orçamentos salvos</button>
     </div>
 
     <div>
@@ -96,9 +96,9 @@
     <div>
       <div class="section-title">Projeto</div>
       <div class="field-group">
-        <div><label>Descricao do Projeto</label><input id="f-project" type="text" placeholder="Ex: Instalacao de CFTV"></div>
+        <div><label>Descrição do Projeto</label><input id="f-project" type="text" placeholder="Ex: Instalação de CFTV"></div>
         <div class="two-col">
-          <div><label>Numero</label><input id="f-quoteno" type="text" placeholder="Auto"></div>
+          <div><label>Número</label><input id="f-quoteno" type="text" placeholder="Auto"></div>
           <div><label>Validade</label>
             <select id="f-validity">
               <option value="15 dias">15 dias</option><option value="30 dias" selected>30 dias</option>
@@ -112,21 +112,21 @@
     <div>
       <div class="section-title">Adicionar Itens</div>
       <div class="category-tabs" id="cat-tabs">
-        <button class="cat-tab active" data-cat="seguranca">Seguranca</button>
-        <button class="cat-tab" data-cat="automacao">Automacao</button>
-        <button class="cat-tab" data-cat="som">Audio</button>
+        <button class="cat-tab active" data-cat="seguranca">Segurança</button>
+        <button class="cat-tab" data-cat="automacao">Automação</button>
+        <button class="cat-tab" data-cat="som">Áudio</button>
         <button class="cat-tab" data-cat="rede">Rede</button>
         <button class="cat-tab" data-cat="outros">Outros</button>
       </div>
       <div style="margin-top:10px;" class="field-group">
-        <div><label>Item do catalogo</label><select id="f-item-select" onchange="onSelectItem(this.value)"><option value="">- Selecione -</option></select></div>
+        <div><label>Item do catálogo</label><select id="f-item-select" onchange="onSelectItem(this.value)"><option value="">- Selecione -</option></select></div>
         <div><label>Ou digite personalizado</label><input id="f-item-name" type="text" placeholder="Nome do item"></div>
         <div class="item-row">
           <div><label>Qtd</label><input id="f-qty" type="number" min="1" value="1"></div>
           <div><label>Unit. (R$)</label><input id="f-price" type="number" min="0" placeholder="0,00"></div>
         </div>
         <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--light);cursor:pointer;">
-          <input type="checkbox" id="f-item-servico"> Item personalizado e mao de obra (servico)
+          <input type="checkbox" id="f-item-servico"> Item personalizado é mão de obra (serviço)
         </label>
         <button class="btn btn-primary btn-block" onclick="addItem()">+ Adicionar Item</button>
       </div>
@@ -138,15 +138,15 @@
     </div>
 
     <div>
-      <div class="section-title">Condicoes</div>
+      <div class="section-title">Condições</div>
       <div class="field-group">
-        <div><label>Prazo de Entrega</label><input id="f-deadline" type="text" placeholder="Ex: 15 dias uteis"></div>
+        <div><label>Prazo de Entrega</label><input id="f-deadline" type="text" placeholder="Ex: 15 dias úteis"></div>
         <div><label>Forma de Pagamento</label><textarea id="f-payment" placeholder="Ex: 50% entrada + 50% entrega"></textarea></div>
         <div class="two-col">
           <div><label>Garantia</label><input id="f-warranty" type="text" placeholder="12 meses"></div>
           <div><label>Desconto (%)</label><input id="f-discount" type="number" min="0" max="100" value="0"></div>
         </div>
-        <div><label>Situacao</label>
+        <div><label>Situação</label>
           <select id="f-status">
             <option value="aberto">Aberto</option>
             <option value="aprovado">Aprovado</option>
@@ -157,19 +157,19 @@
     </div>
 
     <div>
-      <div class="section-title">Observacoes</div>
+      <div class="section-title">Observações</div>
       <textarea id="f-notes" placeholder="Escopo incluso/excluso, etc."></textarea>
     </div>
 
     <div style="display:flex;flex-direction:column;gap:10px;padding-bottom:24px;">
-      <button class="btn btn-gold btn-block" onclick="gerar()">Gerar Orcamento</button>
+      <button class="btn btn-gold btn-block" onclick="gerar()">Gerar Orçamento</button>
       <button class="btn btn-primary btn-block" onclick="salvar()">Salvar no sistema</button>
       <button class="btn btn-ghost btn-block" onclick="window.print()">Imprimir / PDF</button>
     </div>
   </aside>
 
   <main id="preview">
-    <div id="empty-state"><p>Preencha os dados e clique em<br><strong style="color:rgba(26,37,53,.6);">Gerar Orcamento</strong></p></div>
+    <div id="empty-state"><p>Preencha os dados e clique em<br><strong style="color:rgba(26,37,53,.6);">Gerar Orçamento</strong></p></div>
     <div id="quote-doc" style="display:none;"></div>
   </main>
 </div>
@@ -177,7 +177,7 @@
 <!-- MODAL SALVOS -->
 <div class="modal-overlay" id="modal-salvos">
   <div class="modal">
-    <div class="modal-head"><h3>Orcamentos salvos</h3><button class="modal-close" onclick="closeModal('modal-salvos')">&times;</button></div>
+    <div class="modal-head"><h3>Orçamentos salvos</h3><button class="modal-close" onclick="closeModal('modal-salvos')">&times;</button></div>
     <div id="salvos-list" style="max-height:60vh;overflow-y:auto;"></div>
   </div>
 </div>
@@ -191,11 +191,11 @@ let catalog = { seguranca:[], automacao:[], som:[], rede:[], outros:[] };
 let editId = null;  // id do orcamento em edicao (se carregado dos salvos)
 
 const catMeta = {
-  seguranca:{label:'Seguranca (CFTV, Facial, Fechaduras e Controle de Acesso)'},
-  automacao:{label:'Automacao Residencial'},
+  seguranca:{label:'Segurança (CFTV, Facial, Fechaduras e Controle de Acesso)'},
+  automacao:{label:'Automação Residencial'},
   som:{label:'Som Ambiente e Home Theater'},
   rede:{label:'Rede e Infraestrutura'},
-  outros:{label:'Servicos e Outros'},
+  outros:{label:'Serviços e Outros'},
 };
 
 (async function init(){
@@ -262,7 +262,7 @@ function renderItemsList(){
   if(!items.length){ list.innerHTML='<p class="muted" style="text-align:center;padding:12px 0;">Nenhum item</p>'; return; }
   list.innerHTML = items.map((it,i)=>`
     <div class="item-chip">
-      <span class="item-name">${it.nome}${it.tipo==='servico'?' <span style="color:#7fd18c;font-size:10px;">(servico)</span>':''}</span>
+      <span class="item-name">${it.nome}${it.tipo==='servico'?' <span style="color:#7fd18c;font-size:10px;">(serviço)</span>':''}</span>
       <span class="item-info">${it.qtd}x ${fmtBRL(it.preco)}</span>
       <button class="btn-remove" onclick="removeItem(${i})">&times;</button>
     </div>`).join('');
@@ -273,8 +273,11 @@ function coletar(){
   const clienteId = sel.value || null;
   const clienteNome = sel.options[sel.selectedIndex]?.text || '-';
   const subtotal = items.reduce((s,it)=>s+it.qtd*it.preco,0);
+  // desconto incide SOMENTE sobre produtos, nunca sobre mao de obra (servico)
+  const subtotalProdutos = items.filter(it=>it.tipo!=='servico').reduce((s,it)=>s+it.qtd*it.preco,0);
   const desconto = parseFloat(document.getElementById('f-discount').value)||0;
-  const total = subtotal - subtotal*(desconto/100);
+  const descontoValor = subtotalProdutos*(desconto/100);
+  const total = subtotal - descontoValor;
   return {
     clienteId, clienteNome,
     numero: document.getElementById('f-quoteno').value.trim() || `AHS-${Date.now().toString().slice(-5)}`,
@@ -283,7 +286,7 @@ function coletar(){
     prazo: document.getElementById('f-deadline').value.trim() || 'A combinar',
     pagamento: document.getElementById('f-payment').value.trim() || 'A definir',
     garantia: document.getElementById('f-warranty').value.trim() || '12 meses',
-    desconto, subtotal, total,
+    desconto, subtotal, subtotalProdutos, descontoValor, total,
     status: document.getElementById('f-status').value,
     observacoes: document.getElementById('f-notes').value.trim(),
   };
@@ -302,7 +305,7 @@ function gerar(){
       <div class="cat-block">
         <div class="cat-block-header"><span class="cat-block-title">${meta.label}</span></div>
         <table class="doc-table">
-          <thead><tr><th style="width:56px;"></th><th style="width:42%">Descricao</th><th class="th-right" style="width:8%">Qtd</th><th class="th-right" style="width:16%">Unit.</th><th class="th-right" style="width:16%">Total</th></tr></thead>
+          <thead><tr><th style="width:56px;"></th><th style="width:42%">Descrição</th><th class="th-right" style="width:8%">Qtd</th><th class="th-right" style="width:16%">Unit.</th><th class="th-right" style="width:16%">Total</th></tr></thead>
           <tbody>
             ${catItems.map(it=>{
               const imgCell = it.img ? `<img src="${it.img}" class="prod-img" onerror="this.style.display='none'">` : `<div class="prod-img-placeholder">&#128247;</div>`;
@@ -320,7 +323,7 @@ function gerar(){
     <div class="doc-header">
       <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">${logoHTML(64)}</div>
       <div class="doc-meta">
-        <div class="quote-number">Orcamento ${d.numero}</div>
+        <div class="quote-number">Orçamento ${d.numero}</div>
         <div class="quote-date">${today()}</div>
         <div class="quote-date" style="margin-top:3px;">Validade: ${d.validade}</div>
       </div>
@@ -329,21 +332,21 @@ function gerar(){
     <div class="doc-body">
       <div class="doc-client-section">
         <div><div class="doc-section-label">Proposta para</div><div class="doc-client-name">${d.clienteNome}</div></div>
-        <div><div class="doc-section-label">Descricao</div>${d.projeto?`<div class="project-title-doc">${d.projeto}</div>`:''}</div>
+        <div><div class="doc-section-label">Descrição</div>${d.projeto?`<div class="project-title-doc">${d.projeto}</div>`:''}</div>
       </div>
       ${tablesHTML}
       <div class="totals-section"><div class="totals-box">
         <div class="totals-row"><span>Subtotal</span><span>${fmtBRL(d.subtotal)}</span></div>
-        ${d.desconto>0?`<div class="totals-row" style="color:#c04040;"><span>Desconto (${d.desconto}%)</span><span>- ${fmtBRL(d.subtotal*d.desconto/100)}</span></div>`:''}
-        <div class="totals-row total-final"><span class="label-t">Total do Orcamento</span><span class="value-t">${fmtBRL(d.total)}</span></div>
+        ${d.desconto>0&&d.descontoValor>0?`<div class="totals-row" style="color:#c04040;"><span>Desconto (${d.desconto}% em produtos)</span><span>- ${fmtBRL(d.descontoValor)}</span></div>`:''}
+        <div class="totals-row total-final"><span class="label-t">Total do Orçamento</span><span class="value-t">${fmtBRL(d.total)}</span></div>
       </div></div>
       <div class="doc-conditions">
         <div><div class="cond-label">Prazo de Entrega</div><div class="cond-value">${d.prazo}</div></div>
         <div><div class="cond-label">Forma de Pagamento</div><div class="cond-value">${d.pagamento.replace(/\n/g,'<br>')}</div></div>
         <div><div class="cond-label">Garantia</div><div class="cond-value">${d.garantia}</div></div>
-        <div><div class="cond-label">Validade</div><div class="cond-value">${d.validade} a partir da emissao</div></div>
+        <div><div class="cond-label">Validade</div><div class="cond-value">${d.validade} a partir da emissão</div></div>
       </div>
-      ${d.observacoes?`<div class="doc-notes"><div class="doc-section-label" style="margin-bottom:6px;">Observacoes</div><p>${d.observacoes.replace(/\n/g,'<br>')}</p></div>`:''}
+      ${d.observacoes?`<div class="doc-notes"><div class="doc-section-label" style="margin-bottom:6px;">Observações</div><p>${d.observacoes.replace(/\n/g,'<br>')}</p></div>`:''}
     </div>
     <div class="doc-footer">
       <div class="footer-contact"><strong>${EMPRESA.nome}</strong>CNPJ: ${EMPRESA.cnpj}<br>${EMPRESA.pix}</div>
@@ -365,7 +368,7 @@ async function salvar(){
   if(editId){ res = await db.from('orcamentos').update(reg).eq('id', editId); }
   else { res = await db.from('orcamentos').insert(reg); }
   if(res.error){ showToast('Erro ao salvar: '+res.error.message, true); return; }
-  showToast('Orcamento salvo no sistema.');
+  showToast('Orçamento salvo no sistema.');
 }
 
 async function abrirSalvos(){
@@ -373,14 +376,14 @@ async function abrirSalvos(){
   const { data, error } = await db.from('orcamentos').select('*, clientes(nome)').order('criado_em',{ascending:false}).limit(100);
   const el = document.getElementById('salvos-list');
   if(error){ el.innerHTML='<p class="muted">Erro ao carregar.</p>'; return; }
-  if(!data || !data.length){ el.innerHTML='<div class="empty"><p>Nenhum orcamento salvo</p></div>'; return; }
+  if(!data || !data.length){ el.innerHTML='<div class="empty"><p>Nenhum orçamento salvo</p></div>'; return; }
   const badge = st => st==='aprovado' ? '<span class="badge ok">Aprovado</span>'
     : st==='recusado' ? '<span class="badge err">Recusado</span>'
     : '<span class="badge open">Aberto</span>';
   el.innerHTML = data.map(o=>`
     <div class="saved-row">
       <div>
-        <div style="color:var(--white);">${o.numero||'(sem numero)'} - ${fmtBRL(o.total)} ${badge(o.status)}</div>
+        <div style="color:var(--white);">${o.numero||'(sem número)'} - ${fmtBRL(o.total)} ${badge(o.status)}</div>
         <div class="muted">${o.clientes?o.clientes.nome:'sem cliente'} · ${fmtDataCurta(o.criado_em)}</div>
       </div>
       <div class="row-actions">
@@ -408,15 +411,15 @@ async function carregarOrc(id){
   renderItemsList();
   closeModal('modal-salvos');
   gerar();
-  showToast('Orcamento carregado (salvar atualiza o mesmo).');
+  showToast('Orçamento carregado (salvar atualiza o mesmo).');
 }
 
 async function excluirOrc(id){
-  if(!confirm('Excluir este orcamento?')) return;
+  if(!confirm('Excluir este orçamento?')) return;
   const { error } = await db.from('orcamentos').delete().eq('id', id);
   if(error){ showToast('Erro ao excluir.', true); return; }
   if(editId===id) editId=null;
-  showToast('Orcamento excluido.');
+  showToast('Orçamento excluído.');
   abrirSalvos();
 }
 </script>
